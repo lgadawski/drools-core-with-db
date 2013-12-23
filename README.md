@@ -1,0 +1,2 @@
+drools-core-with-db
+===================
