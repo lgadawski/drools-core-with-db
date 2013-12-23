@@ -25,6 +25,9 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
+import com.gadawski.util.db.EntityManagerUtil;
+import com.gadawski.util.facts.Relationship;
+
 /**
  * A parent class for all specific LeftTuple specializations
  * @author etirelli
@@ -70,7 +73,10 @@ public class BaseLeftTuple
                              final LeftTupleSink sink,
                              final boolean leftTupleMemoryEnabled) {
         this.handle = factHandle;
-
+        
+        EntityManagerUtil entityManagerUtil = new EntityManagerUtil();
+        entityManagerUtil.persistSingleRelationship(new Relationship(sink.getId(), factHandle.getObject()));
+        
         if ( leftTupleMemoryEnabled ) {
             this.handle.addLastLeftTuple( this );
         }
@@ -104,7 +110,7 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
         this.handle = rightTuple.getFactHandle();
-
+        
         this.leftParent = leftTuple;
         // insert at the end f the list
         if ( leftTuple.getLastChild() != null ) {
@@ -149,6 +155,18 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
 
+        EntityManagerUtil entityManagerUtil = new EntityManagerUtil();
+        Relationship relationship = new Relationship();
+        relationship.setJoinNode( ( long ) sink.getId() );
+        //add right fact
+        relationship.setObject(rightTuple.getFactHandle().getObject());
+        //add left facts
+        InternalFactHandle[] leftFacts = leftTuple.getFactHandles();
+        for (InternalFactHandle internalFactHandle : leftFacts) {
+            relationship.setObject(internalFactHandle.getObject());
+        }
+        entityManagerUtil.persistSingleRelationship(relationship);
+        
         if ( leftTupleMemoryEnabled ) {
             this.leftParent = leftTuple;
             this.rightParent = rightTuple;
@@ -198,6 +216,12 @@ public class BaseLeftTuple
         this.sink = sink;
     }
     
+    public BaseLeftTuple(InternalFactHandle[] factHandles, LeftTupleSink sink) {
+        // TODO Auto-generated constructor stub
+        this.sink = sink;
+        this.setFactHandles(factHandles, sink);
+    }
+
     /* (non-Javadoc)
      * @see org.drools.reteoo.LeftTuple#reAdd()
      */
@@ -528,6 +552,32 @@ public class BaseLeftTuple
         }
         return handles;
     }
+
+    /**
+     * Sets fact handles to LeftTuple.
+     *  
+     * @param factHandles
+     * @param sink 
+     */
+    private void setFactHandles(InternalFactHandle[] factHandles, LeftTupleSink sink) {
+        // TODO Auto-generated method stub
+        LeftTuple entry = this;
+        LeftTuple newEntry = null;
+        int lastFactHandleIdx = factHandles.length - 1;
+        int index = lastFactHandleIdx; //cause child has lower index than parent
+        for (int j = lastFactHandleIdx; j >= 0; j--) {  
+            entry.setHandle(factHandles[j]);
+            entry.setSink(sink);
+            entry.setIndex(index--);
+            if (j > 0) {
+                newEntry = new BaseLeftTuple();
+                entry.setLeftParent(newEntry);
+                entry.setParent(newEntry);
+                entry = newEntry;
+            }
+        }
+    }
+
      /* (non-Javadoc)
      * @see org.drools.reteoo.LeftTuple#toFactHandles()
      */

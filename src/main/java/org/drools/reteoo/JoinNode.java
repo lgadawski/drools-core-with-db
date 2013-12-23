@@ -16,17 +16,21 @@
 
 package org.drools.reteoo;
 
-import org.drools.RuleBaseConfiguration;
+import java.util.List;
+
 import org.drools.base.DroolsQuery;
 import org.drools.common.BetaConstraints;
+import org.drools.common.DefaultFactHandle;
 import org.drools.common.InternalFactHandle;
 import org.drools.common.InternalWorkingMemory;
-import org.drools.common.Memory;
 import org.drools.core.util.FastIterator;
 import org.drools.core.util.Iterator;
 import org.drools.reteoo.builder.BuildContext;
 import org.drools.rule.ContextEntry;
 import org.drools.spi.PropagationContext;
+
+import com.gadawski.util.db.EntityManagerUtil;
+import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
 
@@ -143,10 +147,22 @@ public class JoinNode extends BetaNode {
                                                workingMemory,
                                                factHandle );
 
-        FastIterator it = getLeftIterator( leftMemory );
-        for ( LeftTuple leftTuple = getFirstLeftTuple( rightTuple, leftMemory, context, it ); leftTuple != null; leftTuple = (LeftTuple) it.next( leftTuple ) ) {
-            propagateFromRight( rightTuple, leftTuple, memory, context, workingMemory );
+        EntityManagerUtil entityManagerUtil = new EntityManagerUtil();
+        List<Relationship> results = entityManagerUtil.getRalationships(this.getId());
+        for (Relationship relationship : results) {
+            InternalFactHandle[] tuple = new InternalFactHandle[relationship.getNoObjectsInTuple()];
+            int i = 0;
+            for (Object object : relationship.getObjects()) {
+                tuple[i++] = new DefaultFactHandle(i, object);
+            }
+            LeftTuple tupleFromDb = new JoinNodeLeftTuple(tuple, this);
+            propagateFromRight(rightTuple, tupleFromDb, memory, context, workingMemory);
         }
+
+//        FastIterator it = getLeftIterator( leftMemory );
+//        for ( LeftTuple leftTuple = getFirstLeftTuple( rightTuple, leftMemory, context, it ); leftTuple != null; leftTuple = (LeftTuple) it.next( leftTuple ) ) {
+//            propagateFromRight( rightTuple, leftTuple, memory, context, workingMemory );
+//        }
 
         this.constraints.resetFactHandle( memory.getContext() );
     }

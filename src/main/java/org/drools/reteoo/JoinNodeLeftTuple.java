@@ -80,6 +80,11 @@ public class JoinNodeLeftTuple extends BaseLeftTuple {
                leftTupleMemoryEnabled );
     }
 
+    public JoinNodeLeftTuple(final InternalFactHandle[] factHandles, final LeftTupleSink sink) {
+        // TODO Auto-generated constructor stub
+        super( factHandles, sink);
+    }
+
     /* (non-Javadoc)
      * @see org.drools.reteoo.LeftTuple#getMemory()
      */
