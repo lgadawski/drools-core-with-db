@@ -33,8 +33,12 @@ import com.gadawski.util.db.EntityManagerUtil;
 import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
-
+    
     private static final long serialVersionUID = 510l;
+    /**
+     * Indicates if rule engine should use database.
+     */
+    public static boolean USE_DB = true;
 
     public JoinNode() {
 
@@ -82,7 +86,9 @@ public class JoinNode extends BetaNode {
         }
 
         if ( useLeftMemory ) {
-            memory.getLeftTupleMemory().add( leftTuple );
+            if ( !JoinNode.USE_DB ) {
+                memory.getLeftTupleMemory().add( leftTuple );
+            }
         } 
         
         this.constraints.updateFromTuple( contextEntry,
@@ -138,31 +144,35 @@ public class JoinNode extends BetaNode {
                                                   context );
 
         memory.getRightTupleMemory().add( rightTuple );
-        if ( memory.getLeftTupleMemory() == null || memory.getLeftTupleMemory().size() == 0 ) {
-            // do nothing here, as no left memory
-            return;
+        if ( !JoinNode.USE_DB ) {
+            if ( memory.getLeftTupleMemory() == null || memory.getLeftTupleMemory().size() == 0 ) {
+                // do nothing here, as no left memory
+                return;
+            }
         }
 
         this.constraints.updateFromFactHandle( memory.getContext(),
                                                workingMemory,
                                                factHandle );
 
-        EntityManagerUtil entityManagerUtil = new EntityManagerUtil();
-        List<Relationship> results = entityManagerUtil.getRalationships(this.getId());
-        for (Relationship relationship : results) {
-            InternalFactHandle[] tuple = new InternalFactHandle[relationship.getNoObjectsInTuple()];
-            int i = 0;
-            for (Object object : relationship.getObjects()) {
-                tuple[i++] = new DefaultFactHandle(i, object);
+        if ( JoinNode.USE_DB ) {
+            EntityManagerUtil entityManagerUtil = EntityManagerUtil.getInstance();
+            List<Relationship> results = entityManagerUtil.getRalationships(this.getId());
+            for (Relationship relationship : results) {
+                InternalFactHandle[] tuple = new InternalFactHandle[relationship.getNoObjectsInTuple()];
+                int i = 0;
+                for (Object object : relationship.getObjects()) {
+                    tuple[i++] = new DefaultFactHandle(i, object);
+                }
+                LeftTuple tupleFromDb = new JoinNodeLeftTuple(tuple, this);
+                propagateFromRight(rightTuple, tupleFromDb, memory, context, workingMemory);
             }
-            LeftTuple tupleFromDb = new JoinNodeLeftTuple(tuple, this);
-            propagateFromRight(rightTuple, tupleFromDb, memory, context, workingMemory);
+        } else {
+            FastIterator it = getLeftIterator( leftMemory );
+            for ( LeftTuple leftTuple = getFirstLeftTuple( rightTuple, leftMemory, context, it ); leftTuple != null; leftTuple = (LeftTuple) it.next( leftTuple ) ) {
+                propagateFromRight( rightTuple, leftTuple, memory, context, workingMemory );
+            }
         }
-
-//        FastIterator it = getLeftIterator( leftMemory );
-//        for ( LeftTuple leftTuple = getFirstLeftTuple( rightTuple, leftMemory, context, it ); leftTuple != null; leftTuple = (LeftTuple) it.next( leftTuple ) ) {
-//            propagateFromRight( rightTuple, leftTuple, memory, context, workingMemory );
-//        }
 
         this.constraints.resetFactHandle( memory.getContext() );
     }

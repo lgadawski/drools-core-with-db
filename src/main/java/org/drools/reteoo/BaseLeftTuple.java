@@ -25,7 +25,6 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
-import com.gadawski.util.db.EntityManagerUtil;
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -62,6 +61,8 @@ public class BaseLeftTuple
 
     private Object             object;
 
+    private RelationshipManager relManager;// = DbRelationshipManager.getInstance();
+
     public BaseLeftTuple() {
         // constructor needed for serialisation
     }
@@ -74,8 +75,11 @@ public class BaseLeftTuple
                              final boolean leftTupleMemoryEnabled) {
         this.handle = factHandle;
         
-        EntityManagerUtil entityManagerUtil = new EntityManagerUtil();
-        entityManagerUtil.persistSingleRelationship(new Relationship(sink.getId(), factHandle.getObject()));
+        if ( JoinNode.USE_DB ) {
+            relManager = DbRelationshipManager.getInstance();
+            Relationship relationship = relManager.createRelationship(sink.getId(), factHandle.getObject());
+            relManager.saveRelationship(relationship);
+        }
         
         if ( leftTupleMemoryEnabled ) {
             this.handle.addLastLeftTuple( this );
@@ -155,17 +159,11 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
 
-        EntityManagerUtil entityManagerUtil = new EntityManagerUtil();
-        Relationship relationship = new Relationship();
-        relationship.setJoinNode( ( long ) sink.getId() );
-        //add right fact
-        relationship.setObject(rightTuple.getFactHandle().getObject());
-        //add left facts
-        InternalFactHandle[] leftFacts = leftTuple.getFactHandles();
-        for (InternalFactHandle internalFactHandle : leftFacts) {
-            relationship.setObject(internalFactHandle.getObject());
+        if ( JoinNode.USE_DB ) {
+            relManager = DbRelationshipManager.getInstance();
+            Relationship relationship = relManager.createRelationship(leftTuple, rightTuple, sink);
+            relManager.saveRelationship(relationship);
         }
-        entityManagerUtil.persistSingleRelationship(relationship);
         
         if ( leftTupleMemoryEnabled ) {
             this.leftParent = leftTuple;
@@ -214,6 +212,10 @@ public class BaseLeftTuple
         }
         
         this.sink = sink;
+    }
+    
+    public void setRelationshipManager(RelationshipManager relManager){
+        this.relManager = relManager;
     }
     
     public BaseLeftTuple(InternalFactHandle[] factHandles, LeftTupleSink sink) {
