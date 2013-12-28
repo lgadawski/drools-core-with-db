@@ -61,7 +61,7 @@ public class BaseLeftTuple
 
     private Object             object;
 
-    private RelationshipManager relManager;// = DbRelationshipManager.getInstance();
+    private IRelationshipManager m_relManager;// = DbRelationshipManager.getInstance();
 
     public BaseLeftTuple() {
         // constructor needed for serialisation
@@ -76,9 +76,9 @@ public class BaseLeftTuple
         this.handle = factHandle;
         
         if ( JoinNode.USE_DB ) {
-            relManager = DbRelationshipManager.getInstance();
-            Relationship relationship = relManager.createRelationship(sink.getId(), factHandle.getObject());
-            relManager.saveRelationship(relationship);
+           if ( !isRuleTerminalNode(sink) ) {
+                saveFactHandleToDb(factHandle, sink);
+            }
         }
         
         if ( leftTupleMemoryEnabled ) {
@@ -160,9 +160,9 @@ public class BaseLeftTuple
         this.parent = leftTuple;
 
         if ( JoinNode.USE_DB ) {
-            relManager = DbRelationshipManager.getInstance();
-            Relationship relationship = relManager.createRelationship(leftTuple, rightTuple, sink);
-            relManager.saveRelationship(relationship);
+            if ( !isRuleTerminalNode(sink) ) {
+                saveRelationshipToDb(leftTuple, rightTuple, sink);
+            }
         }
         
         if ( leftTupleMemoryEnabled ) {
@@ -213,9 +213,51 @@ public class BaseLeftTuple
         
         this.sink = sink;
     }
+
+    /**
+     * Creates relationship from fact handle and saves relationship to db.
+     * 
+     * @param factHandle - to get object for relationship.
+     * @param sink - sink for relationship.
+     */
+    private void saveFactHandleToDb(final InternalFactHandle factHandle,
+            final LeftTupleSink sink) {
+        m_relManager = DbRelationshipManager.getInstance();
+        final Relationship relationship = m_relManager.createRelationship(sink.getId(), factHandle.getObject());
+        m_relManager.saveRelationship(relationship);
+    }
     
-    public void setRelationshipManager(RelationshipManager relManager){
-        this.relManager = relManager;
+    /**
+     * Creates relationship from tuples and saves relationship to db.
+     * 
+     * @param leftTuple - leftTuple for relationship.
+     * @param rightTuple - rightTuple for relationship.
+     * @param sink - sink for relationship.
+     */
+    private void saveRelationshipToDb(final LeftTuple leftTuple,
+            final RightTuple rightTuple, final LeftTupleSink sink) {
+        m_relManager = DbRelationshipManager.getInstance();
+        final Relationship relationship = m_relManager.createRelationship(leftTuple, rightTuple, sink);
+        m_relManager.saveRelationship(relationship);
+    }
+    
+    /**
+     * Sets relationship manager.
+     * 
+     * @param relManager - relationship manager to save.
+     */
+    public void setRelationshipManager(IRelationshipManager relManager){
+        m_relManager = relManager;
+    }
+    
+    /** 
+     * Checks if sink is RuleTerminalNode instanceof.
+     * 
+     * @param sink - node to be checked.
+     * @return true if sink is terminal node, false otherwise.
+     */
+    private boolean isRuleTerminalNode(final LeftTupleSink sink) {
+        return sink instanceof RuleTerminalNode;
     }
     
     public BaseLeftTuple(InternalFactHandle[] factHandles, LeftTupleSink sink) {

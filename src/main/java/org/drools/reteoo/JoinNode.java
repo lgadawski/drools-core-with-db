@@ -29,7 +29,6 @@ import org.drools.reteoo.builder.BuildContext;
 import org.drools.rule.ContextEntry;
 import org.drools.spi.PropagationContext;
 
-import com.gadawski.util.db.EntityManagerUtil;
 import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
@@ -39,6 +38,10 @@ public class JoinNode extends BetaNode {
      * Indicates if rule engine should use database.
      */
     public static boolean USE_DB = true;
+    /**
+     * Db relationship manager.
+     */
+    private IRelationshipManager m_relManager;
 
     public JoinNode() {
 
@@ -156,8 +159,8 @@ public class JoinNode extends BetaNode {
                                                factHandle );
 
         if ( JoinNode.USE_DB ) {
-            EntityManagerUtil entityManagerUtil = EntityManagerUtil.getInstance();
-            List<Relationship> results = entityManagerUtil.getRalationships(this.getId());
+            m_relManager = DbRelationshipManager.getInstance();
+            List<Relationship> results = m_relManager.getRalationships(this.getId());
             for (Relationship relationship : results) {
                 InternalFactHandle[] tuple = new InternalFactHandle[relationship.getNoObjectsInTuple()];
                 int i = 0;

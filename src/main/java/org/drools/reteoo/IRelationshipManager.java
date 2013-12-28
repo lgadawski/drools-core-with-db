@@ -1,5 +1,7 @@
 package org.drools.reteoo;
 
+import java.util.List;
+
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -7,13 +9,13 @@ import com.gadawski.util.facts.Relationship;
  * @author l.gadawski@gmail.com
  * 
  */
-public interface RelationshipManager {
+public interface IRelationshipManager {
 
     /**
      * Creates {@link Relationship} from {@link LeftTuple} and
      * {@link RightTuple}.
      * 
-     * @param leftTuple 
+     * @param leftTuple
      * @param rightTuple
      * @param sink
      */
@@ -35,4 +37,13 @@ public interface RelationshipManager {
      *            - {@link Relationship} to save.
      */
     public void saveRelationship(final Relationship relationship);
+
+    /**
+     * Gets all relationship for given join node id.
+     * 
+     * @param joinNodeId
+     *            - join node for relationship.
+     * @return - list of relationship associated with join node id.
+     */
+    public List<Relationship> getRalationships(int joinNodeId);
 }
