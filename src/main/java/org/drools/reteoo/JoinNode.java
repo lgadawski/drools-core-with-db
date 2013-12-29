@@ -18,7 +18,6 @@ package org.drools.reteoo;
 
 import java.util.List;
 
-import org.drools.base.DroolsQuery;
 import org.drools.common.BetaConstraints;
 import org.drools.common.DefaultFactHandle;
 import org.drools.common.InternalFactHandle;
@@ -32,7 +31,7 @@ import org.drools.spi.PropagationContext;
 import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
-    
+
     private static final long serialVersionUID = 510l;
     /**
      * Indicates if rule engine should use database.
@@ -78,15 +77,16 @@ public class JoinNode extends BetaNode {
         RightTupleMemory rightMemory = memory.getRightTupleMemory();
 
         ContextEntry[] contextEntry = memory.getContext();
-        boolean useLeftMemory = true;       
+//        boolean useLeftMemory = false; 
+        boolean useLeftMemory = !JoinNode.USE_DB;       
     
-        if ( !this.tupleMemoryEnabled ) {
-            // This is a hack, to not add closed DroolsQuery objects
-            Object object = ((InternalFactHandle) leftTuple.get( 0 )).getObject();
-            if ( !(object instanceof DroolsQuery) || !((DroolsQuery) object).isOpen() ) {
-                useLeftMemory = false;
-            }
-        }
+//        if ( !this.tupleMemoryEnabled ) {
+//            // This is a hack, to not add closed DroolsQuery objects
+//            Object object = ((InternalFactHandle) leftTuple.get( 0 )).getObject();
+//            if ( !(object instanceof DroolsQuery) || !((DroolsQuery) object).isOpen() ) {
+//                useLeftMemory = false;
+//            }
+//        }
 
         if ( useLeftMemory ) {
             if ( !JoinNode.USE_DB ) {
@@ -161,13 +161,8 @@ public class JoinNode extends BetaNode {
         if ( JoinNode.USE_DB ) {
             m_relManager = DbRelationshipManager.getInstance();
             List<Relationship> results = m_relManager.getRalationships(this.getId());
-            for (Relationship relationship : results) {
-                InternalFactHandle[] tuple = new InternalFactHandle[relationship.getNoObjectsInTuple()];
-                int i = 0;
-                for (Object object : relationship.getObjects()) {
-                    tuple[i++] = new DefaultFactHandle(i, object);
-                }
-                LeftTuple tupleFromDb = new JoinNodeLeftTuple(tuple, this);
+            for (final Relationship relationship : results) {
+                LeftTuple tupleFromDb = createLeftTuple(relationship);
                 propagateFromRight(rightTuple, tupleFromDb, memory, context, workingMemory);
             }
         } else {
@@ -179,7 +174,6 @@ public class JoinNode extends BetaNode {
 
         this.constraints.resetFactHandle( memory.getContext() );
     }
-
 
     protected void propagateFromRight( RightTuple rightTuple, LeftTuple leftTuple, BetaMemory memory, PropagationContext context, InternalWorkingMemory workingMemory ) {
         if ( this.constraints.isAllowedCachedRight( memory.getContext(),
@@ -495,7 +489,22 @@ public class JoinNode extends BetaNode {
     public String toString() {
         return "[JoinNode(" + this.getId() + ") - " + getObjectTypeNode().getObjectType() + "]";
     }
-    
+
+    /**
+     * Based on given relationship, created {@link JoinNodeLeftTuple}.
+     * 
+     * @param relationship to get from tuples.
+     * @return new left tuple.
+     */
+    private LeftTuple createLeftTuple(final Relationship relationship) {
+        InternalFactHandle[] tuple = new InternalFactHandle[relationship.getNoObjectsInTuple()];
+        int i = 0;
+        for (Object object : relationship.getObjects()) {
+            tuple[i++] = new DefaultFactHandle(i, object);
+        }
+        return new JoinNodeLeftTuple(tuple, this);
+    }
+
     public LeftTuple createLeftTuple(InternalFactHandle factHandle,
                                      LeftTupleSink sink,
                                      boolean leftTupleMemoryEnabled) {

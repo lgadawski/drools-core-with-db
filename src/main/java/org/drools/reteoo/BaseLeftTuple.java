@@ -621,7 +621,7 @@ public class BaseLeftTuple
             }
         }
     }
-
+    
      /* (non-Javadoc)
      * @see org.drools.reteoo.LeftTuple#toFactHandles()
      */

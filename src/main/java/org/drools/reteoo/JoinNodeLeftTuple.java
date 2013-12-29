@@ -20,6 +20,8 @@ import org.drools.common.InternalFactHandle;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.LeftTupleList;
 
+import com.gadawski.util.facts.Relationship;
+
 public class JoinNodeLeftTuple extends BaseLeftTuple {
 
     private static final long serialVersionUID = 540l;
@@ -82,7 +84,7 @@ public class JoinNodeLeftTuple extends BaseLeftTuple {
 
     public JoinNodeLeftTuple(final InternalFactHandle[] factHandles, final LeftTupleSink sink) {
         // TODO Auto-generated constructor stub
-        super( factHandles, sink);
+        super( factHandles, sink );
     }
 
     /* (non-Javadoc)

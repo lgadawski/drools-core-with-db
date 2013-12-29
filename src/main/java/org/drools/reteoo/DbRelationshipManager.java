@@ -35,7 +35,6 @@ public class DbRelationshipManager implements IRelationshipManager {
      * 
      */
     private DbRelationshipManager() {
-        System.out.println("new dbRel");
     }
 
     /**
