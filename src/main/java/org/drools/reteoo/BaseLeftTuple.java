@@ -25,6 +25,7 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
+import com.gadawski.db.DbRelationshipManager;
 import com.gadawski.util.facts.Relationship;
 
 /**

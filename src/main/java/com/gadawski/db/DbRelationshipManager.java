@@ -1,4 +1,4 @@
-package org.drools.reteoo;
+package com.gadawski.db;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.drools.common.InternalFactHandle;
+import org.drools.reteoo.IRelationshipManager;
+import org.drools.reteoo.LeftTuple;
+import org.drools.reteoo.LeftTupleSink;
+import org.drools.reteoo.RightTuple;
 
 import com.gadawski.util.db.EntityManagerUtil;
 import com.gadawski.util.facts.Relationship;

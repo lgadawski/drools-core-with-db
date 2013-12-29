@@ -28,6 +28,7 @@ import org.drools.reteoo.builder.BuildContext;
 import org.drools.rule.ContextEntry;
 import org.drools.spi.PropagationContext;
 
+import com.gadawski.db.DbRelationshipManager;
 import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
