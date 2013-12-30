@@ -26,6 +26,7 @@ import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
 import com.gadawski.db.DbRelationshipManager;
+import com.gadawski.db.IRelationshipManager;
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -224,7 +225,7 @@ public class BaseLeftTuple
     private void saveFactHandleToDb(final InternalFactHandle factHandle,
             final LeftTupleSink sink) {
         m_relManager = DbRelationshipManager.getInstance();
-        final Relationship relationship = m_relManager.createRelationship(sink.getId(), factHandle.getObject());
+        final Relationship relationship = m_relManager.createRelationship(factHandle, sink);
         m_relManager.saveRelationship(relationship);
     }
     

@@ -18,6 +18,7 @@ package org.drools.reteoo;
 
 import java.util.List;
 
+import org.drools.base.DroolsQuery;
 import org.drools.common.BetaConstraints;
 import org.drools.common.DefaultFactHandle;
 import org.drools.common.InternalFactHandle;
@@ -29,6 +30,7 @@ import org.drools.rule.ContextEntry;
 import org.drools.spi.PropagationContext;
 
 import com.gadawski.db.DbRelationshipManager;
+import com.gadawski.db.IRelationshipManager;
 import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
@@ -81,18 +83,16 @@ public class JoinNode extends BetaNode {
 //        boolean useLeftMemory = false; 
         boolean useLeftMemory = !JoinNode.USE_DB;       
     
-//        if ( !this.tupleMemoryEnabled ) {
-//            // This is a hack, to not add closed DroolsQuery objects
-//            Object object = ((InternalFactHandle) leftTuple.get( 0 )).getObject();
-//            if ( !(object instanceof DroolsQuery) || !((DroolsQuery) object).isOpen() ) {
-//                useLeftMemory = false;
-//            }
-//        }
+        if ( !this.tupleMemoryEnabled ) {
+            // This is a hack, to not add closed DroolsQuery objects
+            Object object = ((InternalFactHandle) leftTuple.get( 0 )).getObject();
+            if ( !(object instanceof DroolsQuery) || !((DroolsQuery) object).isOpen() ) {
+                useLeftMemory = false;
+            }
+        }
 
         if ( useLeftMemory ) {
-            if ( !JoinNode.USE_DB ) {
-                memory.getLeftTupleMemory().add( leftTuple );
-            }
+            memory.getLeftTupleMemory().add( leftTuple );
         } 
         
         this.constraints.updateFromTuple( contextEntry,

@@ -9,7 +9,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.drools.common.InternalFactHandle;
-import org.drools.reteoo.IRelationshipManager;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.LeftTupleSink;
 import org.drools.reteoo.RightTuple;
@@ -67,9 +66,9 @@ public class DbRelationshipManager implements IRelationshipManager {
     }
 
     @Override
-    public Relationship createRelationship(final int joinNodeId,
-            final Object object) {
-        return new Relationship(joinNodeId, object);
+    public Relationship createRelationship(final InternalFactHandle fact,
+            final LeftTupleSink sink) {
+        return new Relationship(sink.getId(), fact.getObject());
     }
 
     @Override

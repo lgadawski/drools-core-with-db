@@ -1,6 +1,11 @@
-package org.drools.reteoo;
+package com.gadawski.db;
 
 import java.util.List;
+
+import org.drools.common.InternalFactHandle;
+import org.drools.reteoo.LeftTuple;
+import org.drools.reteoo.LeftTupleSink;
+import org.drools.reteoo.RightTuple;
 
 import com.gadawski.util.facts.Relationship;
 
@@ -28,7 +33,8 @@ public interface IRelationshipManager {
      * @param joinNodeId
      * @param object
      */
-    public Relationship createRelationship(int joinNodeId, Object object);
+    public Relationship createRelationship(final InternalFactHandle fact,
+            final LeftTupleSink sink);
 
     /**
      * Saves relationship to db.
