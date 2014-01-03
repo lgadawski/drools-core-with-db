@@ -10,7 +10,6 @@ import org.drools.reteoo.RightTuple;
 import com.gadawski.util.facts.Relationship;
 
 /**
- * 
  * @author l.gadawski@gmail.com
  * 
  */

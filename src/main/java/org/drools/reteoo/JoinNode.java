@@ -161,10 +161,10 @@ public class JoinNode extends BetaNode {
 
         if ( JoinNode.USE_DB ) {
             m_relManager = DbRelationshipManager.getInstance();
-            List<Relationship> results = m_relManager.getRalationships(this.getId());
+            List<Relationship> results = m_relManager.getRalationships( this.getId() );
             for (final Relationship relationship : results) {
-                LeftTuple tupleFromDb = createLeftTuple(relationship);
-                propagateFromRight(rightTuple, tupleFromDb, memory, context, workingMemory);
+                LeftTuple tupleFromDb = createLeftTuple( relationship );
+                propagateFromRight( rightTuple, tupleFromDb, memory, context, workingMemory );
             }
         } else {
             FastIterator it = getLeftIterator( leftMemory );
@@ -515,7 +515,7 @@ public class JoinNode extends BetaNode {
     public LeftTuple createLeftTuple(LeftTuple leftTuple,
                                      LeftTupleSink sink,
                                      boolean leftTupleMemoryEnabled) {
-        return new JoinNodeLeftTuple(leftTuple,sink, leftTupleMemoryEnabled );
+        return new JoinNodeLeftTuple(leftTuple, sink, leftTupleMemoryEnabled );
     }
 
     public LeftTuple createLeftTuple(LeftTuple leftTuple,

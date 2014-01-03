@@ -83,7 +83,7 @@ public class BaseLeftTuple
             }
         }
         
-        if ( leftTupleMemoryEnabled ) {
+        if ( leftTupleMemoryEnabled && !JoinNode.USE_DB) {
             this.handle.addLastLeftTuple( this );
         }
         this.sink = sink;
@@ -95,7 +95,7 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex();
         this.parent = leftTuple.getParent();
         this.handle = leftTuple.getHandle();
-
+        
         if ( leftTupleMemoryEnabled ) {
             this.leftParent = leftTuple;
             if ( leftTuple.getLastChild() != null ) {
@@ -117,25 +117,34 @@ public class BaseLeftTuple
         this.parent = leftTuple;
         this.handle = rightTuple.getFactHandle();
         
-        this.leftParent = leftTuple;
-        // insert at the end f the list
-        if ( leftTuple.getLastChild() != null ) {
-            this.leftParentPrevious = leftTuple.getLastChild();
-            this.leftParentPrevious.setLeftParentNext( this );
-        } else {
-            leftTuple.setFirstChild( this );
+        if ( JoinNode.USE_DB ) {
+            if ( !isRuleTerminalNode(sink) ) {
+                saveRelationshipToDb(leftTuple, rightTuple, sink);
+            }
         }
-        leftTuple.setLastChild( this );
         
-        // insert at the end of the list
-        this.rightParent = rightTuple;
-        if ( rightTuple.lastChild != null ) {
-            this.rightParentPrevious = rightTuple.lastChild;
-            this.rightParentPrevious.setRightParentNext( this );
-        } else {
-            rightTuple.firstChild = this;
+        if (!JoinNode.USE_DB) {
+            this.leftParent = leftTuple;
+            // insert at the end f the list
+            if ( leftTuple.getLastChild() != null ) {
+                this.leftParentPrevious = leftTuple.getLastChild();
+                this.leftParentPrevious.setLeftParentNext( this );
+            } else {
+                leftTuple.setFirstChild( this );
+            }
+            leftTuple.setLastChild( this );
+            
+            // insert at the end of the list
+            this.rightParent = rightTuple;
+            if ( rightTuple.lastChild != null ) {
+                this.rightParentPrevious = rightTuple.lastChild;
+                this.rightParentPrevious.setRightParentNext( this );
+            } else {
+                rightTuple.firstChild = this;
+            }
+            rightTuple.lastChild = this;        
         }
-        rightTuple.lastChild = this;        
+
         this.sink = sink;
     }    
 
@@ -167,7 +176,7 @@ public class BaseLeftTuple
             }
         }
         
-        if ( leftTupleMemoryEnabled ) {
+        if ( leftTupleMemoryEnabled && !JoinNode.USE_DB) {
             this.leftParent = leftTuple;
             this.rightParent = rightTuple;
             if( currentLeftChild == null ) {
@@ -217,6 +226,15 @@ public class BaseLeftTuple
     }
 
     /**
+     * @param factHandles
+     * @param sink
+     */
+    public BaseLeftTuple(InternalFactHandle[] factHandles, LeftTupleSink sink) {
+        this.sink = sink;
+        this.setFactHandles(factHandles, sink);
+    }
+    
+    /**
      * Creates relationship from fact handle and saves relationship to db.
      * 
      * @param factHandle - to get object for relationship.
@@ -260,12 +278,6 @@ public class BaseLeftTuple
      */
     private boolean isRuleTerminalNode(final LeftTupleSink sink) {
         return sink instanceof RuleTerminalNode;
-    }
-    
-    public BaseLeftTuple(InternalFactHandle[] factHandles, LeftTupleSink sink) {
-        // TODO Auto-generated constructor stub
-        this.sink = sink;
-        this.setFactHandles(factHandles, sink);
     }
 
     /* (non-Javadoc)
@@ -600,13 +612,12 @@ public class BaseLeftTuple
     }
 
     /**
-     * Sets fact handles to LeftTuple.
+     * Set fact handles to LeftTuple.
      *  
      * @param factHandles
      * @param sink 
      */
     private void setFactHandles(InternalFactHandle[] factHandles, LeftTupleSink sink) {
-        // TODO Auto-generated method stub
         LeftTuple entry = this;
         LeftTuple newEntry = null;
         int lastFactHandleIdx = factHandles.length - 1;

@@ -48,6 +48,7 @@ public class BinaryHeapQueueAgendaGroup
     private boolean           active;
 
     private PropagationContext autoFocusActivator;
+
     /**
      * Construct an <code>AgendaGroup</code> with the given name.
      *

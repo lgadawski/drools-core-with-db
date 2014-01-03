@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,15 +31,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.drools.RuleBaseConfiguration;
 import org.drools.WorkingMemory;
 import org.drools.base.DefaultKnowledgeHelper;
-import org.drools.base.SequentialKnowledgeHelper;
 import org.drools.common.RuleFlowGroupImpl.DeactivateCallback;
 import org.drools.core.util.ClassUtils;
-import org.drools.core.util.Entry;
-import org.drools.core.util.LinkedListNode;
 import org.drools.event.rule.ActivationCancelledCause;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.ObjectTypeConf;
-import org.drools.reteoo.ReteooComponentFactory;
 import org.drools.reteoo.RuleTerminalNode;
 import org.drools.rule.Declaration;
 import org.drools.rule.EntryPoint;
@@ -55,7 +50,6 @@ import org.drools.spi.ConsequenceExceptionHandler;
 import org.drools.spi.KnowledgeHelper;
 import org.drools.spi.PropagationContext;
 import org.drools.spi.RuleFlowGroup;
-import org.drools.time.impl.DefaultJobHandle;
 import org.drools.time.impl.ExpressionIntervalTimer;
 import org.drools.time.impl.Timer;
 
@@ -584,7 +578,7 @@ public class DefaultAgenda
             item.setAgendaGroup( agendaGroup );   
         }
         
-
+        
         tuple.setObject( item );
         
         if( activationsFilter != null && !activationsFilter.accept( item, 

@@ -31,13 +31,13 @@ public class DbRelationshipManager implements IRelationshipManager {
     /**
      * Entity manager util instance.
      */
-    private EntityManagerUtil m_entityManagerUtil = EntityManagerUtil
-            .getInstance();
+    private final EntityManagerUtil m_entityManagerUtil;
 
     /**
      * 
      */
     private DbRelationshipManager() {
+        m_entityManagerUtil = EntityManagerUtil.getInstance();
     }
 
     /**
@@ -77,7 +77,8 @@ public class DbRelationshipManager implements IRelationshipManager {
     }
 
     @Override
-    public List<Relationship> getRalationships(int joinNodeId) {
+    public List<Relationship> getRalationships(final int joinNodeId) {
+        // think about named query
         final CriteriaBuilder builder = m_entityManagerUtil
                 .getCriteriaBuilder();
         final CriteriaQuery<Relationship> query = builder
@@ -87,8 +88,8 @@ public class DbRelationshipManager implements IRelationshipManager {
                 builder.equal(root.get("joinNode_ID"), joinNodeId));
         final TypedQuery<Relationship> tQuery = m_entityManagerUtil
                 .createQuery(query);
-        List<Relationship> results = new ArrayList<Relationship>();
-        results = tQuery.getResultList();
+        final List<Relationship> results = new ArrayList<Relationship>();
+        results.addAll(tQuery.getResultList());
         return results;
     }
 }

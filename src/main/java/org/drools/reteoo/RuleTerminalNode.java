@@ -16,6 +16,13 @@
 
 package org.drools.reteoo;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
+
 import org.drools.base.mvel.MVELEnabledExpression;
 import org.drools.base.mvel.MVELSalienceExpression;
 import org.drools.common.AgendaItem;
@@ -36,13 +43,6 @@ import org.drools.rule.Rule;
 import org.drools.spi.Activation;
 import org.drools.spi.PropagationContext;
 import org.drools.time.impl.ExpressionIntervalTimer;
-
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Map;
 
 /**
  * Leaf Rete-OO node responsible for enacting <code>Action</code> s on a
@@ -257,6 +257,10 @@ public class RuleTerminalNode extends AbstractTerminalNode {
                                                 false );
         if( fire && !fireDirect ) {
             agenda.addActivation( (AgendaItem) leftTuple.getObject() );
+            if (JoinNode.USE_DB) {
+                //release memory that holds AgendaItem
+                leftTuple.setObject(null);
+            }
         }
     }
 

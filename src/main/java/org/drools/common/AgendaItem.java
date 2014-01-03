@@ -16,6 +16,23 @@
 
 package org.drools.common;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.drools.FactHandle;
 import org.drools.core.util.LinkedList;
 import org.drools.core.util.LinkedListEntry;
@@ -31,17 +48,11 @@ import org.drools.spi.AgendaGroup;
 import org.drools.spi.Consequence;
 import org.drools.spi.PropagationContext;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Item entry in the <code>Agenda</code>.
  */
+@Entity
+@Table(name="AGENDA_ITEMS")
 public class AgendaItem
     implements
     Activation,
@@ -50,49 +61,74 @@ public class AgendaItem
     // ------------------------------------------------------------
     // Instance members
     // ------------------------------------------------------------
-
+    /**
+     * Entity ID.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ai_seq")
+    @SequenceGenerator(name = "ai_seq", sequenceName = "ai_seq", allocationSize = 500)
+    @Column(name = "Agenda_Item_ID", unique = true, updatable = false, nullable = false)
+    private Long agendaItemID;
+    
+    @Transient
     private static final long         serialVersionUID = 510l;
 
     /** The tuple. */
+    @Transient
     private LeftTuple                 tuple;
 
     /** The salience */
     private int                       salience;
 
     /** Used for sequential mode */
+    @Column(name="ai_sequenence")
     private int                       sequenence;
 
     /** Rule terminal node, gives access to SubRule **/
+    @Transient
     private RuleTerminalNode          rtn;
 
     /** The propagation context */
+    @Transient
     private PropagationContext        context;
 
     /** The activation number */
     private long                      activationNumber;
 
+    @Column(name="ai_index")
     private int                       index;
-
+    
+    @Transient
     private LinkedList<LogicalDependency>                   justified;
 
+    @Transient
     private LinkedList<LogicalDependency>                   blocked;
 
+    @Transient
     private LinkedList<LinkedListEntry<LogicalDependency>>  blockers;
 
+    @Transient
     private boolean                   activated;
 
+    @Transient
     private InternalAgendaGroup       agendaGroup;
 
+    @Transient
     private ActivationGroupNode       activationGroupNode;
 
+    @Transient
     private ActivationNode            activationNode;
 
+    @Transient
     private InternalFactHandle        factHandle;
 
+    @Transient
     private transient boolean         canceled;
 
+    @Transient
     private boolean                   matched;
 
+    @Transient
     private ActivationUnMatchListener activationUnMatchListener;
     
     // ------------------------------------------------------------
