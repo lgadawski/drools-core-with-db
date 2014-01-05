@@ -53,6 +53,9 @@ import org.drools.spi.RuleFlowGroup;
 import org.drools.time.impl.ExpressionIntervalTimer;
 import org.drools.time.impl.Timer;
 
+import com.gadawski.db.DbRelationshipManager;
+import com.gadawski.db.IRelationshipManager;
+
 /**
  * Rule-firing Agenda.
  * 
@@ -121,7 +124,11 @@ public class DefaultAgenda
     private volatile boolean                                    isFiringActivation = false;
 
     private volatile boolean                                    mustNotifyHalt     = false;                          
-
+    /**
+     * Db relationship manager.
+     */
+    private IRelationshipManager m_dbRelationshipManager = DbRelationshipManager.getInstance();
+    
     // ------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------
@@ -276,6 +283,7 @@ public class DefaultAgenda
     
     // @TODO make serialisation work
     private ActivationGroup stagedActivations;
+
     /**
      * If the item belongs to an activation group, add it
      * 
@@ -1197,7 +1205,7 @@ public class DefaultAgenda
                 final InternalAgendaGroup group = (InternalAgendaGroup) getNextFocus();
                 // if there is a group with focus
                 if ( group != null ) {
-                    final AgendaItem item = (AgendaItem) group.getNext();
+                    final AgendaItem item = getNextAgendaItem(group);
                     // if there is an item to fire from that group
                     if ( item != null ) {
                         // if that item is allowed to fire
@@ -1240,6 +1248,50 @@ public class DefaultAgenda
             this.workingMemory.activationFired();
         }
         return result;
+    }
+
+    /**
+     * Get next agenda item. Sets agenda group and finds and sets ruleterminalnode.
+     * @param group
+     * @return
+     */
+    private AgendaItem getNextAgendaItem(InternalAgendaGroup group) {
+        AgendaItem item = (AgendaItem) group.getNext();
+        if (item.getTuple() == null) {
+            LeftTuple tuple = RuleTerminalNode.createLeftTuple(
+                    m_dbRelationshipManager .getRelationiship(item
+                            .getRelationshipId()), item.getRuleTerminalNode());
+            tuple.setObject(item);
+            item.setTuple(tuple);
+        }
+//        if (item.getAgendaGroup() == null) {
+//            item.setAgendaGroup(group);
+//        }
+//        if (item.getRuleTerminalNode() == null) {
+//            item.setRuleTerminalNode(getRuleTerminalNode(item.getRuleTerminalNodeId()));
+//        }
+        return item;
+    }
+
+    /**
+     * Iterates over terminal nodes and returns {@link RuleTerminalNode} 
+     * if exists for given rtnId.
+     * 
+     * @param rtnId
+     * @return 
+     */
+    private RuleTerminalNode getRuleTerminalNode(Long rtnId) {
+        org.drools.core.util.Iterator nodeIter = 
+                TerminalNodeIterator.iterator(
+                        this.workingMemory.getKnowledgeRuntime().getKnowledgeBase());
+        RuleTerminalNode node;
+        while( (node = (RuleTerminalNode) nodeIter.next()) != null ) {
+            if (node.getId() == rtnId) {
+                return node;
+            }
+        }
+        // possible null pointer exception!
+        return null;
     }
 
     /**

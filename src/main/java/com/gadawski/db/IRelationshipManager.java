@@ -7,6 +7,7 @@ import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.LeftTupleSink;
 import org.drools.reteoo.RightTuple;
 
+import com.gadawski.util.facts.AgendaItemRelationship;
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -51,4 +52,22 @@ public interface IRelationshipManager {
      * @return - list of relationship associated with join node id.
      */
     public List<Relationship> getRalationships(int joinNodeId);
+
+    /**
+     * Gets concrete {@link Relationship} for given relationship id.
+     * 
+     * @param relationshipId
+     *            - id of relationship.
+     * @return concrete relationship from db.
+     */
+    public Relationship getRelationiship(Long relationshipId);
+
+    /**
+     * @param leftTuple
+     * @param rightTuple
+     * @param sink
+     * @return
+     */
+    public AgendaItemRelationship createAgendaItemRelationship(
+            LeftTuple leftTuple, RightTuple rightTuple, LeftTupleSink sink);
 }

@@ -63,7 +63,12 @@ public class BaseLeftTuple
 
     private Object             object;
 
-    private IRelationshipManager m_relManager;// = DbRelationshipManager.getInstance();
+    private IRelationshipManager m_relManager;
+
+    /**
+     * Indicates connection with relationship ID from db.
+     */
+    private long m_relationshipId;
 
     public BaseLeftTuple() {
         // constructor needed for serialisation
@@ -78,9 +83,7 @@ public class BaseLeftTuple
         this.handle = factHandle;
         
         if ( JoinNode.USE_DB ) {
-           if ( !isRuleTerminalNode(sink) ) {
-                saveFactHandleToDb(factHandle, sink);
-            }
+            saveFactHandleToDb(factHandle, sink);
         }
         
         if ( leftTupleMemoryEnabled && !JoinNode.USE_DB) {
@@ -118,9 +121,7 @@ public class BaseLeftTuple
         this.handle = rightTuple.getFactHandle();
         
         if ( JoinNode.USE_DB ) {
-            if ( !isRuleTerminalNode(sink) ) {
-                saveRelationshipToDb(leftTuple, rightTuple, sink);
-            }
+            saveRelationshipToDb(leftTuple, rightTuple, sink);
         }
         
         if (!JoinNode.USE_DB) {
@@ -171,9 +172,7 @@ public class BaseLeftTuple
         this.parent = leftTuple;
 
         if ( JoinNode.USE_DB ) {
-            if ( !isRuleTerminalNode(sink) ) {
-                saveRelationshipToDb(leftTuple, rightTuple, sink);
-            }
+            saveRelationshipToDb(leftTuple, rightTuple, sink);
         }
         
         if ( leftTupleMemoryEnabled && !JoinNode.USE_DB) {
@@ -229,9 +228,11 @@ public class BaseLeftTuple
      * @param factHandles
      * @param sink
      */
-    public BaseLeftTuple(InternalFactHandle[] factHandles, LeftTupleSink sink) {
+    public BaseLeftTuple(final InternalFactHandle[] factHandles, final LeftTupleSink sink, 
+            final long relationshipId) {
         this.sink = sink;
         this.setFactHandles(factHandles, sink);
+        this.setRelationshipId(relationshipId);
     }
     
     /**
@@ -245,6 +246,7 @@ public class BaseLeftTuple
         m_relManager = DbRelationshipManager.getInstance();
         final Relationship relationship = m_relManager.createRelationship(factHandle, sink);
         m_relManager.saveRelationship(relationship);
+        this.setRelationshipId(relationship.getRelationshipID());
     }
     
     /**
@@ -259,6 +261,7 @@ public class BaseLeftTuple
         m_relManager = DbRelationshipManager.getInstance();
         final Relationship relationship = m_relManager.createRelationship(leftTuple, rightTuple, sink);
         m_relManager.saveRelationship(relationship);
+        this.setRelationshipId(relationship.getRelationshipID());
     }
     
     /**
@@ -266,7 +269,7 @@ public class BaseLeftTuple
      * 
      * @param relManager - relationship manager to save.
      */
-    public void setRelationshipManager(IRelationshipManager relManager){
+    public void setRelationshipManager(final IRelationshipManager relManager){
         m_relManager = relManager;
     }
     
@@ -903,5 +906,19 @@ public class BaseLeftTuple
                 ((EventFactHandle)entry.getLastHandle()).decreaseActivationsCount();
             }
         }
+    }
+
+    /**
+     * @param relationshipId
+     */
+    public void setRelationshipId(long relationshipId) {
+        this.m_relationshipId = relationshipId;
+    }
+    
+    /**
+     * @return the m_relationshipId
+     */
+    public long getRelationshipId() {
+        return m_relationshipId;
     }    
 }

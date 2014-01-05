@@ -163,7 +163,7 @@ public class JoinNode extends BetaNode {
             m_relManager = DbRelationshipManager.getInstance();
             List<Relationship> results = m_relManager.getRalationships( this.getId() );
             for (final Relationship relationship : results) {
-                LeftTuple tupleFromDb = createLeftTuple( relationship );
+                LeftTuple tupleFromDb = createLeftTuple( relationship, this );
                 propagateFromRight( rightTuple, tupleFromDb, memory, context, workingMemory );
             }
         } else {
@@ -495,15 +495,16 @@ public class JoinNode extends BetaNode {
      * Based on given relationship, created {@link JoinNodeLeftTuple}.
      * 
      * @param relationship to get from tuples.
+     * @param sink 
      * @return new left tuple.
      */
-    private LeftTuple createLeftTuple(final Relationship relationship) {
-        InternalFactHandle[] tuple = new InternalFactHandle[relationship.getNoObjectsInTuple()];
+    public static LeftTuple createLeftTuple(final Relationship relationship, final LeftTupleSink sink ) {
+        InternalFactHandle[] facts = new InternalFactHandle[relationship.getNoObjectsInTuple()];
         int i = 0;
         for (Object object : relationship.getObjects()) {
-            tuple[i++] = new DefaultFactHandle(i, object);
+            facts[i++] = new DefaultFactHandle(i, object);
         }
-        return new JoinNodeLeftTuple(tuple, this);
+        return new JoinNodeLeftTuple(facts, sink, relationship);
     }
 
     public LeftTuple createLeftTuple(InternalFactHandle factHandle,

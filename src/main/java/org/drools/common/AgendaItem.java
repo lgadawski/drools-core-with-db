@@ -24,15 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import org.drools.FactHandle;
 import org.drools.core.util.LinkedList;
 import org.drools.core.util.LinkedListEntry;
@@ -51,8 +42,6 @@ import org.drools.spi.PropagationContext;
 /**
  * Item entry in the <code>Agenda</code>.
  */
-@Entity
-@Table(name="AGENDA_ITEMS")
 public class AgendaItem
     implements
     Activation,
@@ -61,74 +50,50 @@ public class AgendaItem
     // ------------------------------------------------------------
     // Instance members
     // ------------------------------------------------------------
-    /**
-     * Entity ID.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ai_seq")
-    @SequenceGenerator(name = "ai_seq", sequenceName = "ai_seq", allocationSize = 500)
-    @Column(name = "Agenda_Item_ID", unique = true, updatable = false, nullable = false)
-    private Long agendaItemID;
-    
-    @Transient
     private static final long         serialVersionUID = 510l;
 
     /** The tuple. */
-    @Transient
     private LeftTuple                 tuple;
+  
+    private long relationshipId;
 
     /** The salience */
     private int                       salience;
 
     /** Used for sequential mode */
-    @Column(name="ai_sequenence")
     private int                       sequenence;
 
     /** Rule terminal node, gives access to SubRule **/
-    @Transient
     private RuleTerminalNode          rtn;
 
     /** The propagation context */
-    @Transient
     private PropagationContext        context;
 
     /** The activation number */
     private long                      activationNumber;
 
-    @Column(name="ai_index")
     private int                       index;
     
-    @Transient
     private LinkedList<LogicalDependency>                   justified;
 
-    @Transient
     private LinkedList<LogicalDependency>                   blocked;
 
-    @Transient
     private LinkedList<LinkedListEntry<LogicalDependency>>  blockers;
 
-    @Transient
     private boolean                   activated;
 
-    @Transient
     private InternalAgendaGroup       agendaGroup;
 
-    @Transient
     private ActivationGroupNode       activationGroupNode;
 
-    @Transient
     private ActivationNode            activationNode;
 
-    @Transient
     private InternalFactHandle        factHandle;
 
-    @Transient
     private transient boolean         canceled;
 
-    @Transient
     private boolean                   matched;
 
-    @Transient
     private ActivationUnMatchListener activationUnMatchListener;
     
     // ------------------------------------------------------------
@@ -153,6 +118,7 @@ public class AgendaItem
                       final PropagationContext context,
                       final RuleTerminalNode rtn) {
         this.tuple = tuple;
+        this.setRelationshipId(tuple.getRelationshipId());
         this.context = context;
         this.salience = salience;
         this.rtn = rtn;
@@ -202,6 +168,15 @@ public class AgendaItem
         return this.tuple;
     }
 
+    /**
+     * Set the tuple
+     * 
+     * @param tuple - The tuple.
+     */
+    public void setTuple(LeftTuple tuple) {
+        this.tuple = tuple;
+    }
+    
     public int getSalience() {
         return this.salience;
     }
@@ -405,7 +380,6 @@ public class AgendaItem
     public RuleTerminalNode getRuleTerminalNode() {
         return this.rtn;
     }
-        
     
     public ActivationUnMatchListener getActivationUnMatchListener() {
         return activationUnMatchListener;
@@ -478,5 +452,18 @@ public class AgendaItem
     public void setMatched(boolean matched) {
         this.matched = matched;
     }
-    
+
+    /**
+     * @return the relationshipId
+     */
+    public Long getRelationshipId() {
+        return relationshipId;
+    }
+
+    /**
+     * @param relationshipId the relationshipId to set
+     */
+    public void setRelationshipId(Long relationshipId) {
+        this.relationshipId = relationshipId;
+    }
 }

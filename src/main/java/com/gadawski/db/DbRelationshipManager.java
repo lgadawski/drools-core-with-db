@@ -14,6 +14,7 @@ import org.drools.reteoo.LeftTupleSink;
 import org.drools.reteoo.RightTuple;
 
 import com.gadawski.util.db.EntityManagerUtil;
+import com.gadawski.util.facts.AgendaItemRelationship;
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -66,6 +67,17 @@ public class DbRelationshipManager implements IRelationshipManager {
     }
 
     @Override
+    public AgendaItemRelationship createAgendaItemRelationship(
+            final LeftTuple leftTuple, final RightTuple rightTuple,
+            final LeftTupleSink sink) {
+        final Relationship relationship = createRelationship(leftTuple,
+                rightTuple, sink);
+        final AgendaItemRelationship aRelationship = new AgendaItemRelationship(
+                relationship);
+        return aRelationship;
+    }
+
+    @Override
     public Relationship createRelationship(final InternalFactHandle fact,
             final LeftTupleSink sink) {
         return new Relationship(sink.getId(), fact.getObject());
@@ -91,5 +103,20 @@ public class DbRelationshipManager implements IRelationshipManager {
         final List<Relationship> results = new ArrayList<Relationship>();
         results.addAll(tQuery.getResultList());
         return results;
+    }
+
+    @Override
+    public Relationship getRelationiship(final Long relationshipId) {
+        // code repetitions! ugly!
+        final CriteriaBuilder builder = m_entityManagerUtil
+                .getCriteriaBuilder();
+        final CriteriaQuery<Relationship> query = builder
+                .createQuery(Relationship.class);
+        final Root<Relationship> root = query.from(Relationship.class);
+        query.select(root).where(
+                builder.equal(root.get("relationshipID"), relationshipId));
+        final TypedQuery<Relationship> tQuery = m_entityManagerUtil
+                .createQuery(query);
+        return tQuery.getSingleResult();
     }
 }
