@@ -2,10 +2,13 @@ package com.gadawski.db;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.drools.common.InternalFactHandle;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.LeftTupleSink;
 import org.drools.reteoo.RightTuple;
+import org.hibernate.Session;
 
 import com.gadawski.util.facts.AgendaItemRelationship;
 import com.gadawski.util.facts.Relationship;
@@ -70,4 +73,20 @@ public interface IRelationshipManager {
      */
     public AgendaItemRelationship createAgendaItemRelationship(
             LeftTuple leftTuple, RightTuple rightTuple, LeftTupleSink sink);
+
+    /**
+     * Unwraps hibernate's session from {@link EntityManager} and opens
+     * {@link Session}.
+     * 
+     * @return {@link Session} based on {@link EntityManager}.
+     */
+    public Session openSession();
+
+    /**
+     * @param offset
+     * @param i
+     * @param j 
+     * @return
+     */
+    public List<Relationship> getRelsIterable(int offset, int i, long j);
 }

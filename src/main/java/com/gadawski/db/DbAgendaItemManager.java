@@ -30,7 +30,7 @@ public class DbAgendaItemManager implements IAgendaItemManager {
     /**
      * Relationship manager.
      */
-    private DbRelationshipManager m_dbRelationshipManager = DbRelationshipManager
+    private final DbRelationshipManager m_dbRelationshipManager = DbRelationshipManager
             .getInstance();;
 
     /**
@@ -59,7 +59,7 @@ public class DbAgendaItemManager implements IAgendaItemManager {
     public Activation getNextAgendaItem() {
         final AgendaItem item = getFirstRow();
         // TODO possible null poniter exception
-        LeftTuple tuple = RuleTerminalNode.createLeftTuple(
+        final LeftTuple tuple = RuleTerminalNode.createLeftTuple(
                 m_dbRelationshipManager.getRelationiship(item
                         .getRelationshipId()), null);
         item.setTuple(tuple);

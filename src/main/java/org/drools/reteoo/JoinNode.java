@@ -16,7 +16,7 @@
 
 package org.drools.reteoo;
 
-import java.util.List;
+import javax.persistence.Query;
 
 import org.drools.base.DroolsQuery;
 import org.drools.common.BetaConstraints;
@@ -28,9 +28,14 @@ import org.drools.core.util.Iterator;
 import org.drools.reteoo.builder.BuildContext;
 import org.drools.rule.ContextEntry;
 import org.drools.spi.PropagationContext;
+import org.hibernate.CacheMode;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 
 import com.gadawski.db.DbRelationshipManager;
 import com.gadawski.db.IRelationshipManager;
+import com.gadawski.util.db.EntityManagerUtil;
 import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
@@ -160,12 +165,7 @@ public class JoinNode extends BetaNode {
                                                factHandle );
 
         if ( JoinNode.USE_DB ) {
-            m_relManager = DbRelationshipManager.getInstance();
-            List<Relationship> results = m_relManager.getRalationships( this.getId() );
-            for (final Relationship relationship : results) {
-                LeftTuple tupleFromDb = createLeftTuple( relationship, this );
-                propagateFromRight( rightTuple, tupleFromDb, memory, context, workingMemory );
-            }
+            getAndPropagateDBTupleFromRight(context, workingMemory, memory, rightTuple);
         } else {
             FastIterator it = getLeftIterator( leftMemory );
             for ( LeftTuple leftTuple = getFirstLeftTuple( rightTuple, leftMemory, context, it ); leftTuple != null; leftTuple = (LeftTuple) it.next( leftTuple ) ) {
@@ -174,6 +174,75 @@ public class JoinNode extends BetaNode {
         }
 
         this.constraints.resetFactHandle( memory.getContext() );
+    }
+
+    /**
+     * Performs query to db. Operates on {@link Relationship} with {@link ScrollableResults}. 
+     * It's allows to operates on single fetched row, not full query results. There is no need
+     * for flushing and/or clearing cause that's read-only operation.
+     * 
+     * @param context - for propagating tuple.
+     * @param workingMemory - for propagating tuple.
+     * @param memory - for propagating tuple.
+     * @param rightTuple - the tuple to propagate.
+     */
+    private void getAndPropagateDBTupleFromRight(final PropagationContext context,
+            final InternalWorkingMemory workingMemory, final BetaMemory memory,
+            RightTuple rightTuple) {
+//        m_relManager = DbRelationshipManager.getInstance();
+//        Session session = m_relManager.openSession();
+        EntityManagerUtil emu = EntityManagerUtil.getInstance();
+        Query query = 
+                emu.getEntityManager().
+                createNamedQuery(Relationship.FIND_RELS_BY_JOINNODE_ID, Relationship.class);
+        query.setParameter("nodeId", (long) this.getId());
+        ScrollableResults sr = query.unwrap(org.hibernate.Query.class)
+                .setReadOnly(true)
+                .setFetchSize(1000)
+                .setCacheable(false)
+                .setCacheMode(CacheMode.IGNORE)
+                .scroll(ScrollMode.FORWARD_ONLY);
+        while (sr.next()) {
+            Relationship relationship = (Relationship) sr.get()[0];
+            LeftTuple tupleFromDb = createLeftTuple( relationship, this );
+            propagateFromRight( rightTuple, tupleFromDb, memory, context, workingMemory );
+        }
+        sr.close();
+//        session.clear();
+        
+//        int offset = 0;
+//        EntityManagerUtil emu = EntityManagerUtil.getInstance();
+//        m_relManager = DbRelationshipManager.getInstance();
+//        
+//        List<Relationship> rels;
+//        while ((rels = m_relManager.getRelsIterable(offset, 100, this.getId())).size() > 0) {
+//            emu.beginTransaction();
+//            for (Relationship relationship : rels) {
+//              LeftTuple tupleFromDb = createLeftTuple( relationship, this );
+//              propagateFromRight( rightTuple, tupleFromDb, memory, context, workingMemory );
+//            }
+//            emu.flush();
+//            emu.clear();
+//            emu.commitTransaction();
+//            offset += rels.size();
+//        }
+        
+//        m_relManager = DbRelationshipManager.getInstance();
+//        Session session = m_relManager.openSession();
+////        Transaction tx = session.beginTransaction();
+//
+//        Query query = session.getNamedQuery(Relationship.FIND_RELS_BY_JOINNODE_ID);
+//        query.setParameter("nodeId", (long) this.getId());
+//        ScrollableResults scrollableResults = query.setReadOnly(true).setFetchSize(1000)
+//                .scroll(ScrollMode.FORWARD_ONLY);
+//        while (scrollableResults.next()) {
+//            Relationship relationship = (Relationship) scrollableResults.get()[0];
+//            LeftTuple tupleFromDb = createLeftTuple( relationship, this );
+//            propagateFromRight( rightTuple, tupleFromDb, memory, context, workingMemory );
+//        }
+//        
+////        tx.commit();
+//        session.close();
     }
 
     protected void propagateFromRight( RightTuple rightTuple, LeftTuple leftTuple, BetaMemory memory, PropagationContext context, InternalWorkingMemory workingMemory ) {
@@ -423,6 +492,7 @@ public class JoinNode extends BetaNode {
 
         FastIterator it = memory.getLeftTupleMemory().fastIterator();
 
+        @SuppressWarnings("rawtypes")
         final Iterator tupleIter = memory.getLeftTupleMemory().iterator();
         for ( LeftTuple leftTuple = (LeftTuple) tupleIter.next(); leftTuple != null; leftTuple = (LeftTuple) tupleIter.next() ) {
             this.constraints.updateFromTuple( memory.getContext(),

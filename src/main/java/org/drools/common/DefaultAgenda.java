@@ -34,6 +34,7 @@ import org.drools.base.DefaultKnowledgeHelper;
 import org.drools.common.RuleFlowGroupImpl.DeactivateCallback;
 import org.drools.core.util.ClassUtils;
 import org.drools.event.rule.ActivationCancelledCause;
+import org.drools.reteoo.JoinNode;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.ObjectTypeConf;
 import org.drools.reteoo.RuleTerminalNode;
@@ -1257,7 +1258,7 @@ public class DefaultAgenda
      */
     private AgendaItem getNextAgendaItem(InternalAgendaGroup group) {
         AgendaItem item = (AgendaItem) group.getNext();
-        if (item.getTuple() == null) {
+        if (item.getTuple() == null && JoinNode.USE_DB) {
             LeftTuple tuple = RuleTerminalNode.createLeftTuple(
                     m_dbRelationshipManager .getRelationiship(item
                             .getRelationshipId()), item.getRuleTerminalNode());
@@ -1280,6 +1281,7 @@ public class DefaultAgenda
      * @param rtnId
      * @return 
      */
+    @SuppressWarnings("unused")
     private RuleTerminalNode getRuleTerminalNode(Long rtnId) {
         org.drools.core.util.Iterator nodeIter = 
                 TerminalNodeIterator.iterator(

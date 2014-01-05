@@ -3,6 +3,7 @@ package com.gadawski.db;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -12,6 +13,7 @@ import org.drools.common.InternalFactHandle;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.LeftTupleSink;
 import org.drools.reteoo.RightTuple;
+import org.hibernate.Session;
 
 import com.gadawski.util.db.EntityManagerUtil;
 import com.gadawski.util.facts.AgendaItemRelationship;
@@ -102,6 +104,7 @@ public class DbRelationshipManager implements IRelationshipManager {
                 .createQuery(query);
         final List<Relationship> results = new ArrayList<Relationship>();
         results.addAll(tQuery.getResultList());
+        m_entityManagerUtil.clear();
         return results;
     }
 
@@ -118,5 +121,21 @@ public class DbRelationshipManager implements IRelationshipManager {
         final TypedQuery<Relationship> tQuery = m_entityManagerUtil
                 .createQuery(query);
         return tQuery.getSingleResult();
+    }
+
+    @Override
+    public Session openSession() {
+        return m_entityManagerUtil.openSession();
+    }
+
+    @Override
+    public List<Relationship> getRelsIterable(int offset, int max, long nodeId) {
+        Query query = m_entityManagerUtil.getEntityManager()
+        .createNamedQuery(Relationship.FIND_RELS_BY_JOINNODE_ID)
+        .setParameter("nodeId", nodeId).setFirstResult(offset)
+        .setMaxResults(max);
+        List<Relationship> rels = new ArrayList<Relationship>();
+        rels.addAll(query.getResultList());
+        return rels;
     }
 }

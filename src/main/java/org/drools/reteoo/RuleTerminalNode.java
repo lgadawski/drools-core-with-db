@@ -175,7 +175,6 @@ public class RuleTerminalNode extends AbstractTerminalNode {
     // ------------------------------------------------------------
     // Instance methods
     // ------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException,
                                             ClassNotFoundException {
         super.readExternal(in);
