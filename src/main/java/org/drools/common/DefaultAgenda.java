@@ -1252,7 +1252,9 @@ public class DefaultAgenda
     }
 
     /**
-     * Get next agenda item. Sets agenda group and finds and sets ruleterminalnode.
+     * Get next agenda item. Sets {@link DefaultAgenda} and finds and sets
+     * {@link RuleTerminalNode}.
+     * 
      * @param group
      * @return
      */
@@ -1260,7 +1262,7 @@ public class DefaultAgenda
         AgendaItem item = (AgendaItem) group.getNext();
         if (item.getTuple() == null && JoinNode.USE_DB) {
             LeftTuple tuple = RuleTerminalNode.createLeftTuple(
-                    m_dbRelationshipManager .getRelationiship(item
+                    m_dbRelationshipManager.getRelationiship(item
                             .getRelationshipId()), item.getRuleTerminalNode());
             tuple.setObject(item);
             item.setTuple(tuple);
@@ -1275,19 +1277,19 @@ public class DefaultAgenda
     }
 
     /**
-     * Iterates over terminal nodes and returns {@link RuleTerminalNode} 
-     * if exists for given rtnId.
+     * Iterates over terminal nodes and returns {@link RuleTerminalNode} if
+     * exists for given rtnId.
      * 
      * @param rtnId
-     * @return 
+     * @return
      */
     @SuppressWarnings("unused")
     private RuleTerminalNode getRuleTerminalNode(Long rtnId) {
-        org.drools.core.util.Iterator nodeIter = 
-                TerminalNodeIterator.iterator(
-                        this.workingMemory.getKnowledgeRuntime().getKnowledgeBase());
+        org.drools.core.util.Iterator nodeIter = TerminalNodeIterator
+                .iterator(this.workingMemory.getKnowledgeRuntime()
+                        .getKnowledgeBase());
         RuleTerminalNode node;
-        while( (node = (RuleTerminalNode) nodeIter.next()) != null ) {
+        while ((node = (RuleTerminalNode) nodeIter.next()) != null) {
             if (node.getId() == rtnId) {
                 return node;
             }

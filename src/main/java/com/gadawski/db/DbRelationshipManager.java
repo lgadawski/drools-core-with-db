@@ -13,6 +13,8 @@ import org.drools.common.InternalFactHandle;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.LeftTupleSink;
 import org.drools.reteoo.RightTuple;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
 import com.gadawski.util.db.EntityManagerUtil;
@@ -27,6 +29,12 @@ import com.gadawski.util.facts.Relationship;
  * 
  */
 public class DbRelationshipManager implements IRelationshipManager {
+    /**
+     * Number of objects after which session should be cleared. Using in
+     * {@link ScrollableResults} to clear {@link Session}. Should be same as
+     * hibernate.batch_size in persistence.xml.
+     */
+    public static final int BATCH_SIZE = EntityManagerUtil.BATCH_SIZE;
     /**
      * Instance of {@link DbRelationshipManager}.
      */
@@ -128,14 +136,31 @@ public class DbRelationshipManager implements IRelationshipManager {
         return m_entityManagerUtil.openSession();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<Relationship> getRelsIterable(int offset, int max, long nodeId) {
-        Query query = m_entityManagerUtil.getEntityManager()
-        .createNamedQuery(Relationship.FIND_RELS_BY_JOINNODE_ID)
-        .setParameter("nodeId", nodeId).setFirstResult(offset)
-        .setMaxResults(max);
-        List<Relationship> rels = new ArrayList<Relationship>();
+    public List<Relationship> getRelsIterable(final int offset, final int max,
+            final long nodeId) {
+        final Query query = m_entityManagerUtil.getEntityManager()
+                .createNamedQuery(Relationship.FIND_RELS_BY_JOINNODE_ID)
+                .setParameter("nodeId", nodeId).setFirstResult(offset)
+                .setMaxResults(max);
+        final List<Relationship> rels = new ArrayList<Relationship>();
         rels.addAll(query.getResultList());
         return rels;
+    }
+
+    @Override
+    public Query createQueryGetRelsByJoinNodeId(final long nodeId) {
+        Query query = m_entityManagerUtil.createNamedQuery(
+                Relationship.FIND_RELS_BY_JOINNODE_ID, Relationship.class);
+        query.setParameter(Relationship.NODE_ID_TXT, nodeId);
+        return query;
+    }
+
+    @Override
+    public ScrollableResults getScrollableResultsIterator(Query query) {
+        return query.unwrap(org.hibernate.Query.class).setReadOnly(true)
+                .setFetchSize(DbRelationshipManager.BATCH_SIZE)
+                .setCacheable(false).scroll(ScrollMode.FORWARD_ONLY);
     }
 }

@@ -260,9 +260,10 @@ public class RuleTerminalNode extends AbstractTerminalNode {
         if( fire && !fireDirect ) {
             AgendaItem activation = (AgendaItem) leftTuple.getObject();
             if (JoinNode.USE_DB) {
-                //release memory that holds AgendaItem
+                //release memory that holds leftTuple in AgendaItem
                 leftTuple = null;
                 activation.setTuple(null);  
+//                activation.setPropagationContext(null);
             }
             agenda.addActivation(activation);
 //            agenda.addActivation( (AgendaItem) leftTuple.getObject() );

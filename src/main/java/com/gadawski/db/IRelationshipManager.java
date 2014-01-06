@@ -3,11 +3,13 @@ package com.gadawski.db;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.drools.common.InternalFactHandle;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.LeftTupleSink;
 import org.drools.reteoo.RightTuple;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
 import com.gadawski.util.facts.AgendaItemRelationship;
@@ -85,8 +87,27 @@ public interface IRelationshipManager {
     /**
      * @param offset
      * @param i
-     * @param j 
+     * @param j
      * @return
      */
     public List<Relationship> getRelsIterable(int offset, int i, long j);
+
+    /**
+     * Creates query that searches relationships for given nodeId.
+     * 
+     * @param nodeId
+     * @return the Query.
+     */
+    public Query createQueryGetRelsByJoinNodeId(final long nodeId);
+
+    /**
+     * Creates {@link ScrollableResults} iterator for given query. Sets
+     * read-only mode, fetch size defined in {@link DbRelationshipManager},
+     * cacheable to false and ForwardOnly mode.
+     * 
+     * @param query
+     *            to get iterator for.
+     * @return {@link ScrollableResults} iterator.
+     */
+    public ScrollableResults getScrollableResultsIterator(final Query query);
 }
