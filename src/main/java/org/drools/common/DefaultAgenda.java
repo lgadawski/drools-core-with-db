@@ -37,6 +37,7 @@ import org.drools.event.rule.ActivationCancelledCause;
 import org.drools.reteoo.JoinNode;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.ObjectTypeConf;
+import org.drools.reteoo.ObjectTypeNode;
 import org.drools.reteoo.RuleTerminalNode;
 import org.drools.rule.Declaration;
 import org.drools.rule.EntryPoint;
@@ -49,6 +50,7 @@ import org.drools.spi.AgendaGroup;
 import org.drools.spi.ConsequenceException;
 import org.drools.spi.ConsequenceExceptionHandler;
 import org.drools.spi.KnowledgeHelper;
+import org.drools.spi.ObjectType;
 import org.drools.spi.PropagationContext;
 import org.drools.spi.RuleFlowGroup;
 import org.drools.time.impl.ExpressionIntervalTimer;
@@ -218,6 +220,7 @@ public class DefaultAgenda
         }
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void readExternal(ObjectInput in) throws IOException,
                                             ClassNotFoundException {
         workingMemory = (InternalWorkingMemory) in.readObject();
@@ -1266,14 +1269,33 @@ public class DefaultAgenda
                             .getRelationshipId()), item.getRuleTerminalNode());
             tuple.setObject(item);
             item.setTuple(tuple);
+            item.setCurrentOTNforPropagationContext(getObjectTypeNode( item.getCurrentOTNidforPropagationContext()) );
         }
-//        if (item.getAgendaGroup() == null) {
-//            item.setAgendaGroup(group);
-//        }
-//        if (item.getRuleTerminalNode() == null) {
-//            item.setRuleTerminalNode(getRuleTerminalNode(item.getRuleTerminalNodeId()));
-//        }
+        if (item.getAgendaGroup() == null) {
+            item.setAgendaGroup(group);
+        }
+        if (item.getRuleTerminalNode() == null) {
+            item.setRuleTerminalNode(getRuleTerminalNode(item.getRuleTerminalNodeId()));
+        }
         return item;
+    }
+
+    /**
+     * Find {@link ObjectTypeNode} for given nodeId.
+     * 
+     * @param nodeId
+     * @return {@link ObjectTypeNode} if node has been found, null otherwise.
+     */
+    private ObjectTypeNode getObjectTypeNode(final long nodeId) {
+        Map<ObjectType, ObjectTypeNode> map = this.workingMemory
+                .getEntryPointNode().getObjectTypeNodes();
+        for (ObjectType type : map.keySet()) {
+            ObjectTypeNode objectTypeNode = map.get(type);
+            if (objectTypeNode.getId() == nodeId) {
+                return objectTypeNode;
+            }
+        }
+        return null;
     }
 
     /**
@@ -1283,8 +1305,8 @@ public class DefaultAgenda
      * @param rtnId
      * @return
      */
-    @SuppressWarnings("unused")
-    private RuleTerminalNode getRuleTerminalNode(Long rtnId) {
+    private RuleTerminalNode getRuleTerminalNode(long rtnId) {
+        @SuppressWarnings("rawtypes")
         org.drools.core.util.Iterator nodeIter = TerminalNodeIterator
                 .iterator(this.workingMemory.getKnowledgeRuntime()
                         .getKnowledgeBase());

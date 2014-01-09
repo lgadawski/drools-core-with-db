@@ -97,4 +97,14 @@ public interface PropagationContext
     void setObjectType(ObjectType objectType);
 
     public MarshallerReaderContext getReaderContext();
+    
+    /**
+     * @return the currentPropagatingOTNid
+     */
+    public Long getCurrentPropagatingOTNid() ;
+
+    /**
+     * @param currentPropagatingOTNid the currentPropagatingOTNid to set
+     */
+    public void setCurrentPropagatingOTNid(Long currentPropagatingOTNid) ;
 }

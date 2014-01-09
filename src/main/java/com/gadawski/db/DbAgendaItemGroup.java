@@ -3,10 +3,12 @@ package com.gadawski.db;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.List;
 
 import org.drools.common.AgendaItem;
 import org.drools.common.InternalAgendaGroup;
 import org.drools.common.InternalRuleBase;
+import org.drools.reteoo.ObjectTypeNode;
 import org.drools.spi.Activation;
 import org.drools.spi.PropagationContext;
 
@@ -19,7 +21,7 @@ public class DbAgendaItemGroup implements InternalAgendaGroup {
     /**
      * 
      */
-    private final String m_name;
+    private String m_name;
     /**
      * 
      */
@@ -35,15 +37,27 @@ public class DbAgendaItemGroup implements InternalAgendaGroup {
      */
     public DbAgendaItemGroup(final String name, final InternalRuleBase ruleBase) {
         this.m_name = name;
+        
+        List<ObjectTypeNode> nodes = ruleBase.getRete().getObjectTypeNodes();
+        for (ObjectTypeNode node : nodes) {
+            node.getId();
+        }
     }
 
     @Override
-    public void readExternal(final ObjectInput arg) throws IOException,
+    public void readExternal(final ObjectInput in) throws IOException,
             ClassNotFoundException {
+        this.m_name = (String) in.readObject();
+        this.m_active = in.readBoolean();
+        this.m_autoFocusActivator = (PropagationContext) in.readObject();
+        
     }
 
     @Override
-    public void writeExternal(final ObjectOutput arg) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeObject(this.m_name);
+        out.writeBoolean(this.m_active);
+        out.writeObject(this.m_autoFocusActivator);
     }
 
     @Override
