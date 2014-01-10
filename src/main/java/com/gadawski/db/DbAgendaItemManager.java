@@ -1,15 +1,11 @@
 package com.gadawski.db;
 
 import org.drools.common.AgendaItem;
-import org.drools.reteoo.LeftTuple;
-import org.drools.reteoo.RuleTerminalNode;
 import org.drools.spi.Activation;
 
+import com.gadawski.util.db.jdbc.JdbcEntityManagerUtil;
+
 public class DbAgendaItemManager implements IAgendaItemManager {
-    /**
-     * Based on annotations, table name.
-     */
-    private static final String AGENDA_ITEMS_ENTITY_NAME = "AgendaItem";
     // = AgendaItem.class
     // .getAnnotation(Table.class).name();
     /**
@@ -19,13 +15,7 @@ public class DbAgendaItemManager implements IAgendaItemManager {
     /**
      * Entity manager util instance.
      */
-//    private final EntityManagerUtil m_jdbcEntityManagerUtil;
     private final JdbcEntityManagerUtil m_jdbcEntityManagerUtil;
-    /**
-     * Relationship manager.
-     */
-    private final DbRelationshipManager m_dbRelationshipManager = DbRelationshipManager
-            .getInstance();;
 
     /**
      * 
@@ -51,25 +41,20 @@ public class DbAgendaItemManager implements IAgendaItemManager {
 
     @Override
     public Activation getNextAgendaItem() {
-        final AgendaItem item = (AgendaItem) m_jdbcEntityManagerUtil.getNextAgendaItemObject();
-        // TODO possible null pointer exception
-        final LeftTuple tuple = RuleTerminalNode.createLeftTuple(
-                m_dbRelationshipManager.getRelationiship(item
-                        .getRelationshipId()), null);
-        item.setTuple(tuple);
-        m_jdbcEntityManagerUtil.removeAgendaItem(item);
+        final AgendaItem item = (AgendaItem) m_jdbcEntityManagerUtil
+                .getNextAgendaItemObject();
+        m_jdbcEntityManagerUtil.removeNextAgendaItem();
         return item;
     }
 
     @Override
     public void clearAgenda() {
-        m_jdbcEntityManagerUtil.truncateTable(AGENDA_ITEMS_ENTITY_NAME);
+        m_jdbcEntityManagerUtil.truncateAgendaItems();
     }
 
     @Override
     public int getNumberOfAgendaItems() {
-        return m_jdbcEntityManagerUtil
-                .getTotalNumberOfRows(AGENDA_ITEMS_ENTITY_NAME);
+        return m_jdbcEntityManagerUtil.getTotalNumberOfRows();
     }
 
     @Override
@@ -97,17 +82,17 @@ public class DbAgendaItemManager implements IAgendaItemManager {
      */
     @SuppressWarnings("unused")
     private AgendaItem getFirstRow() {
-//        final CriteriaBuilder builder = m_jdbcEntityManagerUtil
-//                .getCriteriaBuilder();
-//        final CriteriaQuery<AgendaItem> query = builder
-//                .createQuery(AgendaItem.class);
-//        final Root<AgendaItem> root = query.from(AgendaItem.class);
-//        final TypedQuery<AgendaItem> tQuery = m_jdbcEntityManagerUtil
-//                .getEntityManager().createQuery(query); // yes, it looks
-//                                                        // horrible..
-//        tQuery.setFirstResult(0);
-//        tQuery.setMaxResults(1);
-//        return tQuery.getSingleResult();
+        // final CriteriaBuilder builder = m_jdbcEntityManagerUtil
+        // .getCriteriaBuilder();
+        // final CriteriaQuery<AgendaItem> query = builder
+        // .createQuery(AgendaItem.class);
+        // final Root<AgendaItem> root = query.from(AgendaItem.class);
+        // final TypedQuery<AgendaItem> tQuery = m_jdbcEntityManagerUtil
+        // .getEntityManager().createQuery(query); // yes, it looks
+        // // horrible..
+        // tQuery.setFirstResult(0);
+        // tQuery.setMaxResults(1);
+        // return tQuery.getSingleResult();
         return null;
     }
 }

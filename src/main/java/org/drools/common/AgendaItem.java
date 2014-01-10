@@ -69,7 +69,7 @@ public class AgendaItem
     /**
      * {@link RuleTerminalNode} id, helped to restore rtn, after serialization
      * */
-    private long m_ruleTerminalNodeId;
+    private Long m_ruleTerminalNodeId;
     
     /** The propagation context */
     private PropagationContext        context;
@@ -123,10 +123,11 @@ public class AgendaItem
                       final PropagationContext context,
                       final RuleTerminalNode rtn) {
         this.tuple = tuple;
-        this.setRelationshipId(tuple.getRelationshipId());
+        this.relationshipId = tuple.getRelationshipId();
         this.context = context;
         this.salience = salience;
         this.rtn = rtn;
+        this.m_ruleTerminalNodeId = (long) rtn.getId();
         this.activationNumber = activationNumber;
         this.index = -1;
         this.matched = true;
@@ -138,6 +139,7 @@ public class AgendaItem
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
         this.relationshipId = in.readLong();
+        this.m_ruleTerminalNodeId = in.readLong();
         this.salience = in.readInt();
         this.sequenence = in.readInt();
         this.context = (PropagationContext) in.readObject();
@@ -151,6 +153,7 @@ public class AgendaItem
 
     public synchronized void writeExternal(ObjectOutput out) throws IOException {
         out.writeLong(this.relationshipId);
+        out.writeLong(this.m_ruleTerminalNodeId);
         out.writeInt(this.salience);
         out.writeInt(this.sequenence);
         out.writeObject(this.context);

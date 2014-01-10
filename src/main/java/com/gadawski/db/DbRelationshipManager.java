@@ -17,7 +17,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
-import com.gadawski.util.db.EntityManagerUtil;
+import com.gadawski.util.db.jpa.EntityManagerUtil;
 import com.gadawski.util.facts.AgendaItemRelationship;
 import com.gadawski.util.facts.Relationship;
 
@@ -118,7 +118,7 @@ public class DbRelationshipManager implements IRelationshipManager {
 
     @Override
     public Relationship getRelationiship(final Long relationshipId) {
-        // code repetitions! ugly!
+        // TODO code repetitions! ugly!
         final CriteriaBuilder builder = m_entityManagerUtil
                 .getCriteriaBuilder();
         final CriteriaQuery<Relationship> query = builder
