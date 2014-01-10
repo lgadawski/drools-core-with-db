@@ -60,6 +60,12 @@ public class PropagationContextImpl
 
     private ObjectTypeNode     currentPropagatingOTN;
     
+    /**
+     * CurrentProgatingOTN id, trick useful for serialization. Because
+     * serializing {@link ObjectTypeNode} was problematic.
+     */
+    private Long currentPropagatingOTNid;
+    
     private boolean            shouldPropagateAll;
     
     private final LinkedList<WorkingMemoryAction> queue1 = new LinkedList<WorkingMemoryAction>(); // for inserts
@@ -76,8 +82,9 @@ public class PropagationContextImpl
     // the deserialization of a session
     private MarshallerReaderContext readerContext;
 
-    public PropagationContextImpl() {
 
+    public PropagationContextImpl() {
+        
     }
 
     public PropagationContextImpl(final long number,
@@ -195,7 +202,8 @@ public class PropagationContextImpl
         this.entryPoint = (EntryPoint) in.readObject();
         this.originOffset = in.readInt();
         this.propagationAttempts = (ObjectHashSet) in.readObject();
-        this.currentPropagatingOTN = (ObjectTypeNode) in.readObject();
+        this.currentPropagatingOTNid = in.readLong();
+//        this.currentPropagatingOTN = (ObjectTypeNode) in.readObject();
         this.shouldPropagateAll = in.readBoolean();        
         this.modificationMask = in.readLong();
     }
@@ -210,8 +218,9 @@ public class PropagationContextImpl
         out.writeObject( this.entryPoint );
         out.writeInt( this.originOffset );
         out.writeObject( this.propagationAttempts );
-        out.writeObject( this.currentPropagatingOTN );
-        out.writeObject( this.shouldPropagateAll );
+        out.writeLong( this.currentPropagatingOTN.getId() );
+//        out.writeObject( this.currentPropagatingOTN );
+        out.writeBoolean( this.shouldPropagateAll );
         out.writeLong( this.modificationMask );
     }
 
@@ -396,5 +405,15 @@ public class PropagationContextImpl
     public String toString() {
         return "PropagationContextImpl [activeActivations=" + activeActivations + ", dormantActivations=" + dormantActivations + ", entryPoint=" + entryPoint + ", factHandle=" + factHandle + ", leftTuple=" + leftTuple + ", originOffset="
                + originOffset + ", propagationNumber=" + propagationNumber + ", rule=" + rule + ", type=" + type + "]";
+    }
+
+    @Override
+    public Long getCurrentPropagatingOTNid() {
+        return currentPropagatingOTNid;
+    }
+
+    @Override
+    public void setCurrentPropagatingOTNid(Long currentPropagatingOTNid) {
+        this.currentPropagatingOTNid = currentPropagatingOTNid;
     }
 }

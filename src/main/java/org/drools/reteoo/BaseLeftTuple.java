@@ -25,6 +25,10 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
+import com.gadawski.db.DbRelationshipManager;
+import com.gadawski.db.IRelationshipManager;
+import com.gadawski.util.facts.Relationship;
+
 /**
  * A parent class for all specific LeftTuple specializations
  * @author etirelli
@@ -59,6 +63,13 @@ public class BaseLeftTuple
 
     private Object             object;
 
+    private IRelationshipManager m_relManager;
+
+    /**
+     * Indicates connection with relationship ID from db.
+     */
+    private long m_relationshipId;
+
     public BaseLeftTuple() {
         // constructor needed for serialisation
     }
@@ -70,8 +81,12 @@ public class BaseLeftTuple
                              final LeftTupleSink sink,
                              final boolean leftTupleMemoryEnabled) {
         this.handle = factHandle;
-
-        if ( leftTupleMemoryEnabled ) {
+        
+        if ( JoinNode.USE_DB ) {
+            saveFactHandleToDb(factHandle, sink);
+        }
+        
+        if ( leftTupleMemoryEnabled && !JoinNode.USE_DB) {
             this.handle.addLastLeftTuple( this );
         }
         this.sink = sink;
@@ -83,7 +98,7 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex();
         this.parent = leftTuple.getParent();
         this.handle = leftTuple.getHandle();
-
+        
         if ( leftTupleMemoryEnabled ) {
             this.leftParent = leftTuple;
             if ( leftTuple.getLastChild() != null ) {
@@ -104,26 +119,33 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
         this.handle = rightTuple.getFactHandle();
-
-        this.leftParent = leftTuple;
-        // insert at the end f the list
-        if ( leftTuple.getLastChild() != null ) {
-            this.leftParentPrevious = leftTuple.getLastChild();
-            this.leftParentPrevious.setLeftParentNext( this );
-        } else {
-            leftTuple.setFirstChild( this );
-        }
-        leftTuple.setLastChild( this );
         
-        // insert at the end of the list
-        this.rightParent = rightTuple;
-        if ( rightTuple.lastChild != null ) {
-            this.rightParentPrevious = rightTuple.lastChild;
-            this.rightParentPrevious.setRightParentNext( this );
-        } else {
-            rightTuple.firstChild = this;
+        if ( JoinNode.USE_DB ) {
+            saveRelationshipToDb(leftTuple, rightTuple, sink);
         }
-        rightTuple.lastChild = this;        
+        
+        if (!JoinNode.USE_DB) {
+            this.leftParent = leftTuple;
+            // insert at the end f the list
+            if ( leftTuple.getLastChild() != null ) {
+                this.leftParentPrevious = leftTuple.getLastChild();
+                this.leftParentPrevious.setLeftParentNext( this );
+            } else {
+                leftTuple.setFirstChild( this );
+            }
+            leftTuple.setLastChild( this );
+            
+            // insert at the end of the list
+            this.rightParent = rightTuple;
+            if ( rightTuple.lastChild != null ) {
+                this.rightParentPrevious = rightTuple.lastChild;
+                this.rightParentPrevious.setRightParentNext( this );
+            } else {
+                rightTuple.firstChild = this;
+            }
+            rightTuple.lastChild = this;        
+        }
+
         this.sink = sink;
     }    
 
@@ -149,7 +171,11 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
 
-        if ( leftTupleMemoryEnabled ) {
+        if ( JoinNode.USE_DB ) {
+            saveRelationshipToDb(leftTuple, rightTuple, sink);
+        }
+        
+        if ( leftTupleMemoryEnabled && !JoinNode.USE_DB) {
             this.leftParent = leftTuple;
             this.rightParent = rightTuple;
             if( currentLeftChild == null ) {
@@ -197,7 +223,66 @@ public class BaseLeftTuple
         
         this.sink = sink;
     }
+
+    /**
+     * @param factHandles
+     * @param sink
+     */
+    public BaseLeftTuple(final InternalFactHandle[] factHandles, final LeftTupleSink sink, 
+            final long relationshipId) {
+        this.sink = sink;
+        this.setFactHandles(factHandles, sink);
+        this.setRelationshipId(relationshipId);
+    }
     
+    /**
+     * Creates relationship from fact handle and saves relationship to db.
+     * 
+     * @param factHandle - to get object for relationship.
+     * @param sink - sink for relationship.
+     */
+    private void saveFactHandleToDb(final InternalFactHandle factHandle,
+            final LeftTupleSink sink) {
+        m_relManager = DbRelationshipManager.getInstance();
+        final Relationship relationship = m_relManager.createRelationship(factHandle, sink);
+        m_relManager.saveRelationship(relationship);
+        this.setRelationshipId(relationship.getRelationshipID());
+    }
+    
+    /**
+     * Creates relationship from tuples and saves relationship to db.
+     * 
+     * @param leftTuple - leftTuple for relationship.
+     * @param rightTuple - rightTuple for relationship.
+     * @param sink - sink for relationship.
+     */
+    private void saveRelationshipToDb(final LeftTuple leftTuple,
+            final RightTuple rightTuple, final LeftTupleSink sink) {
+        m_relManager = DbRelationshipManager.getInstance();
+        final Relationship relationship = m_relManager.createRelationship(leftTuple, rightTuple, sink);
+        m_relManager.saveRelationship(relationship);
+        this.setRelationshipId(relationship.getRelationshipID());
+    }
+    
+    /**
+     * Sets relationship manager.
+     * 
+     * @param relManager - relationship manager to save.
+     */
+    public void setRelationshipManager(final IRelationshipManager relManager){
+        m_relManager = relManager;
+    }
+    
+    /** 
+     * Checks if sink is RuleTerminalNode instanceof.
+     * 
+     * @param sink - node to be checked.
+     * @return true if sink is terminal node, false otherwise.
+     */
+    private boolean isRuleTerminalNode(final LeftTupleSink sink) {
+        return sink instanceof RuleTerminalNode;
+    }
+
     /* (non-Javadoc)
      * @see org.drools.reteoo.LeftTuple#reAdd()
      */
@@ -528,6 +613,31 @@ public class BaseLeftTuple
         }
         return handles;
     }
+
+    /**
+     * Set fact handles to LeftTuple.
+     *  
+     * @param factHandles
+     * @param sink 
+     */
+    private void setFactHandles(InternalFactHandle[] factHandles, LeftTupleSink sink) {
+        LeftTuple entry = this;
+        LeftTuple newEntry = null;
+        int lastFactHandleIdx = factHandles.length - 1;
+        int index = lastFactHandleIdx; //cause child has lower index than parent
+        for (int j = lastFactHandleIdx; j >= 0; j--) {  
+            entry.setHandle(factHandles[j]);
+            entry.setSink(sink);
+            entry.setIndex(index--);
+            if (j > 0) {
+                newEntry = new BaseLeftTuple();
+                entry.setLeftParent(newEntry);
+                entry.setParent(newEntry);
+                entry = newEntry;
+            }
+        }
+    }
+    
      /* (non-Javadoc)
      * @see org.drools.reteoo.LeftTuple#toFactHandles()
      */
@@ -796,5 +906,19 @@ public class BaseLeftTuple
                 ((EventFactHandle)entry.getLastHandle()).decreaseActivationsCount();
             }
         }
+    }
+
+    /**
+     * @param relationshipId
+     */
+    public void setRelationshipId(long relationshipId) {
+        this.m_relationshipId = relationshipId;
+    }
+    
+    /**
+     * @return the m_relationshipId
+     */
+    public long getRelationshipId() {
+        return m_relationshipId;
     }    
 }

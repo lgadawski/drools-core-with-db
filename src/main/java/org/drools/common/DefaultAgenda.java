@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,15 +31,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.drools.RuleBaseConfiguration;
 import org.drools.WorkingMemory;
 import org.drools.base.DefaultKnowledgeHelper;
-import org.drools.base.SequentialKnowledgeHelper;
 import org.drools.common.RuleFlowGroupImpl.DeactivateCallback;
 import org.drools.core.util.ClassUtils;
-import org.drools.core.util.Entry;
-import org.drools.core.util.LinkedListNode;
 import org.drools.event.rule.ActivationCancelledCause;
+import org.drools.reteoo.JoinNode;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.ObjectTypeConf;
-import org.drools.reteoo.ReteooComponentFactory;
+import org.drools.reteoo.ObjectTypeNode;
 import org.drools.reteoo.RuleTerminalNode;
 import org.drools.rule.Declaration;
 import org.drools.rule.EntryPoint;
@@ -53,11 +50,14 @@ import org.drools.spi.AgendaGroup;
 import org.drools.spi.ConsequenceException;
 import org.drools.spi.ConsequenceExceptionHandler;
 import org.drools.spi.KnowledgeHelper;
+import org.drools.spi.ObjectType;
 import org.drools.spi.PropagationContext;
 import org.drools.spi.RuleFlowGroup;
-import org.drools.time.impl.DefaultJobHandle;
 import org.drools.time.impl.ExpressionIntervalTimer;
 import org.drools.time.impl.Timer;
+
+import com.gadawski.db.DbRelationshipManager;
+import com.gadawski.db.IRelationshipManager;
 
 /**
  * Rule-firing Agenda.
@@ -127,7 +127,11 @@ public class DefaultAgenda
     private volatile boolean                                    isFiringActivation = false;
 
     private volatile boolean                                    mustNotifyHalt     = false;                          
-
+    /**
+     * Db relationship manager.
+     */
+    private IRelationshipManager m_dbRelationshipManager = DbRelationshipManager.getInstance();
+    
     // ------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------
@@ -216,6 +220,7 @@ public class DefaultAgenda
         }
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void readExternal(ObjectInput in) throws IOException,
                                             ClassNotFoundException {
         workingMemory = (InternalWorkingMemory) in.readObject();
@@ -282,6 +287,7 @@ public class DefaultAgenda
     
     // @TODO make serialisation work
     private ActivationGroup stagedActivations;
+
     /**
      * If the item belongs to an activation group, add it
      * 
@@ -584,7 +590,7 @@ public class DefaultAgenda
             item.setAgendaGroup( agendaGroup );   
         }
         
-
+        
         tuple.setObject( item );
         
         if( activationsFilter != null && !activationsFilter.accept( item, 
@@ -1203,7 +1209,7 @@ public class DefaultAgenda
                 final InternalAgendaGroup group = (InternalAgendaGroup) getNextFocus();
                 // if there is a group with focus
                 if ( group != null ) {
-                    final AgendaItem item = (AgendaItem) group.getNext();
+                    final AgendaItem item = getNextAgendaItem(group);
                     // if there is an item to fire from that group
                     if ( item != null ) {
                         // if that item is allowed to fire
@@ -1246,6 +1252,70 @@ public class DefaultAgenda
             this.workingMemory.activationFired();
         }
         return result;
+    }
+
+    /**
+     * Get next agenda item. Sets {@link DefaultAgenda} and finds and sets
+     * {@link RuleTerminalNode}.
+     * 
+     * @param group
+     * @return
+     */
+    private AgendaItem getNextAgendaItem(InternalAgendaGroup group) {
+        AgendaItem item = (AgendaItem) group.getNext();
+        if (item.getTuple() == null && JoinNode.USE_DB) {
+            item.setRuleTerminalNode(getRuleTerminalNode(item
+                    .getRuleTerminalNodeId()));
+            item.setCurrentOTNforPropagationContext(getObjectTypeNode(item
+                    .getCurrentOTNidforPropagationContext()));
+            item.setAgendaGroup(group);
+            LeftTuple tuple = RuleTerminalNode.createLeftTuple(
+                    m_dbRelationshipManager.getRelationiship(item
+                            .getRelationshipId()), item.getRuleTerminalNode());
+            tuple.setObject(item);
+            item.setTuple(tuple);
+        }
+        return item;
+    }
+
+    /**
+     * Find {@link ObjectTypeNode} for given nodeId.
+     * 
+     * @param nodeId
+     * @return {@link ObjectTypeNode} if node has been found, null otherwise.
+     */
+    private ObjectTypeNode getObjectTypeNode(final long nodeId) {
+        Map<ObjectType, ObjectTypeNode> map = this.workingMemory
+                .getEntryPointNode().getObjectTypeNodes();
+        for (ObjectType type : map.keySet()) {
+            ObjectTypeNode objectTypeNode = map.get(type);
+            if (objectTypeNode.getId() == nodeId) {
+                return objectTypeNode;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Iterates over terminal nodes and returns {@link RuleTerminalNode} if
+     * exists for given rtnId.
+     * 
+     * @param rtnId
+     * @return
+     */
+    private RuleTerminalNode getRuleTerminalNode(long rtnId) {
+        @SuppressWarnings("rawtypes")
+        org.drools.core.util.Iterator nodeIter = TerminalNodeIterator
+                .iterator(this.workingMemory.getKnowledgeRuntime()
+                        .getKnowledgeBase());
+        RuleTerminalNode node;
+        while ((node = (RuleTerminalNode) nodeIter.next()) != null) {
+            if (node.getId() == rtnId) {
+                return node;
+            }
+        }
+        // possible null pointer exception!
+        return null;
     }
 
     /**

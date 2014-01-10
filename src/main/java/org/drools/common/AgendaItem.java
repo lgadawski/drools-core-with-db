@@ -16,12 +16,21 @@
 
 package org.drools.common;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.drools.FactHandle;
 import org.drools.core.util.LinkedList;
 import org.drools.core.util.LinkedListEntry;
 import org.drools.core.util.Queueable;
 import org.drools.event.rule.ActivationUnMatchListener;
 import org.drools.reteoo.LeftTuple;
+import org.drools.reteoo.ObjectTypeNode;
 import org.drools.reteoo.RuleTerminalNode;
 import org.drools.rule.Declaration;
 import org.drools.rule.GroupElement;
@@ -30,14 +39,6 @@ import org.drools.spi.Activation;
 import org.drools.spi.AgendaGroup;
 import org.drools.spi.Consequence;
 import org.drools.spi.PropagationContext;
-
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Item entry in the <code>Agenda</code>.
@@ -50,11 +51,12 @@ public class AgendaItem
     // ------------------------------------------------------------
     // Instance members
     // ------------------------------------------------------------
-
     private static final long         serialVersionUID = 510l;
 
     /** The tuple. */
-    private LeftTuple                 tuple;
+    private transient LeftTuple                 tuple;
+  
+    private long relationshipId;
 
     /** The salience */
     private int                       salience;
@@ -63,8 +65,12 @@ public class AgendaItem
     private int                       sequenence;
 
     /** Rule terminal node, gives access to SubRule **/
-    private RuleTerminalNode          rtn;
-
+    private transient RuleTerminalNode          rtn;
+    /**
+     * {@link RuleTerminalNode} id, helped to restore rtn, after serialization
+     * */
+    private Long m_ruleTerminalNodeId;
+    
     /** The propagation context */
     private PropagationContext        context;
 
@@ -72,28 +78,28 @@ public class AgendaItem
     private long                      activationNumber;
 
     private int                       index;
+    
+    private transient LinkedList<LogicalDependency>                   justified;
 
-    private LinkedList<LogicalDependency>                   justified;
+    private transient LinkedList<LogicalDependency>                   blocked;
 
-    private LinkedList<LogicalDependency>                   blocked;
-
-    private LinkedList<LinkedListEntry<LogicalDependency>>  blockers;
+    private transient LinkedList<LinkedListEntry<LogicalDependency>>  blockers;
 
     private boolean                   activated;
 
     private InternalAgendaGroup       agendaGroup;
 
-    private ActivationGroupNode       activationGroupNode;
+    private transient ActivationGroupNode       activationGroupNode;
 
-    private ActivationNode            activationNode;
+    private transient ActivationNode            activationNode;
 
-    private InternalFactHandle        factHandle;
+    private transient InternalFactHandle        factHandle;
 
     private transient boolean         canceled;
 
     private boolean                   matched;
 
-    private ActivationUnMatchListener activationUnMatchListener;
+    private transient ActivationUnMatchListener activationUnMatchListener;
     
     // ------------------------------------------------------------
     // Constructors
@@ -117,9 +123,11 @@ public class AgendaItem
                       final PropagationContext context,
                       final RuleTerminalNode rtn) {
         this.tuple = tuple;
+        this.relationshipId = tuple.getRelationshipId();
         this.context = context;
         this.salience = salience;
         this.rtn = rtn;
+        this.m_ruleTerminalNodeId = (long) rtn.getId();
         this.activationNumber = activationNumber;
         this.index = -1;
         this.matched = true;
@@ -129,10 +137,32 @@ public class AgendaItem
     // Instance methods
     // ------------------------------------------------------------
     public void readExternal(ObjectInput in) throws IOException,
-                                            ClassNotFoundException {
+            ClassNotFoundException {
+        this.relationshipId = in.readLong();
+        this.m_ruleTerminalNodeId = in.readLong();
+        this.salience = in.readInt();
+        this.sequenence = in.readInt();
+        this.context = (PropagationContext) in.readObject();
+        this.activationNumber = in.readLong();
+        this.index = in.readInt();
+        // lists..
+        this.activated = in.readBoolean();
+//        this.agendaGroup = (InternalAgendaGroup) in.readObject();
+        this.matched = in.readBoolean();
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public synchronized void writeExternal(ObjectOutput out) throws IOException {
+        out.writeLong(this.relationshipId);
+        out.writeLong(this.m_ruleTerminalNodeId);
+        out.writeInt(this.salience);
+        out.writeInt(this.sequenence);
+        out.writeObject(this.context);
+        out.writeLong(this.activationNumber);
+        out.writeInt(this.index);
+        // lists
+        out.writeBoolean(this.activated);
+//        out.writeObject(this.agendaGroup);
+        out.writeBoolean(this.matched);
     }
 
     public PropagationContext getPropagationContext() {
@@ -166,6 +196,15 @@ public class AgendaItem
         return this.tuple;
     }
 
+    /**
+     * Set the tuple
+     * 
+     * @param tuple - The tuple.
+     */
+    public void setTuple(LeftTuple tuple) {
+        this.tuple = tuple;
+    }
+    
     public int getSalience() {
         return this.salience;
     }
@@ -369,7 +408,13 @@ public class AgendaItem
     public RuleTerminalNode getRuleTerminalNode() {
         return this.rtn;
     }
-        
+    
+    /**
+     * @param ruleTerminalNode
+     */
+    public void setRuleTerminalNode(RuleTerminalNode ruleTerminalNode) {
+        this.rtn = ruleTerminalNode;
+    }
     
     public ActivationUnMatchListener getActivationUnMatchListener() {
         return activationUnMatchListener;
@@ -442,5 +487,39 @@ public class AgendaItem
     public void setMatched(boolean matched) {
         this.matched = matched;
     }
-    
+
+    /**
+     * @return the relationshipId
+     */
+    public Long getRelationshipId() {
+        return relationshipId;
+    }
+
+    /**
+     * @param relationshipId the relationshipId to set
+     */
+    public void setRelationshipId(Long relationshipId) {
+        this.relationshipId = relationshipId;
+    }
+
+    /**
+     * @return
+     */
+    public long getRuleTerminalNodeId() {
+        return m_ruleTerminalNodeId;
+    }
+
+    /**
+     * @return
+     */
+    public long getCurrentOTNidforPropagationContext() {
+        return getPropagationContext().getCurrentPropagatingOTNid();
+    }
+
+    /**
+     * @param objectTypeNode
+     */
+    public void setCurrentOTNforPropagationContext(ObjectTypeNode objectTypeNode) {
+        getPropagationContext().setCurrentPropagatingOTN(objectTypeNode);
+    }
 }

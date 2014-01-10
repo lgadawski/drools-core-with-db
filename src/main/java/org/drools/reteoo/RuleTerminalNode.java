@@ -16,10 +16,18 @@
 
 package org.drools.reteoo;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
+
 import org.drools.base.mvel.MVELEnabledExpression;
 import org.drools.base.mvel.MVELSalienceExpression;
 import org.drools.common.AgendaItem;
 import org.drools.common.BaseNode;
+import org.drools.common.DefaultFactHandle;
 import org.drools.common.EventSupport;
 import org.drools.common.InternalAgenda;
 import org.drools.common.InternalFactHandle;
@@ -37,12 +45,7 @@ import org.drools.spi.Activation;
 import org.drools.spi.PropagationContext;
 import org.drools.time.impl.ExpressionIntervalTimer;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Map;
+import com.gadawski.util.facts.Relationship;
 
 /**
  * Leaf Rete-OO node responsible for enacting <code>Action</code> s on a
@@ -172,7 +175,6 @@ public class RuleTerminalNode extends AbstractTerminalNode {
     // ------------------------------------------------------------
     // Instance methods
     // ------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException,
                                             ClassNotFoundException {
         super.readExternal(in);
@@ -235,7 +237,7 @@ public class RuleTerminalNode extends AbstractTerminalNode {
         return this.sequence;
     }
 
-    public void assertLeftTuple(final LeftTuple leftTuple,
+    public void assertLeftTuple(LeftTuple leftTuple,
                                 final PropagationContext context,
                                 final InternalWorkingMemory workingMemory) {
         //check if the rule is not effective or
@@ -256,7 +258,15 @@ public class RuleTerminalNode extends AbstractTerminalNode {
                                                 this, 
                                                 false );
         if( fire && !fireDirect ) {
-            agenda.addActivation( (AgendaItem) leftTuple.getObject() );
+            AgendaItem activation = (AgendaItem) leftTuple.getObject();
+            if (JoinNode.USE_DB) {
+                //release memory that holds leftTuple in AgendaItem
+                leftTuple = null;
+                activation.setTuple(null);  
+//                activation.setPropagationContext(null);
+            }
+            agenda.addActivation(activation);
+//            agenda.addActivation( (AgendaItem) leftTuple.getObject() );
         }
     }
 
@@ -546,6 +556,22 @@ public class RuleTerminalNode extends AbstractTerminalNode {
         }
     }
 
+    /**
+     * Based on given relationship, created {@link JoinNodeLeftTuple}.
+     * 
+     * @param relationship to get from tuples.
+     * @param sink 
+     * @return new left tuple.
+     */
+    public static LeftTuple createLeftTuple(final Relationship relationship, final LeftTupleSink sink ) {
+        InternalFactHandle[] facts = new InternalFactHandle[relationship.getNoObjectsInTuple()];
+        int i = 0;
+        for (Object object : relationship.getObjects()) {
+            facts[i++] = new DefaultFactHandle(i, object);
+        }
+        return new RuleTerminalNodeLeftTuple(facts, sink, relationship);
+    }
+    
     public LeftTuple createLeftTuple(InternalFactHandle factHandle,
                                      LeftTupleSink sink,
                                      boolean leftTupleMemoryEnabled) {

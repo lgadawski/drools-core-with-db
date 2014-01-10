@@ -16,21 +16,36 @@
 
 package org.drools.reteoo;
 
-import org.drools.RuleBaseConfiguration;
+import javax.persistence.Query;
+
 import org.drools.base.DroolsQuery;
 import org.drools.common.BetaConstraints;
+import org.drools.common.DefaultFactHandle;
 import org.drools.common.InternalFactHandle;
 import org.drools.common.InternalWorkingMemory;
-import org.drools.common.Memory;
 import org.drools.core.util.FastIterator;
 import org.drools.core.util.Iterator;
 import org.drools.reteoo.builder.BuildContext;
 import org.drools.rule.ContextEntry;
 import org.drools.spi.PropagationContext;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
+
+import com.gadawski.db.DbRelationshipManager;
+import com.gadawski.db.IRelationshipManager;
+import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
 
     private static final long serialVersionUID = 510l;
+    /**
+     * Indicates if rule engine should use database.
+     */
+    public static boolean USE_DB = true;
+    /**
+     * Db relationship manager.
+     */
+    private IRelationshipManager m_relManager;
 
     public JoinNode() {
 
@@ -67,7 +82,8 @@ public class JoinNode extends BetaNode {
         RightTupleMemory rightMemory = memory.getRightTupleMemory();
 
         ContextEntry[] contextEntry = memory.getContext();
-        boolean useLeftMemory = true;       
+//        boolean useLeftMemory = false; 
+        boolean useLeftMemory = !JoinNode.USE_DB;       
     
         if ( !this.tupleMemoryEnabled ) {
             // This is a hack, to not add closed DroolsQuery objects
@@ -134,23 +150,65 @@ public class JoinNode extends BetaNode {
                                                   context );
 
         memory.getRightTupleMemory().add( rightTuple );
-        if ( memory.getLeftTupleMemory() == null || memory.getLeftTupleMemory().size() == 0 ) {
-            // do nothing here, as no left memory
-            return;
+        if ( !JoinNode.USE_DB ) {
+            if ( memory.getLeftTupleMemory() == null || memory.getLeftTupleMemory().size() == 0 ) {
+                // do nothing here, as no left memory
+                return;
+            }
         }
 
         this.constraints.updateFromFactHandle( memory.getContext(),
                                                workingMemory,
                                                factHandle );
 
-        FastIterator it = getLeftIterator( leftMemory );
-        for ( LeftTuple leftTuple = getFirstLeftTuple( rightTuple, leftMemory, context, it ); leftTuple != null; leftTuple = (LeftTuple) it.next( leftTuple ) ) {
-            propagateFromRight( rightTuple, leftTuple, memory, context, workingMemory );
+        if ( JoinNode.USE_DB ) {
+            getAndPropagateDBTupleFromRight(context, workingMemory, memory, rightTuple);
+        } else {
+            FastIterator it = getLeftIterator( leftMemory );
+            for ( LeftTuple leftTuple = getFirstLeftTuple( rightTuple, leftMemory, context, it ); leftTuple != null; leftTuple = (LeftTuple) it.next( leftTuple ) ) {
+                propagateFromRight( rightTuple, leftTuple, memory, context, workingMemory );
+            }
         }
 
         this.constraints.resetFactHandle( memory.getContext() );
     }
 
+    /**
+     * Performs query to db. Operates on {@link Relationship} with
+     * {@link ScrollableResults}. It's allows to operates on single fetched row,
+     * not full query results. There is no need for flushing and/or clearing
+     * cause that's read-only operation.
+     * 
+     * @param context
+     *            - for propagating tuple.
+     * @param workingMemory
+     *            - for propagating tuple.
+     * @param memory
+     *            - for propagating tuple.
+     * @param rightTuple
+     *            - the tuple to propagate.
+     */
+    private void getAndPropagateDBTupleFromRight(
+            final PropagationContext context,
+            final InternalWorkingMemory workingMemory, final BetaMemory memory,
+            final RightTuple rightTuple) {
+        int counterToClear = 0;
+        m_relManager = DbRelationshipManager.getInstance();
+        final Session session = m_relManager.openSession();
+        final Query query = m_relManager.createQueryGetRelsByJoinNodeId(this.getId());
+        final ScrollableResults iterator = m_relManager.getScrollableResultsIterator(query);
+        while (iterator.next()) {
+            final Relationship relationship = (Relationship) iterator.get()[0];
+            final LeftTuple tupleFromDb = createLeftTuple(relationship, this);
+            if ((++counterToClear % DbRelationshipManager.BATCH_SIZE) == 0) {
+                session.clear();
+            }
+            propagateFromRight(rightTuple, tupleFromDb, memory, context,
+                    workingMemory);
+        }
+        iterator.close();
+        session.close();
+    }
 
     protected void propagateFromRight( RightTuple rightTuple, LeftTuple leftTuple, BetaMemory memory, PropagationContext context, InternalWorkingMemory workingMemory ) {
         if ( this.constraints.isAllowedCachedRight( memory.getContext(),
@@ -399,6 +457,7 @@ public class JoinNode extends BetaNode {
 
         FastIterator it = memory.getLeftTupleMemory().fastIterator();
 
+        @SuppressWarnings("rawtypes")
         final Iterator tupleIter = memory.getLeftTupleMemory().iterator();
         for ( LeftTuple leftTuple = (LeftTuple) tupleIter.next(); leftTuple != null; leftTuple = (LeftTuple) tupleIter.next() ) {
             this.constraints.updateFromTuple( memory.getContext(),
@@ -466,7 +525,23 @@ public class JoinNode extends BetaNode {
     public String toString() {
         return "[JoinNode(" + this.getId() + ") - " + getObjectTypeNode().getObjectType() + "]";
     }
-    
+
+    /**
+     * Based on given relationship, created {@link JoinNodeLeftTuple}.
+     * 
+     * @param relationship to get from tuples.
+     * @param sink 
+     * @return new left tuple.
+     */
+    public LeftTuple createLeftTuple(final Relationship relationship, final LeftTupleSink sink ) {
+        InternalFactHandle[] facts = new InternalFactHandle[relationship.getNoObjectsInTuple()];
+        int i = 0;
+        for (Object object : relationship.getObjects()) {
+            facts[i++] = new DefaultFactHandle(i, object);
+        }
+        return new JoinNodeLeftTuple(facts, sink, relationship);
+    }
+
     public LeftTuple createLeftTuple(InternalFactHandle factHandle,
                                      LeftTupleSink sink,
                                      boolean leftTupleMemoryEnabled) {
@@ -476,7 +551,7 @@ public class JoinNode extends BetaNode {
     public LeftTuple createLeftTuple(LeftTuple leftTuple,
                                      LeftTupleSink sink,
                                      boolean leftTupleMemoryEnabled) {
-        return new JoinNodeLeftTuple(leftTuple,sink, leftTupleMemoryEnabled );
+        return new JoinNodeLeftTuple(leftTuple, sink, leftTupleMemoryEnabled );
     }
 
     public LeftTuple createLeftTuple(LeftTuple leftTuple,

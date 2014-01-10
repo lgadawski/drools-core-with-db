@@ -130,4 +130,13 @@ public interface LeftTuple extends Entry, Tuple {
 
     void setParent(LeftTuple parent);
 
+    /**
+     * @param relationshipId
+     */
+    void setRelationshipId(long relationshipId);
+    
+    /**
+     * @return the m_relationshipId
+     */
+    long getRelationshipId();
 }

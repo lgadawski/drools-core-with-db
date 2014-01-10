@@ -73,7 +73,11 @@ public class LeftInputAdapterNode extends LeftTupleSource
                context.getPartitionId(),
                context.getRuleBase().getConfiguration().isMultithreadEvaluation() );
         this.objectSource = source;
-        this.leftTupleMemoryEnabled = context.isTupleMemoryEnabled();
+        if ( !JoinNode.USE_DB ) {
+            this.leftTupleMemoryEnabled = context.isTupleMemoryEnabled();
+        } else {
+            this.leftTupleMemoryEnabled = !JoinNode.USE_DB;
+        }
         ObjectSource current = source;
         while ( !(current instanceof ObjectTypeNode) ) {
                current = current.getParentObjectSource();
@@ -141,7 +145,7 @@ public class LeftInputAdapterNode extends LeftTupleSource
     public void assertObject(final InternalFactHandle factHandle,
                              final PropagationContext context,
                              final InternalWorkingMemory workingMemory) {
-        boolean useLeftMemory = true;
+        boolean useLeftMemory = !JoinNode.USE_DB;
         if ( !this.leftTupleMemoryEnabled ) {
             // This is a hack, to not add closed DroolsQuery objects
             Object object = ((InternalFactHandle)context.getFactHandle()).getObject();
