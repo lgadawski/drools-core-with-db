@@ -259,13 +259,12 @@ public class RuleTerminalNode extends AbstractTerminalNode {
                                                 false );
         if( fire && !fireDirect ) {
             AgendaItem activation = (AgendaItem) leftTuple.getObject();
+            agenda.addActivation(activation);
             if (JoinNode.USE_DB) {
                 //release memory that holds leftTuple in AgendaItem
                 leftTuple = null;
-                activation.setTuple(null);  
-//                activation.setPropagationContext(null);
+                activation = null;
             }
-            agenda.addActivation(activation);
 //            agenda.addActivation( (AgendaItem) leftTuple.getObject() );
         }
     }
