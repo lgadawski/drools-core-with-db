@@ -31,17 +31,14 @@ import org.drools.spi.PropagationContext;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
-import com.gadawski.db.DbRelationshipManager;
-import com.gadawski.db.IRelationshipManager;
+import com.gadawski.drools.config.MyAppConfig;
+import com.gadawski.drools.db.DbRelationshipManager;
+import com.gadawski.drools.db.IRelationshipManager;
 import com.gadawski.util.facts.Relationship;
 
 public class JoinNode extends BetaNode {
 
     private static final long serialVersionUID = 510l;
-    /**
-     * Indicates if rule engine should use database.
-     */
-    public static boolean USE_DB = true;
     /**
      * Db relationship manager.
      */
@@ -83,7 +80,7 @@ public class JoinNode extends BetaNode {
 
         ContextEntry[] contextEntry = memory.getContext();
 //        boolean useLeftMemory = false; 
-        boolean useLeftMemory = !JoinNode.USE_DB;       
+        boolean useLeftMemory = !MyAppConfig.USE_DB;       
     
         if ( !this.tupleMemoryEnabled ) {
             // This is a hack, to not add closed DroolsQuery objects
@@ -150,7 +147,7 @@ public class JoinNode extends BetaNode {
                                                   context );
 
         memory.getRightTupleMemory().add( rightTuple );
-        if ( !JoinNode.USE_DB ) {
+        if ( !MyAppConfig.USE_DB ) {
             if ( memory.getLeftTupleMemory() == null || memory.getLeftTupleMemory().size() == 0 ) {
                 // do nothing here, as no left memory
                 return;
@@ -161,7 +158,7 @@ public class JoinNode extends BetaNode {
                                                workingMemory,
                                                factHandle );
 
-        if ( JoinNode.USE_DB ) {
+        if ( MyAppConfig.USE_DB ) {
             getAndPropagateDBTupleFromRight(context, workingMemory, memory, rightTuple);
         } else {
             FastIterator it = getLeftIterator( leftMemory );

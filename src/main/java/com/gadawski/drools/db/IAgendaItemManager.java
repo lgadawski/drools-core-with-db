@@ -1,4 +1,4 @@
-package com.gadawski.db;
+package com.gadawski.drools.db;
 
 import org.drools.common.AgendaItem;
 import org.drools.spi.Activation;

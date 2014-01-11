@@ -45,6 +45,7 @@ import org.drools.spi.Activation;
 import org.drools.spi.PropagationContext;
 import org.drools.time.impl.ExpressionIntervalTimer;
 
+import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -259,7 +260,7 @@ public class RuleTerminalNode extends AbstractTerminalNode {
                                                 false );
         if( fire && !fireDirect ) {
             AgendaItem activation = (AgendaItem) leftTuple.getObject();
-            if (JoinNode.USE_DB) {
+            if (MyAppConfig.USE_DB) {
                 agenda.addActivation(activation);
                 //release memory that holds leftTuple in AgendaItem
                 leftTuple = null;

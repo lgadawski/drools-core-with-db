@@ -1,4 +1,4 @@
-package com.gadawski.db;
+package com.gadawski.drools.db;
 
 import java.util.List;
 

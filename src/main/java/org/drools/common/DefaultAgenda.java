@@ -34,7 +34,6 @@ import org.drools.base.DefaultKnowledgeHelper;
 import org.drools.common.RuleFlowGroupImpl.DeactivateCallback;
 import org.drools.core.util.ClassUtils;
 import org.drools.event.rule.ActivationCancelledCause;
-import org.drools.reteoo.JoinNode;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.ObjectTypeConf;
 import org.drools.reteoo.ObjectTypeNode;
@@ -56,8 +55,9 @@ import org.drools.spi.RuleFlowGroup;
 import org.drools.time.impl.ExpressionIntervalTimer;
 import org.drools.time.impl.Timer;
 
-import com.gadawski.db.DbRelationshipManager;
-import com.gadawski.db.IRelationshipManager;
+import com.gadawski.drools.config.MyAppConfig;
+import com.gadawski.drools.db.DbRelationshipManager;
+import com.gadawski.drools.db.IRelationshipManager;
 
 /**
  * Rule-firing Agenda.
@@ -1263,7 +1263,7 @@ public class DefaultAgenda
      */
     private AgendaItem getNextAgendaItem(InternalAgendaGroup group) {
         AgendaItem item = (AgendaItem) group.getNext();
-        if (JoinNode.USE_DB) {
+        if (MyAppConfig.USE_DB) {
             item.setRuleTerminalNode(getRuleTerminalNode(item
                     .getRuleTerminalNodeId()));
             item.setCurrentOTNforPropagationContext(getObjectTypeNode(item

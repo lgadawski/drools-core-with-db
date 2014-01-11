@@ -21,9 +21,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.drools.reteoo.JoinNode;
-
-import com.gadawski.db.DbAgendaItemGroup;
+import com.gadawski.drools.config.MyAppConfig;
+import com.gadawski.drools.db.DbAgendaItemGroup;
 
 
 public class PriorityQueueAgendaGroupFactory implements AgendaGroupFactory, Externalizable {
@@ -41,7 +40,7 @@ public class PriorityQueueAgendaGroupFactory implements AgendaGroupFactory, Exte
 
     public InternalAgendaGroup createAgendaGroup(String name, InternalRuleBase ruleBase) {
 //        return new SimpleAgendaGroup(name, ruleBase);
-        if (JoinNode.USE_DB) {
+        if (MyAppConfig.USE_DB) {
             return new DbAgendaItemGroup( name, ruleBase);
         }
         return new BinaryHeapQueueAgendaGroup( name,

@@ -31,6 +31,8 @@ import org.drools.common.UpdateContext;
 import org.drools.reteoo.builder.BuildContext;
 import org.drools.spi.PropagationContext;
 
+import com.gadawski.drools.config.MyAppConfig;
+
 /**
  * All asserting Facts must propagated into the right <code>ObjectSink</code> side of a BetaNode, if this is the first Pattern
  * then there are no BetaNodes to propagate to. <code>LeftInputAdapter</code> is used to adapt an ObjectSink propagation into a
@@ -73,10 +75,10 @@ public class LeftInputAdapterNode extends LeftTupleSource
                context.getPartitionId(),
                context.getRuleBase().getConfiguration().isMultithreadEvaluation() );
         this.objectSource = source;
-        if ( !JoinNode.USE_DB ) {
+        if ( !MyAppConfig.USE_DB ) {
             this.leftTupleMemoryEnabled = context.isTupleMemoryEnabled();
         } else {
-            this.leftTupleMemoryEnabled = !JoinNode.USE_DB;
+            this.leftTupleMemoryEnabled = !MyAppConfig.USE_DB;
         }
         ObjectSource current = source;
         while ( !(current instanceof ObjectTypeNode) ) {
@@ -145,7 +147,7 @@ public class LeftInputAdapterNode extends LeftTupleSource
     public void assertObject(final InternalFactHandle factHandle,
                              final PropagationContext context,
                              final InternalWorkingMemory workingMemory) {
-        boolean useLeftMemory = !JoinNode.USE_DB;
+        boolean useLeftMemory = !MyAppConfig.USE_DB;
         if ( !this.leftTupleMemoryEnabled ) {
             // This is a hack, to not add closed DroolsQuery objects
             Object object = ((InternalFactHandle)context.getFactHandle()).getObject();

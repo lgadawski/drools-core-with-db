@@ -25,8 +25,9 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
-import com.gadawski.db.DbRelationshipManager;
-import com.gadawski.db.IRelationshipManager;
+import com.gadawski.drools.config.MyAppConfig;
+import com.gadawski.drools.db.DbRelationshipManager;
+import com.gadawski.drools.db.IRelationshipManager;
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -82,11 +83,11 @@ public class BaseLeftTuple
                              final boolean leftTupleMemoryEnabled) {
         this.handle = factHandle;
         
-        if ( JoinNode.USE_DB ) {
+        if ( MyAppConfig.USE_DB ) {
             saveFactHandleToDb(factHandle, sink);
         }
         
-        if ( leftTupleMemoryEnabled && !JoinNode.USE_DB) {
+        if ( leftTupleMemoryEnabled && !MyAppConfig.USE_DB) {
             this.handle.addLastLeftTuple( this );
         }
         this.sink = sink;
@@ -120,11 +121,11 @@ public class BaseLeftTuple
         this.parent = leftTuple;
         this.handle = rightTuple.getFactHandle();
         
-        if ( JoinNode.USE_DB ) {
+        if ( MyAppConfig.USE_DB ) {
             saveRelationshipToDb(leftTuple, rightTuple, sink);
         }
         
-        if (!JoinNode.USE_DB) {
+        if (!MyAppConfig.USE_DB) {
             this.leftParent = leftTuple;
             // insert at the end f the list
             if ( leftTuple.getLastChild() != null ) {
@@ -171,11 +172,11 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
 
-        if ( JoinNode.USE_DB ) {
+        if ( MyAppConfig.USE_DB ) {
             saveRelationshipToDb(leftTuple, rightTuple, sink);
         }
         
-        if ( leftTupleMemoryEnabled && !JoinNode.USE_DB) {
+        if ( leftTupleMemoryEnabled && !MyAppConfig.USE_DB) {
             this.leftParent = leftTuple;
             this.rightParent = rightTuple;
             if( currentLeftChild == null ) {
