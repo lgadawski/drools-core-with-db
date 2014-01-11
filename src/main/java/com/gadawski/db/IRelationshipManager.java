@@ -12,7 +12,6 @@ import org.drools.reteoo.RightTuple;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
-import com.gadawski.util.facts.AgendaItemRelationship;
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -67,15 +66,6 @@ public interface IRelationshipManager {
      * @return concrete relationship from db.
      */
     public Relationship getRelationiship(long relationshipId);
-
-    /**
-     * @param leftTuple
-     * @param rightTuple
-     * @param sink
-     * @return
-     */
-    public AgendaItemRelationship createAgendaItemRelationship(
-            LeftTuple leftTuple, RightTuple rightTuple, LeftTupleSink sink);
 
     /**
      * Unwraps hibernate's session from {@link EntityManager} and opens

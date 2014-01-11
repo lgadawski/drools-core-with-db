@@ -3,12 +3,10 @@ package com.gadawski.db;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.List;
 
 import org.drools.common.AgendaItem;
 import org.drools.common.InternalAgendaGroup;
 import org.drools.common.InternalRuleBase;
-import org.drools.reteoo.ObjectTypeNode;
 import org.drools.spi.Activation;
 import org.drools.spi.PropagationContext;
 
@@ -37,11 +35,6 @@ public class DbAgendaItemGroup implements InternalAgendaGroup {
      */
     public DbAgendaItemGroup(final String name, final InternalRuleBase ruleBase) {
         this.m_name = name;
-        
-        List<ObjectTypeNode> nodes = ruleBase.getRete().getObjectTypeNodes();
-        for (ObjectTypeNode node : nodes) {
-            node.getId();
-        }
     }
 
     @Override

@@ -18,7 +18,6 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
 import com.gadawski.util.db.jpa.EntityManagerUtil;
-import com.gadawski.util.facts.AgendaItemRelationship;
 import com.gadawski.util.facts.Relationship;
 
 /**
@@ -74,17 +73,6 @@ public class DbRelationshipManager implements IRelationshipManager {
             relationship.setObject(internalFactHandle.getObject());
         }
         return relationship;
-    }
-
-    @Override
-    public AgendaItemRelationship createAgendaItemRelationship(
-            final LeftTuple leftTuple, final RightTuple rightTuple,
-            final LeftTupleSink sink) {
-        final Relationship relationship = createRelationship(leftTuple,
-                rightTuple, sink);
-        final AgendaItemRelationship aRelationship = new AgendaItemRelationship(
-                relationship);
-        return aRelationship;
     }
 
     @Override
