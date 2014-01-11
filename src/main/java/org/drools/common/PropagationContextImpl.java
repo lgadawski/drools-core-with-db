@@ -218,7 +218,11 @@ public class PropagationContextImpl
         out.writeObject( this.entryPoint );
         out.writeInt( this.originOffset );
         out.writeObject( this.propagationAttempts );
-        out.writeLong( this.currentPropagatingOTN.getId() );
+        if (currentPropagatingOTN != null) {
+            out.writeLong( this.currentPropagatingOTN.getId() );
+        } else {
+            out.writeLong(-1L);
+        }
 //        out.writeObject( this.currentPropagatingOTN );
         out.writeBoolean( this.shouldPropagateAll );
         out.writeLong( this.modificationMask );
@@ -408,12 +412,12 @@ public class PropagationContextImpl
     }
 
     @Override
-    public Long getCurrentPropagatingOTNid() {
+    public long getCurrentPropagatingOTNid() {
         return currentPropagatingOTNid;
     }
 
     @Override
-    public void setCurrentPropagatingOTNid(Long currentPropagatingOTNid) {
+    public void setCurrentPropagatingOTNid(long currentPropagatingOTNid) {
         this.currentPropagatingOTNid = currentPropagatingOTNid;
     }
 }

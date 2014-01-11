@@ -90,7 +90,11 @@ public class DbRelationshipManager implements IRelationshipManager {
     @Override
     public Relationship createRelationship(final InternalFactHandle fact,
             final LeftTupleSink sink) {
-        return new Relationship(sink.getId(), fact.getObject());
+        int sinkId = -1;
+        if (sink != null) {
+            sinkId = sink.getId();
+        }
+        return new Relationship(sinkId, fact.getObject());
     }
 
     @Override
@@ -117,7 +121,7 @@ public class DbRelationshipManager implements IRelationshipManager {
     }
 
     @Override
-    public Relationship getRelationiship(final Long relationshipId) {
+    public Relationship getRelationiship(final long relationshipId) {
         // TODO code repetitions! ugly!
         final CriteriaBuilder builder = m_entityManagerUtil
                 .getCriteriaBuilder();
@@ -134,19 +138,6 @@ public class DbRelationshipManager implements IRelationshipManager {
     @Override
     public Session openSession() {
         return m_entityManagerUtil.openSession();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Relationship> getRelsIterable(final int offset, final int max,
-            final long nodeId) {
-        final Query query = m_entityManagerUtil.getEntityManager()
-                .createNamedQuery(Relationship.FIND_RELS_BY_JOINNODE_ID)
-                .setParameter("nodeId", nodeId).setFirstResult(offset)
-                .setMaxResults(max);
-        final List<Relationship> rels = new ArrayList<Relationship>();
-        rels.addAll(query.getResultList());
-        return rels;
     }
 
     @Override

@@ -69,7 +69,7 @@ public class AgendaItem
     /**
      * {@link RuleTerminalNode} id, helped to restore rtn, after serialization
      * */
-    private Long m_ruleTerminalNodeId;
+    private long m_ruleTerminalNodeId;
     
     /** The propagation context */
     private PropagationContext        context;
@@ -123,7 +123,9 @@ public class AgendaItem
                       final PropagationContext context,
                       final RuleTerminalNode rtn) {
         this.tuple = tuple;
-        this.relationshipId = tuple.getRelationshipId();
+        if (tuple != null) {
+            this.relationshipId = tuple.getRelationshipId();
+        }
         this.context = context;
         this.salience = salience;
         this.rtn = rtn;
@@ -491,14 +493,14 @@ public class AgendaItem
     /**
      * @return the relationshipId
      */
-    public Long getRelationshipId() {
+    public long getRelationshipId() {
         return relationshipId;
     }
 
     /**
      * @param relationshipId the relationshipId to set
      */
-    public void setRelationshipId(Long relationshipId) {
+    public void setRelationshipId(long relationshipId) {
         this.relationshipId = relationshipId;
     }
 

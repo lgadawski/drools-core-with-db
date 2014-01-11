@@ -101,10 +101,10 @@ public interface PropagationContext
     /**
      * @return the currentPropagatingOTNid
      */
-    public Long getCurrentPropagatingOTNid() ;
+    public long getCurrentPropagatingOTNid() ;
 
     /**
      * @param currentPropagatingOTNid the currentPropagatingOTNid to set
      */
-    public void setCurrentPropagatingOTNid(Long currentPropagatingOTNid) ;
+    public void setCurrentPropagatingOTNid(long currentPropagatingOTNid) ;
 }

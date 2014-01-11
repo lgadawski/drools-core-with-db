@@ -50,7 +50,8 @@ public interface IRelationshipManager {
     public void saveRelationship(final Relationship relationship);
 
     /**
-     * Gets all relationship for given join node id.
+     * Gets all relationship for given join node id. Useful only for reasonable
+     * number of objects that are fetched. 
      * 
      * @param joinNodeId
      *            - join node for relationship.
@@ -65,7 +66,7 @@ public interface IRelationshipManager {
      *            - id of relationship.
      * @return concrete relationship from db.
      */
-    public Relationship getRelationiship(Long relationshipId);
+    public Relationship getRelationiship(long relationshipId);
 
     /**
      * @param leftTuple
@@ -83,14 +84,6 @@ public interface IRelationshipManager {
      * @return {@link Session} based on {@link EntityManager}.
      */
     public Session openSession();
-
-    /**
-     * @param offset
-     * @param i
-     * @param j
-     * @return
-     */
-    public List<Relationship> getRelsIterable(int offset, int i, long j);
 
     /**
      * Creates query that searches relationships for given nodeId.

@@ -1263,7 +1263,7 @@ public class DefaultAgenda
      */
     private AgendaItem getNextAgendaItem(InternalAgendaGroup group) {
         AgendaItem item = (AgendaItem) group.getNext();
-        if (item.getTuple() == null && JoinNode.USE_DB) {
+        if (JoinNode.USE_DB) {
             item.setRuleTerminalNode(getRuleTerminalNode(item
                     .getRuleTerminalNodeId()));
             item.setCurrentOTNforPropagationContext(getObjectTypeNode(item
