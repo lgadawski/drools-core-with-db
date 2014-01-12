@@ -11,6 +11,7 @@
         <class>com.gadawski.util.facts.Customer</class>
         <class>com.gadawski.util.facts.House</class>
         <class>com.gadawski.util.facts.Relationship</class>
+        <class>com.gadawski.util.facts.RightRelationship</class>
 
         <!-- entities are nor cached unless U explicitly mark them as cacheable -->
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>

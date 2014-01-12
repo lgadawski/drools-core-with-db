@@ -27,7 +27,7 @@ public class DbAgendaItemGroup implements InternalAgendaGroup {
     /**
      * 
      */
-    private PropagationContext m_autoFocusActivator;
+    private transient PropagationContext m_autoFocusActivator;
 
     /**
      * @param name
@@ -43,7 +43,7 @@ public class DbAgendaItemGroup implements InternalAgendaGroup {
         this.m_name = (String) in.readObject();
         this.m_active = in.readBoolean();
         this.m_autoFocusActivator = (PropagationContext) in.readObject();
-        
+
     }
 
     @Override
@@ -123,5 +123,49 @@ public class DbAgendaItemGroup implements InternalAgendaGroup {
     @Override
     public PropagationContext getAutoFocusActivator() {
         return m_autoFocusActivator;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return "AgendaGroup '" + this.m_name + "'";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((m_name == null) ? 0 : m_name.hashCode());
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DbAgendaItemGroup other = (DbAgendaItemGroup) obj;
+        if (m_name == null) {
+            if (other.m_name != null)
+                return false;
+        } else if (!m_name.equals(other.m_name))
+            return false;
+        return true;
     }
 }

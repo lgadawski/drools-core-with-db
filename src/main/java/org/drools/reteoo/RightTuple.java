@@ -20,6 +20,11 @@ import org.drools.common.InternalFactHandle;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.RightTupleList;
 
+import com.gadawski.drools.config.MyAppConfig;
+import com.gadawski.drools.db.DbRelationshipManager;
+import com.gadawski.drools.db.IRelationshipManager;
+import com.gadawski.util.facts.RightRelationship;
+
 public class RightTuple
     implements
     Entry {
@@ -40,6 +45,8 @@ public class RightTuple
 
     protected RightTupleSink     sink;
 
+    private IRelationshipManager m_relManager;
+
     public RightTuple() {
 
     }
@@ -51,11 +58,52 @@ public class RightTuple
 
     public RightTuple(InternalFactHandle handle,
                       RightTupleSink sink) {
+        setUpHandleAndSink(handle, sink);
+        
+        if (MyAppConfig.USE_DB) {
+            saveRightTupleToDb(handle, sink);   
+        }
+    }
+
+    /**
+     * Sets up handle and sink.
+     * 
+     * @param handle
+     * @param sink
+     * @return 
+     */
+    private RightTuple setUpHandleAndSink(InternalFactHandle handle,
+            RightTupleSink sink) {
         this.handle = handle;
         this.sink = sink;
 
         // add to end of RightTuples on handle
-        handle.addLastRightTuple( this );
+        handle.addLastRightTuple(this);
+        return this;
+    }
+
+    /**
+     * Creates {@link RightTuple}. Same as RightTuple(InternalFactHandle,
+     * RightTupleSink) but don't saves right tuple to db.
+     * 
+     * @param handle
+     * @param sink
+     * @return new {@link RightTuple}.
+     */
+    public static RightTuple createRightTupleFromDb(InternalFactHandle handle,
+            RightTupleSink sink) {
+        return new RightTuple().setUpHandleAndSink(handle, sink);
+    }
+
+    /**
+     * @param fact
+     * @param sink
+     */
+    private void saveRightTupleToDb(InternalFactHandle fact, RightTupleSink sink) {
+        m_relManager = DbRelationshipManager.getInstance();
+        final RightRelationship rightRel = (RightRelationship) m_relManager
+                .createRightRelationship(fact, sink);
+        m_relManager.saveRelationship(rightRel);
     }
 
     public RightTupleSink getRightTupleSink() {

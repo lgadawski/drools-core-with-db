@@ -9,10 +9,12 @@ import org.drools.common.InternalFactHandle;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.LeftTupleSink;
 import org.drools.reteoo.RightTuple;
+import org.drools.reteoo.Sink;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
 import com.gadawski.util.facts.Relationship;
+import com.gadawski.util.facts.RightRelationship;
 
 /**
  * @author l.gadawski@gmail.com
@@ -32,13 +34,22 @@ public interface IRelationshipManager {
             final RightTuple rightTuple, final LeftTupleSink sink);
 
     /**
-     * Creates {@link Relationship} from fact handle object and join node id.
+     * Creates {@link Relationship} from fact handle object and sink.
      * 
-     * @param joinNodeId
+     * @param sink
      * @param object
      */
     public Relationship createRelationship(final InternalFactHandle fact,
-            final LeftTupleSink sink);
+            final Sink sink);
+
+    /**
+     * Creates {@link RightRelationship} for fact handle object and sink.
+     * 
+     * @param fact
+     * @param sink
+     */
+    public RightRelationship createRightRelationship(
+            final InternalFactHandle fact, final Sink sink);
 
     /**
      * Saves relationship to db.
@@ -50,7 +61,7 @@ public interface IRelationshipManager {
 
     /**
      * Gets all relationship for given join node id. Useful only for reasonable
-     * number of objects that are fetched. 
+     * number of objects that are fetched.
      * 
      * @param joinNodeId
      *            - join node for relationship.
@@ -76,12 +87,21 @@ public interface IRelationshipManager {
     public Session openSession();
 
     /**
-     * Creates query that searches relationships for given nodeId.
+     * Creates query that searches relationships (left tuples) for given nodeId.
      * 
      * @param nodeId
      * @return the Query.
      */
-    public Query createQueryGetRelsByJoinNodeId(final long nodeId);
+    public Query createQueryGetRelsByJoinNodeId(long nodeId);
+
+    /**
+     * Creates query that searches right relationships (right tuples) for given
+     * nodeId.
+     * 
+     * @param nodeId
+     * @return the Query.
+     */
+    public Query createQueryGetRightRelsByJoinNodeId(long nodeId);
 
     /**
      * Creates {@link ScrollableResults} iterator for given query. Sets
