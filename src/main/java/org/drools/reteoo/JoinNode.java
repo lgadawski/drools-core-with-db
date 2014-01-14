@@ -16,8 +16,11 @@
 
 package org.drools.reteoo;
 
+import java.util.List;
+
 import javax.persistence.Query;
 
+import org.drools.WorkingMemoryEntryPoint;
 import org.drools.base.DroolsQuery;
 import org.drools.common.BetaConstraints;
 import org.drools.common.DefaultFactHandle;
@@ -34,7 +37,8 @@ import org.hibernate.Session;
 import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.DbRelationshipManager;
 import com.gadawski.drools.db.IRelationshipManager;
-import com.gadawski.util.db.jdbc.JdbcAgendaItemManagerUtil;
+import com.gadawski.drools.db.tuple.DbTupleManager;
+import com.gadawski.drools.db.tuple.IDbTupleManager;
 import com.gadawski.util.facts.Relationship;
 import com.gadawski.util.facts.RightRelationship;
 
@@ -45,6 +49,10 @@ public class JoinNode extends BetaNode {
      * Db relationship manager.
      */
     private IRelationshipManager m_relManager;
+    /**
+     * 
+     */
+    private transient IDbTupleManager m_tupleManager;
 
     public JoinNode() {
 
@@ -94,7 +102,10 @@ public class JoinNode extends BetaNode {
         
         if ( useLeftMemory ) {
             memory.getLeftTupleMemory().add( leftTuple );
-        } 
+        } else {
+            m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.saveLeftTuple(leftTuple);
+        }
         
         this.constraints.updateFromTuple( contextEntry,
                                           workingMemory,
@@ -103,7 +114,7 @@ public class JoinNode extends BetaNode {
         FastIterator it = getRightIterator( rightMemory );
 
         if (MyAppConfig.USE_DB) {
-            getAndPropagateDBTupleFromLeft(contextEntry,
+            getAndPropagateSerialDBTupleFromLeft(contextEntry,
                     useLeftMemory, context, workingMemory, leftTuple);
         } else {
             for (RightTuple rightTuple = getFirstRightTuple(leftTuple,
@@ -119,6 +130,33 @@ public class JoinNode extends BetaNode {
     }
 
     /**
+     * @param contextEntry
+     * @param useLeftMemory
+     * @param context
+     * @param workingMemory
+     * @param leftTuple
+     */
+    private void getAndPropagateSerialDBTupleFromLeft(
+            ContextEntry[] contextEntry, boolean useLeftMemory,
+            PropagationContext context, InternalWorkingMemory workingMemory,
+            LeftTuple leftTuple) {
+        m_tupleManager = DbTupleManager.getInstance();
+        List<Object> dbTuples = m_tupleManager.getRightTuples(this.getId());
+        for (Object rightTupleFromDb : dbTuples) {
+            RightTuple tuple = (RightTuple) rightTupleFromDb;
+            if (tuple.getSinkId() == this.getId()) {
+                tuple.setSink(this);
+            }
+            WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(tuple.getHandleEntryPointId());
+            tuple.setHandleEntryPoint(tupleEntryPoint);
+            
+            propagateFromLeft(tuple, leftTuple, contextEntry,
+                    useLeftMemory, context, workingMemory);
+        }
+        
+    }
+
+    /**
      * Performs query to db. Operates on {@link RightRelationship} with
      * {@link ScrollableResults}. It's allows to operates on single fetched row,
      * not full query results. There is no need for flushing and/or clearing
@@ -130,6 +168,7 @@ public class JoinNode extends BetaNode {
      * @param workingMemory
      * @param leftTuple
      */
+    @SuppressWarnings("unused")
     private void getAndPropagateDBTupleFromLeft(ContextEntry[] contextEntry,
             boolean useLeftMemory, PropagationContext context,
             InternalWorkingMemory workingMemory, LeftTuple leftTuple) {
@@ -188,8 +227,14 @@ public class JoinNode extends BetaNode {
                                                   this,
                                                   context );
 
-        if ( !MyAppConfig.USE_DB ) {
+        if (MyAppConfig.USE_DB) {
+            m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.saveRightTuple(rightTuple);
+        } else {
             memory.getRightTupleMemory().add( rightTuple );
+        }
+        
+        if ( !MyAppConfig.USE_DB ) {
             if ( memory.getLeftTupleMemory() == null || memory.getLeftTupleMemory().size() == 0 ) {
                 // do nothing here, as no left memory
                 return;
@@ -201,7 +246,7 @@ public class JoinNode extends BetaNode {
                                                factHandle );
 
         if ( MyAppConfig.USE_DB ) {
-            getAndPropagateDBTupleFromRight(context, workingMemory, memory, rightTuple);
+            getAndPropagateSerialDBTupleFromRight(context, workingMemory, memory, rightTuple);
         } else {
             FastIterator it = getLeftIterator( leftMemory );
             for ( LeftTuple leftTuple = getFirstLeftTuple( rightTuple, leftMemory, context, it ); leftTuple != null; leftTuple = (LeftTuple) it.next( leftTuple ) ) {
@@ -210,6 +255,29 @@ public class JoinNode extends BetaNode {
         }
 
         this.constraints.resetFactHandle( memory.getContext() );
+    }
+
+    /**
+     * @param context
+     * @param workingMemory
+     * @param memory
+     * @param rightTuple
+     */
+    private void getAndPropagateSerialDBTupleFromRight(
+            PropagationContext context, InternalWorkingMemory workingMemory,
+            BetaMemory memory, RightTuple rightTuple) {
+        m_tupleManager = DbTupleManager.getInstance();
+        List<Object> dbTuples = m_tupleManager.getLeftTuples(this.getId());
+        for (Object leftTupleFromDb : dbTuples) {
+            LeftTuple tuple = (LeftTuple) leftTupleFromDb;
+            if (tuple.getSinkId() == this.getId()) {
+                tuple.setSink(this);
+            }
+            WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(tuple.getHandleEntryPointId());
+            tuple.setHandleEntryPoint(tupleEntryPoint);
+            
+            propagateFromRight(rightTuple, tuple, memory, context, workingMemory);
+        }
     }
 
     /**
@@ -227,6 +295,7 @@ public class JoinNode extends BetaNode {
      * @param rightTuple
      *            - the tuple to propagate.
      */
+    @SuppressWarnings("unused")
     private void getAndPropagateDBTupleFromRight(
             final PropagationContext context,
             final InternalWorkingMemory workingMemory, final BetaMemory memory,

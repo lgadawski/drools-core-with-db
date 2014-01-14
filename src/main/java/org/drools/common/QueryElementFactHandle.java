@@ -195,5 +195,17 @@ public class QueryElementFactHandle
     public void removeRightTuple( RightTuple rightTuple ) {
         throw new UnsupportedOperationException( "QueryElementFactHandle does not support this method" );
     }
+
+    @Override
+    public String getEntryPointId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setEntryPointId(String entryPointId) {
+        // TODO Auto-generated method stub
+        
+    }
     
 }

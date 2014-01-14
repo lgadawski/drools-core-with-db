@@ -1263,18 +1263,18 @@ public class DefaultAgenda
      */
     private AgendaItem getNextAgendaItem(InternalAgendaGroup group) {
         AgendaItem item = (AgendaItem) group.getNext();
-        if (MyAppConfig.USE_DB) {
-            item.setRuleTerminalNode(getRuleTerminalNode(item
-                    .getRuleTerminalNodeId()));
-            item.setCurrentOTNforPropagationContext(getObjectTypeNode(item
-                    .getCurrentOTNidforPropagationContext()));
-            item.setAgendaGroup(group);
-            LeftTuple tuple = RuleTerminalNode.createLeftTuple(
-                    m_dbRelationshipManager.getRelationiship(item
-                            .getRelationshipId()), item.getRuleTerminalNode());
-            tuple.setObject(item);
-            item.setTuple(tuple);
-        }
+//        if (MyAppConfig.USE_DB) {
+//            item.setRuleTerminalNode(getRuleTerminalNode(item
+//                    .getRuleTerminalNodeId()));
+//            item.setCurrentOTNforPropagationContext(getObjectTypeNode(item
+//                    .getCurrentOTNidforPropagationContext()));
+//            item.setAgendaGroup(group);
+//            LeftTuple tuple = RuleTerminalNode.createLeftTuple(
+//                    m_dbRelationshipManager.getRelationiship(item
+//                            .getRelationshipId()), item.getRuleTerminalNode());
+//            tuple.setObject(item);
+//            item.setTuple(tuple);
+//        }
         return item;
     }
 

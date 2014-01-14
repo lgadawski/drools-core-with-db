@@ -1,5 +1,6 @@
 package org.drools.reteoo;
 
+import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.InternalFactHandle;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.LeftTupleList;
@@ -139,4 +140,19 @@ public interface LeftTuple extends Entry, Tuple {
      * @return the m_relationshipId
      */
     long getRelationshipId();
+    
+    /**
+     * @return
+     */
+    long getSinkId();
+
+    /**
+     * @return
+     */
+    String getHandleEntryPointId();
+
+    /**
+     * @param tupleEntryPoint
+     */
+    void setHandleEntryPoint(WorkingMemoryEntryPoint tupleEntryPoint);
 }

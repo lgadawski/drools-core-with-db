@@ -91,4 +91,14 @@ public interface InternalFactHandle
 
     public void removeRightTuple( RightTuple rightTuple );
     
+    /**
+     * @return the entryPointId
+     */
+    public String getEntryPointId() ;
+
+    /**
+     * @param entryPointId the entryPointId to set
+     */
+    public void setEntryPointId(String entryPointId) ;
+    
 }

@@ -36,7 +36,7 @@ public class DbAgendaItemManager implements IAgendaItemManager {
 
     @Override
     public void saveAgendaItem(AgendaItem item) {
-        m_jdbcAgendaItemManagerUtil.saveObject(item);
+        m_jdbcAgendaItemManagerUtil.saveAgendaItem(item);
     }
 
     @Override

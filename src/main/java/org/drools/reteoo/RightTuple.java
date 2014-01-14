@@ -16,18 +16,25 @@
 
 package org.drools.reteoo;
 
+import java.io.Serializable;
+
+import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.InternalFactHandle;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.RightTupleList;
 
-import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.DbRelationshipManager;
 import com.gadawski.drools.db.IRelationshipManager;
 import com.gadawski.util.facts.RightRelationship;
 
 public class RightTuple
     implements
-    Entry {
+    Entry, Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     protected InternalFactHandle handle;
 
     private RightTuple           handlePrevious;
@@ -43,9 +50,13 @@ public class RightTuple
 
     private LeftTuple            blocked;
 
-    protected RightTupleSink     sink;
+    /**
+     * 
+     */
+    protected int                         sinkId;
+    protected transient RightTupleSink     sink;
 
-    private IRelationshipManager m_relManager;
+    private transient IRelationshipManager m_relManager;
 
     public RightTuple() {
 
@@ -60,9 +71,9 @@ public class RightTuple
                       RightTupleSink sink) {
         setUpHandleAndSink(handle, sink);
         
-        if (MyAppConfig.USE_DB) {
-            saveRightTupleToDb(handle, sink);   
-        }
+//        if (MyAppConfig.USE_DB) {
+//            saveRightTupleToDb(handle, sink);   
+//        }
     }
 
     /**
@@ -76,6 +87,7 @@ public class RightTuple
             RightTupleSink sink) {
         this.handle = handle;
         this.sink = sink;
+        this.sinkId = sink.getId();
 
         // add to end of RightTuples on handle
         handle.addLastRightTuple(this);
@@ -247,5 +259,38 @@ public class RightTuple
 
     public boolean equals(Object object) {
         return equals( (RightTuple) object );
+    }
+
+    /**
+     * @return
+     */
+    public String getHandleEntryPointId() {
+        if (handle != null) {
+            return handle.getEntryPointId();
+        }
+        return "";
+    }
+
+    /**
+     * @param tupleEntryPoint
+     */
+    public void setHandleEntryPoint(WorkingMemoryEntryPoint tupleEntryPoint) {
+        if (handle != null) {
+            handle.setEntryPoint(tupleEntryPoint);
+        }
+    }
+
+    /**
+     * @return
+     */
+    public int getSinkId() {
+        return sinkId;
+    }
+
+    /**
+     * @param sink
+     */
+    public void setSink(RightTupleSink sink) {
+        this.sink = sink;
     }
 }

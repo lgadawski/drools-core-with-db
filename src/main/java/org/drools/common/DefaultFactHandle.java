@@ -58,7 +58,11 @@ public class DefaultFactHandle
     private LeftTuple               firstLeftTuple;
     private LeftTuple               lastLeftTuple;
 
-    private WorkingMemoryEntryPoint entryPoint;
+    /**
+     * Entry point id, helpful for deserializing object.
+     */
+    private String entryPointId;
+    private transient WorkingMemoryEntryPoint entryPoint;
 
     private boolean                 disconnected;
 
@@ -98,6 +102,7 @@ public class DefaultFactHandle
             final WorkingMemoryEntryPoint wmEntryPoint) {
         this.id = id;
         this.entryPoint = wmEntryPoint;
+        this.entryPointId = wmEntryPoint.getEntryPointId();
         this.recency = recency;
         this.object = object;
         this.objectHashCode = ( object != null ) ? object.hashCode() : 0;
@@ -112,6 +117,7 @@ public class DefaultFactHandle
             Object object) {
         this.id = id;
         this.entryPoint = ( wmEntryPointId == null ) ? null : new DisconnectedWorkingMemoryEntryPoint( wmEntryPointId );
+        this.entryPointId = this.entryPoint.getEntryPointId();
         this.identityHashCode = identityHashCode;
         this.objectHashCode = objectHashCode;
         this.recency = recency;
@@ -481,7 +487,22 @@ public class DefaultFactHandle
         this.entryPoint = ( StringUtils.isEmpty( elements[5] ) || "null".equals( elements[5].trim() ) ) ? null
                                                                                                        : new DisconnectedWorkingMemoryEntryPoint(
                                                                                                                                                   elements[5].trim() );
+        this.entryPointId = this.entryPoint.getEntryPointId();
         this.disconnected = true;
+    }
+
+    /**
+     * @return the entryPointId
+     */
+    public String getEntryPointId() {
+        return entryPointId;
+    }
+
+    /**
+     * @param entryPointId the entryPointId to set
+     */
+    public void setEntryPointId(String entryPointId) {
+        this.entryPointId = entryPointId;
     }
 
 }

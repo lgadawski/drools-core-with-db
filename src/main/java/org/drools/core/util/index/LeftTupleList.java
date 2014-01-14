@@ -16,6 +16,8 @@
 
 package org.drools.core.util.index;
 
+import java.io.Serializable;
+
 import org.drools.core.util.AbstractHashTable.Index;
 import org.drools.core.util.Entry;
 import org.drools.core.util.FastIterator;
@@ -28,7 +30,7 @@ import org.drools.reteoo.RightTuple;
 public class LeftTupleList
     implements
     LeftTupleMemory,
-        Entry {
+        Entry, Serializable {
 
     public static final long       serialVersionUID = 510l;
     //      private Entry             previous;

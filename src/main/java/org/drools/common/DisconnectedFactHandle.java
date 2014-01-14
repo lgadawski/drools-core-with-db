@@ -254,4 +254,10 @@ public class DisconnectedFactHandle
         parseExternalForm( externalForm );
     }
 
+    @Override
+    public void setEntryPointId(String entryPointId) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

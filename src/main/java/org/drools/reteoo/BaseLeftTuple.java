@@ -18,6 +18,7 @@ package org.drools.reteoo;
 
 import java.util.Arrays;
 
+import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.EventFactHandle;
 import org.drools.common.InternalFactHandle;
 import org.drools.core.util.Entry;
@@ -25,7 +26,6 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
-import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.DbRelationshipManager;
 import com.gadawski.drools.db.IRelationshipManager;
 import com.gadawski.util.facts.Relationship;
@@ -60,7 +60,11 @@ public class BaseLeftTuple
     private LeftTuple          firstChild;
     private LeftTuple          lastChild;
 
-    private LeftTupleSink      sink;
+    /**
+     * Id of {@link LeftTupleSink} object to store it after serilizing object.
+     */
+    private int                         sinkId;
+    private transient LeftTupleSink      sink;
 
     private Object             object;
 
@@ -83,14 +87,15 @@ public class BaseLeftTuple
                              final boolean leftTupleMemoryEnabled) {
         this.handle = factHandle;
         
-        if ( MyAppConfig.USE_DB ) {
-            saveFactHandleToDb(factHandle, sink);
-        }
+//        if ( MyAppConfig.USE_DB ) {
+//            saveFactHandleToDb(factHandle, sink);
+//        }
         
-        if ( leftTupleMemoryEnabled && !MyAppConfig.USE_DB) {
+        if ( leftTupleMemoryEnabled ) {
             this.handle.addLastLeftTuple( this );
         }
         this.sink = sink;
+        this.sinkId = sink.getId();
     }
 
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -112,6 +117,7 @@ public class BaseLeftTuple
         }
         
         this.sink = sink;
+        this.sinkId = sink.getId();
     }
     
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -121,33 +127,32 @@ public class BaseLeftTuple
         this.parent = leftTuple;
         this.handle = rightTuple.getFactHandle();
         
-        if ( MyAppConfig.USE_DB ) {
-            saveRelationshipToDb(leftTuple, rightTuple, sink);
-        }
+//        if ( MyAppConfig.USE_DB ) {
+//            saveRelationshipToDb(leftTuple, rightTuple, sink);
+//        }
         
-        if (!MyAppConfig.USE_DB) {
-            this.leftParent = leftTuple;
-            // insert at the end f the list
-            if ( leftTuple.getLastChild() != null ) {
-                this.leftParentPrevious = leftTuple.getLastChild();
-                this.leftParentPrevious.setLeftParentNext( this );
-            } else {
-                leftTuple.setFirstChild( this );
-            }
-            leftTuple.setLastChild( this );
-            
-            // insert at the end of the list
-            this.rightParent = rightTuple;
-            if ( rightTuple.lastChild != null ) {
-                this.rightParentPrevious = rightTuple.lastChild;
-                this.rightParentPrevious.setRightParentNext( this );
-            } else {
-                rightTuple.firstChild = this;
-            }
-            rightTuple.lastChild = this;        
+        this.leftParent = leftTuple;
+        // insert at the end f the list
+        if ( leftTuple.getLastChild() != null ) {
+            this.leftParentPrevious = leftTuple.getLastChild();
+            this.leftParentPrevious.setLeftParentNext( this );
+        } else {
+            leftTuple.setFirstChild( this );
         }
+        leftTuple.setLastChild( this );
+        
+        // insert at the end of the list
+        this.rightParent = rightTuple;
+        if ( rightTuple.lastChild != null ) {
+            this.rightParentPrevious = rightTuple.lastChild;
+            this.rightParentPrevious.setRightParentNext( this );
+        } else {
+            rightTuple.firstChild = this;
+        }
+        rightTuple.lastChild = this;        
 
         this.sink = sink;
+        this.sinkId = sink.getId();
     }    
 
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -172,11 +177,11 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
 
-        if ( MyAppConfig.USE_DB ) {
-            saveRelationshipToDb(leftTuple, rightTuple, sink);
-        }
+//        if ( MyAppConfig.USE_DB ) {
+//            saveRelationshipToDb(leftTuple, rightTuple, sink);
+//        }
         
-        if ( leftTupleMemoryEnabled && !MyAppConfig.USE_DB) {
+        if ( leftTupleMemoryEnabled ) {
             this.leftParent = leftTuple;
             this.rightParent = rightTuple;
             if( currentLeftChild == null ) {
@@ -223,6 +228,7 @@ public class BaseLeftTuple
         }
         
         this.sink = sink;
+        this.sinkId = sink.getId();
     }
 
     /**
@@ -921,5 +927,34 @@ public class BaseLeftTuple
      */
     public long getRelationshipId() {
         return m_relationshipId;
+    }
+
+    /**
+     * @return the sinkId
+     */
+    public long getSinkId() {
+        return sinkId;
+    }
+
+    /**
+     * @param sinkId the sinkId to set
+     */
+    public void setSinkId(int sinkId) {
+        this.sinkId = sinkId;
+    }
+
+    @Override
+    public String getHandleEntryPointId() {
+        if (handle != null) {
+            return handle.getEntryPointId();
+        }
+        return "";
+    }
+
+    @Override
+    public void setHandleEntryPoint(WorkingMemoryEntryPoint tupleEntryPoint) {
+        if (handle != null) {
+            handle.setEntryPoint(tupleEntryPoint);
+        }
     }    
 }
