@@ -64,7 +64,7 @@ public class BaseLeftTuple
 
     private Object             object;
 
-    private IRelationshipManager m_relManager;
+    private transient IRelationshipManager m_relManager;
 
     /**
      * Indicates connection with relationship ID from db.
@@ -274,15 +274,15 @@ public class BaseLeftTuple
         m_relManager = relManager;
     }
     
-    /** 
-     * Checks if sink is RuleTerminalNode instanceof.
-     * 
-     * @param sink - node to be checked.
-     * @return true if sink is terminal node, false otherwise.
-     */
-    private boolean isRuleTerminalNode(final LeftTupleSink sink) {
-        return sink instanceof RuleTerminalNode;
-    }
+//    /** 
+//     * Checks if sink is RuleTerminalNode instanceof.
+//     * 
+//     * @param sink - node to be checked.
+//     * @return true if sink is terminal node, false otherwise.
+//     */
+//    private boolean isRuleTerminalNode(final LeftTupleSink sink) {
+//        return sink instanceof RuleTerminalNode;
+//    }
 
     /* (non-Javadoc)
      * @see org.drools.reteoo.LeftTuple#reAdd()

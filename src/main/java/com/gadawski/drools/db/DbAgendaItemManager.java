@@ -3,7 +3,7 @@ package com.gadawski.drools.db;
 import org.drools.common.AgendaItem;
 import org.drools.spi.Activation;
 
-import com.gadawski.util.db.jdbc.JdbcEntityManagerUtil;
+import com.gadawski.util.db.jdbc.JdbcAgendaItemManagerUtil;
 
 public class DbAgendaItemManager implements IAgendaItemManager {
     // = AgendaItem.class
@@ -15,13 +15,13 @@ public class DbAgendaItemManager implements IAgendaItemManager {
     /**
      * Entity manager util instance.
      */
-    private final JdbcEntityManagerUtil m_jdbcEntityManagerUtil;
+    private final JdbcAgendaItemManagerUtil m_jdbcAgendaItemManagerUtil;
 
     /**
      * 
      */
     private DbAgendaItemManager() {
-        m_jdbcEntityManagerUtil = JdbcEntityManagerUtil.getInstance();
+        m_jdbcAgendaItemManagerUtil = JdbcAgendaItemManagerUtil.getInstance();
     }
 
     /**
@@ -36,25 +36,25 @@ public class DbAgendaItemManager implements IAgendaItemManager {
 
     @Override
     public void saveAgendaItem(AgendaItem item) {
-        m_jdbcEntityManagerUtil.saveObject(item);
+        m_jdbcAgendaItemManagerUtil.saveObject(item);
     }
 
     @Override
     public Activation getNextAgendaItem() {
-        final AgendaItem item = (AgendaItem) m_jdbcEntityManagerUtil
+        final AgendaItem item = (AgendaItem) m_jdbcAgendaItemManagerUtil
                 .getNextAgendaItemObject();
-        m_jdbcEntityManagerUtil.removeNextAgendaItem();
+        m_jdbcAgendaItemManagerUtil.removeNextAgendaItem();
         return item;
     }
 
     @Override
     public void clearAgenda() {
-        m_jdbcEntityManagerUtil.truncateAgendaItems();
+        m_jdbcAgendaItemManagerUtil.truncateAgendaItems();
     }
 
     @Override
     public int getNumberOfAgendaItems() {
-        return m_jdbcEntityManagerUtil.getTotalNumberOfRows();
+        return m_jdbcAgendaItemManagerUtil.getTotalNumberOfRows();
     }
 
     @Override
@@ -72,7 +72,6 @@ public class DbAgendaItemManager implements IAgendaItemManager {
     @Override
     public void removeAgendaItem(final AgendaItem agendaItem) {
         // TODO Auto-generated method stub
-
     }
 
     /**

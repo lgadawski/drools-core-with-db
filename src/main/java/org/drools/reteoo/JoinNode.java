@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.DbRelationshipManager;
 import com.gadawski.drools.db.IRelationshipManager;
+import com.gadawski.util.db.jdbc.JdbcAgendaItemManagerUtil;
 import com.gadawski.util.facts.Relationship;
 import com.gadawski.util.facts.RightRelationship;
 
@@ -82,7 +83,7 @@ public class JoinNode extends BetaNode {
         ContextEntry[] contextEntry = memory.getContext();
 //        boolean useLeftMemory = false; 
         boolean useLeftMemory = !MyAppConfig.USE_DB;       
-    
+        
         if ( !this.tupleMemoryEnabled ) {
             // This is a hack, to not add closed DroolsQuery objects
             Object object = ((InternalFactHandle) leftTuple.get( 0 )).getObject();
@@ -90,7 +91,7 @@ public class JoinNode extends BetaNode {
                 useLeftMemory = false;
             }
         }
-
+        
         if ( useLeftMemory ) {
             memory.getLeftTupleMemory().add( leftTuple );
         } 
