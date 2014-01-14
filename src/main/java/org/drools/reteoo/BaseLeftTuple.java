@@ -21,6 +21,7 @@ import java.util.Arrays;
 import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.EventFactHandle;
 import org.drools.common.InternalFactHandle;
+import org.drools.common.InternalWorkingMemory;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
@@ -35,7 +36,7 @@ import com.gadawski.util.facts.Relationship;
  * @author etirelli
  *
  */
-public class BaseLeftTuple
+public class BaseLeftTuple  
     implements
     Tuple,
     Entry, LeftTuple {
@@ -956,5 +957,16 @@ public class BaseLeftTuple
         if (handle != null) {
             handle.setEntryPoint(tupleEntryPoint);
         }
-    }    
+    }
+
+    @Override
+    public void restoreTupleAfterSerialization(
+            InternalWorkingMemory workingMemory, LeftTupleSink sink) {
+        if (this.getSinkId() == sink.getId()) {
+            this.setSink(sink);
+        }
+        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
+                .getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
+        this.setHandleEntryPoint(tupleEntryPoint);
+    }   
 }

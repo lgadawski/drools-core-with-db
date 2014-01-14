@@ -2,6 +2,7 @@ package org.drools.reteoo;
 
 import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.InternalFactHandle;
+import org.drools.common.InternalWorkingMemory;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.LeftTupleList;
 import org.drools.spi.Tuple;
@@ -155,4 +156,11 @@ public interface LeftTuple extends Entry, Tuple {
      * @param tupleEntryPoint
      */
     void setHandleEntryPoint(WorkingMemoryEntryPoint tupleEntryPoint);
+
+    /**
+     * @param workingMemory
+     * @param joinNode
+     */
+    void restoreTupleAfterSerialization(InternalWorkingMemory workingMemory,
+            LeftTupleSink sink);
 }

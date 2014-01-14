@@ -20,7 +20,6 @@ import java.util.List;
 
 import javax.persistence.Query;
 
-import org.drools.WorkingMemoryEntryPoint;
 import org.drools.base.DroolsQuery;
 import org.drools.common.BetaConstraints;
 import org.drools.common.DefaultFactHandle;
@@ -144,11 +143,7 @@ public class JoinNode extends BetaNode {
         List<Object> dbTuples = m_tupleManager.getRightTuples(this.getId());
         for (Object rightTupleFromDb : dbTuples) {
             RightTuple tuple = (RightTuple) rightTupleFromDb;
-            if (tuple.getSinkId() == this.getId()) {
-                tuple.setSink(this);
-            }
-            WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(tuple.getHandleEntryPointId());
-            tuple.setHandleEntryPoint(tupleEntryPoint);
+            tuple.restoreTupleAfterSerialization(workingMemory, this);
             
             propagateFromLeft(tuple, leftTuple, contextEntry,
                     useLeftMemory, context, workingMemory);
@@ -270,11 +265,7 @@ public class JoinNode extends BetaNode {
         List<Object> dbTuples = m_tupleManager.getLeftTuples(this.getId());
         for (Object leftTupleFromDb : dbTuples) {
             LeftTuple tuple = (LeftTuple) leftTupleFromDb;
-            if (tuple.getSinkId() == this.getId()) {
-                tuple.setSink(this);
-            }
-            WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(tuple.getHandleEntryPointId());
-            tuple.setHandleEntryPoint(tupleEntryPoint);
+            tuple.restoreTupleAfterSerialization(workingMemory, this);
             
             propagateFromRight(rightTuple, tuple, memory, context, workingMemory);
         }

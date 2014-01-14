@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.InternalFactHandle;
+import org.drools.common.InternalWorkingMemory;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.RightTupleList;
 
@@ -292,5 +293,18 @@ public class RightTuple
      */
     public void setSink(RightTupleSink sink) {
         this.sink = sink;
+    }
+
+    /**
+     * @param workingMemory
+     * @param sink
+     */
+    public void restoreTupleAfterSerialization(
+            InternalWorkingMemory workingMemory, RightTupleSink sink) {
+        if (this.getSinkId() == sink.getId()) {
+            this.setSink(sink);
+        }
+        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
+        this.setHandleEntryPoint(tupleEntryPoint);
     }
 }

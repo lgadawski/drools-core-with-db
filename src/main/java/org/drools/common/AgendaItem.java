@@ -23,6 +23,7 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.drools.FactHandle;
 import org.drools.core.util.LinkedList;
@@ -38,6 +39,7 @@ import org.drools.rule.Rule;
 import org.drools.spi.Activation;
 import org.drools.spi.AgendaGroup;
 import org.drools.spi.Consequence;
+import org.drools.spi.ObjectType;
 import org.drools.spi.PropagationContext;
 
 /**
@@ -54,9 +56,9 @@ public class AgendaItem
     private static final long         serialVersionUID = 510l;
 
     /** The tuple. */
-    private transient LeftTuple                 tuple;
+    private LeftTuple                 tuple;
   
-    private long relationshipId;
+    private transient long relationshipId;
 
     /** The salience */
     private int                       salience;
@@ -140,7 +142,8 @@ public class AgendaItem
     // ------------------------------------------------------------
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
-        this.relationshipId = in.readLong();
+        this.tuple = (LeftTuple) in.readObject();
+//        this.relationshipId = in.readLong();
         this.m_ruleTerminalNodeId = in.readLong();
         this.salience = in.readInt();
         this.sequenence = in.readInt();
@@ -154,7 +157,8 @@ public class AgendaItem
     }
 
     public synchronized void writeExternal(ObjectOutput out) throws IOException {
-        out.writeLong(this.relationshipId);
+        out.writeObject(this.tuple);
+//        out.writeLong(this.relationshipId);
         out.writeLong(this.m_ruleTerminalNodeId);
         out.writeInt(this.salience);
         out.writeInt(this.sequenence);
@@ -523,5 +527,64 @@ public class AgendaItem
      */
     public void setCurrentOTNforPropagationContext(ObjectTypeNode objectTypeNode) {
         getPropagationContext().setCurrentPropagatingOTN(objectTypeNode);
+    }
+
+    /**
+     * Restore necessary references after serialization based on workingMemory
+     * and agendaGroup.
+     * 
+     * @param workingMemory
+     * @param group
+     */
+    public void restoreAgendaItemAfterSerialization(
+            InternalWorkingMemory workingMemory, InternalAgendaGroup group) {
+        this.setRuleTerminalNode(getRuleTerminalNode(
+                this.getRuleTerminalNodeId(), workingMemory));
+        this.setCurrentOTNforPropagationContext(getObjectTypeNode(
+                this.getCurrentOTNidforPropagationContext(), workingMemory));
+        this.setAgendaGroup(group);
+        tuple.restoreTupleAfterSerialization(workingMemory, rtn);
+    }
+    
+    /**
+     * Find {@link ObjectTypeNode} for given nodeId.
+     * 
+     * @param nodeId
+     * @return {@link ObjectTypeNode} if node has been found, null otherwise.
+     */
+    private ObjectTypeNode getObjectTypeNode(final long nodeId,
+            InternalWorkingMemory workingMemory) {
+        Map<ObjectType, ObjectTypeNode> map = workingMemory.getEntryPointNode()
+                .getObjectTypeNodes();
+        for (ObjectType type : map.keySet()) {
+            ObjectTypeNode objectTypeNode = map.get(type);
+            if (objectTypeNode.getId() == nodeId) {
+                return objectTypeNode;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Iterates over terminal nodes and returns {@link RuleTerminalNode} if
+     * exists for given rtnId.
+     * 
+     * @param rtnId
+     * @return
+     */
+    private RuleTerminalNode getRuleTerminalNode(long rtnId,
+            InternalWorkingMemory workingMemory) {
+        @SuppressWarnings("rawtypes")
+        org.drools.core.util.Iterator nodeIter = TerminalNodeIterator
+                .iterator(workingMemory.getKnowledgeRuntime()
+                        .getKnowledgeBase());
+        RuleTerminalNode node;
+        while ((node = (RuleTerminalNode) nodeIter.next()) != null) {
+            if (node.getId() == rtnId) {
+                return node;
+            }
+        }
+        // possible null pointer exception!
+        return null;
     }
 }
