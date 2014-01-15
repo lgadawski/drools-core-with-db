@@ -102,7 +102,9 @@ public class DefaultFactHandle
             final WorkingMemoryEntryPoint wmEntryPoint) {
         this.id = id;
         this.entryPoint = wmEntryPoint;
-        this.entryPointId = wmEntryPoint.getEntryPointId();
+        if (wmEntryPoint != null) {
+            this.entryPointId = wmEntryPoint.getEntryPointId();
+        }
         this.recency = recency;
         this.object = object;
         this.objectHashCode = ( object != null ) ? object.hashCode() : 0;

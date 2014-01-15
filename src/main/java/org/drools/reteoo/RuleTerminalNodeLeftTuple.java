@@ -18,8 +18,6 @@ package org.drools.reteoo;
 
 import org.drools.common.InternalFactHandle;
 
-import com.gadawski.util.facts.Relationship;
-
 public class RuleTerminalNodeLeftTuple extends BaseLeftTuple {
     private static final long  serialVersionUID = 540l;
 
@@ -78,15 +76,5 @@ public class RuleTerminalNodeLeftTuple extends BaseLeftTuple {
                currentRightChild, 
                sink, 
                leftTupleMemoryEnabled );
-    }
-
-    /**
-     * @param facts
-     * @param sink
-     * @param relationship
-     */
-    public RuleTerminalNodeLeftTuple(InternalFactHandle[] facts,
-            LeftTupleSink sink, Relationship relationship) {
-        super(facts, sink, relationship.getRelationshipID());
     }
 }

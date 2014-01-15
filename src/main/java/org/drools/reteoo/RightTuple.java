@@ -88,7 +88,9 @@ public class RightTuple
             RightTupleSink sink) {
         this.handle = handle;
         this.sink = sink;
-        this.sinkId = sink.getId();
+        if (sink != null) {
+            this.sinkId = sink.getId();
+        }
 
         // add to end of RightTuples on handle
         handle.addLastRightTuple(this);

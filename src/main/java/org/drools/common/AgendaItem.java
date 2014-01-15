@@ -125,13 +125,12 @@ public class AgendaItem
                       final PropagationContext context,
                       final RuleTerminalNode rtn) {
         this.tuple = tuple;
-        if (tuple != null) {
-            this.relationshipId = tuple.getRelationshipId();
-        }
         this.context = context;
         this.salience = salience;
         this.rtn = rtn;
-        this.m_ruleTerminalNodeId = (long) rtn.getId();
+        if (rtn != null) {
+            this.m_ruleTerminalNodeId = (long) rtn.getId();
+        }
         this.activationNumber = activationNumber;
         this.index = -1;
         this.matched = true;
@@ -143,7 +142,6 @@ public class AgendaItem
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
         this.tuple = (LeftTuple) in.readObject();
-//        this.relationshipId = in.readLong();
         this.m_ruleTerminalNodeId = in.readLong();
         this.salience = in.readInt();
         this.sequenence = in.readInt();

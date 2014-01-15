@@ -27,7 +27,6 @@ import org.drools.base.mvel.MVELEnabledExpression;
 import org.drools.base.mvel.MVELSalienceExpression;
 import org.drools.common.AgendaItem;
 import org.drools.common.BaseNode;
-import org.drools.common.DefaultFactHandle;
 import org.drools.common.EventSupport;
 import org.drools.common.InternalAgenda;
 import org.drools.common.InternalFactHandle;
@@ -46,7 +45,6 @@ import org.drools.spi.PropagationContext;
 import org.drools.time.impl.ExpressionIntervalTimer;
 
 import com.gadawski.drools.config.MyAppConfig;
-import com.gadawski.util.facts.Relationship;
 
 /**
  * Leaf Rete-OO node responsible for enacting <code>Action</code> s on a
@@ -557,22 +555,6 @@ public class RuleTerminalNode extends AbstractTerminalNode {
         }
     }
 
-    /**
-     * Based on given relationship, created {@link JoinNodeLeftTuple}.
-     * 
-     * @param relationship to get from tuples.
-     * @param sink 
-     * @return new left tuple.
-     */
-    public static LeftTuple createLeftTuple(final Relationship relationship, final LeftTupleSink sink ) {
-        InternalFactHandle[] facts = new InternalFactHandle[relationship.getNoObjectsInTuple()];
-        int i = 0;
-        for (Object object : relationship.getObjects()) {
-            facts[i++] = new DefaultFactHandle(i, object);
-        }
-        return new RuleTerminalNodeLeftTuple(facts, sink, relationship);
-    }
-    
     public LeftTuple createLeftTuple(InternalFactHandle factHandle,
                                      LeftTupleSink sink,
                                      boolean leftTupleMemoryEnabled) {
