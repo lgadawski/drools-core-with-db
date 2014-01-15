@@ -3,6 +3,11 @@
  */
 package com.gadawski.drools.db.tuple;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.drools.reteoo.LeftTuple;
@@ -63,6 +68,26 @@ public class DbTupleManager implements IDbTupleManager {
         return m_jdbcAgendaItemManagerUtil.getRightTuples(sinkId);
     }
 
+    @Override
+    public ResultSet getRightTupleCursor(int sinkId, Connection connection,
+            PreparedStatement statement, ResultSet resultSet) {
+        return m_jdbcAgendaItemManagerUtil.getRightTupleCursor(sinkId,
+                connection, statement, resultSet);
+    }
+
+    @Override
+    public ResultSet getLeftTupleCursor(int sinkId, Connection connection,
+            PreparedStatement statement, ResultSet resultSet) {
+        return m_jdbcAgendaItemManagerUtil.getLeftTupleCursor(sinkId,
+                connection, statement, resultSet);
+    }
+
+    @Override
+    public Object readObject(ResultSet resultSet) throws IOException,
+            ClassNotFoundException, SQLException {
+        return m_jdbcAgendaItemManagerUtil.readObject(resultSet);
+    }
+
     /**
      * @param sink
      * @return
@@ -73,5 +98,11 @@ public class DbTupleManager implements IDbTupleManager {
             return sink.getId();
         }
         return sinkId;
+    }
+
+    @Override
+    public void closeEverything(Connection connection,
+            PreparedStatement statement, ResultSet resultSet) {
+        JdbcAgendaItemManagerUtil.closeEverything(connection, statement, resultSet);
     }
 }

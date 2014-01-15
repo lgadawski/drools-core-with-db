@@ -58,8 +58,6 @@ public class AgendaItem
     /** The tuple. */
     private LeftTuple                 tuple;
   
-    private transient long relationshipId;
-
     /** The salience */
     private int                       salience;
 
@@ -490,20 +488,6 @@ public class AgendaItem
 
     public void setMatched(boolean matched) {
         this.matched = matched;
-    }
-
-    /**
-     * @return the relationshipId
-     */
-    public long getRelationshipId() {
-        return relationshipId;
-    }
-
-    /**
-     * @param relationshipId the relationshipId to set
-     */
-    public void setRelationshipId(long relationshipId) {
-        this.relationshipId = relationshipId;
     }
 
     /**

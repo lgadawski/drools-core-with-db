@@ -16,7 +16,11 @@
 
 package org.drools.reteoo;
 
-import java.util.List;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.drools.base.DroolsQuery;
 import org.drools.common.BetaConstraints;
@@ -31,6 +35,8 @@ import org.drools.spi.PropagationContext;
 import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.tuple.DbTupleManager;
 import com.gadawski.drools.db.tuple.IDbTupleManager;
+import com.gadawski.util.db.jdbc.JdbcAgendaItemManagerUtil;
+import com.gadawski.util.db.jdbc.Statements;
 
 public class JoinNode extends BetaNode {
 
@@ -39,6 +45,10 @@ public class JoinNode extends BetaNode {
      * 
      */
     private transient IDbTupleManager m_tupleManager;
+    /**
+     * 
+     */
+    private JdbcAgendaItemManagerUtil m_jdbcManager;
 
     public JoinNode() {
 
@@ -126,16 +136,47 @@ public class JoinNode extends BetaNode {
             ContextEntry[] contextEntry, boolean useLeftMemory,
             PropagationContext context, InternalWorkingMemory workingMemory,
             LeftTuple leftTuple) {
-        m_tupleManager = DbTupleManager.getInstance();
-        List<Object> dbTuples = m_tupleManager.getRightTuples(this.getId());
-        for (Object rightTupleFromDb : dbTuples) {
-            RightTuple tuple = (RightTuple) rightTupleFromDb;
-            tuple.restoreTupleAfterSerialization(workingMemory, this);
-            
-            propagateFromLeft(tuple, leftTuple, contextEntry,
-                    useLeftMemory, context, workingMemory);
-        }
+//        m_tupleManager = DbTupleManager.getInstance();
+//        List<Object> dbTuples = m_tupleManager.getRightTuples(this.getId());
+//        for (Object rightTupleFromDb : dbTuples) {
+//            RightTuple tuple = (RightTuple) rightTupleFromDb;
+//            tuple.restoreTupleAfterSerialization(workingMemory, this);
+//            
+//            propagateFromLeft(tuple, leftTuple, contextEntry,
+//                    useLeftMemory, context, workingMemory);
+//        }
         
+        m_jdbcManager = JdbcAgendaItemManagerUtil.getInstance();
+        m_tupleManager = DbTupleManager.getInstance();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = m_jdbcManager.getConnection();
+            connection.setAutoCommit(false);
+
+            statement = connection
+                    .prepareStatement(Statements.SELECT_RIGHT_TUPLES);
+            statement.setInt(1, this.getId());
+            statement.setFetchSize(JdbcAgendaItemManagerUtil.FETCH_SIZE);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                RightTuple tuple = (RightTuple) m_tupleManager
+                        .readObject(resultSet);
+                tuple.restoreTupleAfterSerialization(workingMemory, this);
+                propagateFromLeft(tuple, leftTuple, contextEntry,
+                        useLeftMemory, context, workingMemory);
+            }
+            connection.setAutoCommit(true);
+            m_tupleManager.closeEverything(connection, statement, resultSet); // release
+        } catch (SQLException e) {
+            // TODO handle exceptions!
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     protected void propagateFromLeft( RightTuple rightTuple, LeftTuple leftTuple, ContextEntry[] contextEntry, boolean useLeftMemory, PropagationContext context, InternalWorkingMemory workingMemory ) {
@@ -210,13 +251,45 @@ public class JoinNode extends BetaNode {
     private void getAndPropagateSerialDBTupleFromRight(
             PropagationContext context, InternalWorkingMemory workingMemory,
             BetaMemory memory, RightTuple rightTuple) {
+//        m_tupleManager = DbTupleManager.getInstance();
+//        List<Object> dbTuples = m_tupleManager.getLeftTuples(this.getId());
+//        for (Object leftTupleFromDb : dbTuples) {
+//            LeftTuple tuple = (LeftTuple) leftTupleFromDb;
+//            tuple.restoreTupleAfterSerialization(workingMemory, this);
+//            
+//            propagateFromRight(rightTuple, tuple, memory, context, workingMemory);
+//        }
+        
+        m_jdbcManager = JdbcAgendaItemManagerUtil.getInstance();
         m_tupleManager = DbTupleManager.getInstance();
-        List<Object> dbTuples = m_tupleManager.getLeftTuples(this.getId());
-        for (Object leftTupleFromDb : dbTuples) {
-            LeftTuple tuple = (LeftTuple) leftTupleFromDb;
-            tuple.restoreTupleAfterSerialization(workingMemory, this);
-            
-            propagateFromRight(rightTuple, tuple, memory, context, workingMemory);
+        Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement statement = null;
+        try {
+            connection = m_jdbcManager.getConnection();
+            connection.setAutoCommit(false);
+
+            statement = connection
+                    .prepareStatement(Statements.SELECT_LEFT_TUPLES);
+            statement.setInt(1, this.getId());
+            statement.setFetchSize(JdbcAgendaItemManagerUtil.FETCH_SIZE);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                LeftTuple tuple = (LeftTuple) m_tupleManager
+                        .readObject(resultSet);
+                tuple.restoreTupleAfterSerialization(workingMemory, this);
+                propagateFromRight(rightTuple, tuple, memory, context,
+                        workingMemory);
+            }
+            connection.setAutoCommit(true);
+            m_tupleManager.closeEverything(connection, statement, resultSet);// release
+        } catch (SQLException e) {
+            // TODO handle expections
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

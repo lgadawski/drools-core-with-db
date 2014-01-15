@@ -77,10 +77,6 @@ public class BaseLeftTuple
                              final boolean leftTupleMemoryEnabled) {
         this.handle = factHandle;
         
-//        if ( MyAppConfig.USE_DB ) {
-//            saveFactHandleToDb(factHandle, sink);
-//        }
-        
         if ( leftTupleMemoryEnabled ) {
             this.handle.addLastLeftTuple( this );
         }
@@ -120,10 +116,6 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
         this.handle = rightTuple.getFactHandle();
-        
-//        if ( MyAppConfig.USE_DB ) {
-//            saveRelationshipToDb(leftTuple, rightTuple, sink);
-//        }
         
         this.leftParent = leftTuple;
         // insert at the end f the list
@@ -171,10 +163,6 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
 
-//        if ( MyAppConfig.USE_DB ) {
-//            saveRelationshipToDb(leftTuple, rightTuple, sink);
-//        }
-        
         if ( leftTupleMemoryEnabled ) {
             this.leftParent = leftTuple;
             this.rightParent = rightTuple;
