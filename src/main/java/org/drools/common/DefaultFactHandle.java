@@ -119,7 +119,9 @@ public class DefaultFactHandle
             Object object) {
         this.id = id;
         this.entryPoint = ( wmEntryPointId == null ) ? null : new DisconnectedWorkingMemoryEntryPoint( wmEntryPointId );
-        this.entryPointId = this.entryPoint.getEntryPointId();
+        if (entryPoint != null) {
+            this.entryPointId = this.entryPoint.getEntryPointId();
+        }
         this.identityHashCode = identityHashCode;
         this.objectHashCode = objectHashCode;
         this.recency = recency;
@@ -505,6 +507,16 @@ public class DefaultFactHandle
      */
     public void setEntryPointId(String entryPointId) {
         this.entryPointId = entryPointId;
+    }
+
+    @Override
+    public void nullAll() {
+        object = null;
+        firstRightTuple = null;
+        lastRightTuple = null;
+
+        firstLeftTuple = null;
+        lastLeftTuple = null;
     }
 
 }

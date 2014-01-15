@@ -260,4 +260,10 @@ public class DisconnectedFactHandle
         
     }
 
+    @Override
+    public void nullAll() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

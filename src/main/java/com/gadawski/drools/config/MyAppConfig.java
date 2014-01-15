@@ -10,7 +10,7 @@ public final class MyAppConfig {
     /**
      * Indicates if rule engine should use database.
      */
-    public static boolean USE_DB = false;
+    public static boolean USE_DB = true;
 
     /**
      * Prevent from creating objects.

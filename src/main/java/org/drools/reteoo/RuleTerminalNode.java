@@ -241,6 +241,7 @@ public class RuleTerminalNode extends AbstractTerminalNode {
                                 final InternalWorkingMemory workingMemory) {
         //check if the rule is not effective or
         // if the current Rule is no-loop and the origin rule is the same then return
+
         if ( (!this.rule.isEffective( leftTuple,
                                       this,
                                       workingMemory )) ||
@@ -261,6 +262,8 @@ public class RuleTerminalNode extends AbstractTerminalNode {
             if (MyAppConfig.USE_DB) {
                 agenda.addActivation(activation);
                 //release memory that holds leftTuple in AgendaItem
+                activation.nullTuples();
+                leftTuple.nullAll();
                 leftTuple = null;
                 activation = null;
             } else {

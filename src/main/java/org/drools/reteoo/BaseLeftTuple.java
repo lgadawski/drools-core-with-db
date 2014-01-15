@@ -854,5 +854,25 @@ public class BaseLeftTuple
         WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
                 .getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
         this.setHandleEntryPoint(tupleEntryPoint);
-    }   
+    }
+
+    @Override
+    public void nullAll() {
+        if (handle != null) {
+            handle.nullAll();
+            handle = null;
+        }
+        parent = null;
+        leftParent = null;
+        leftParentPrevious = null;
+        leftParentNext = null;
+        rightParent = null;
+        rightParentPrevious = null;
+        rightParentNext = null;
+        // children
+        firstChild = null;
+        lastChild = null;
+        sink = null;
+        object = null;
+    }
 }

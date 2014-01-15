@@ -207,5 +207,11 @@ public class QueryElementFactHandle
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public void nullAll() {
+        // TODO Auto-generated method stub
+        
+    }
     
 }

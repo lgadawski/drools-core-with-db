@@ -569,4 +569,12 @@ public class AgendaItem
         // possible null pointer exception!
         return null;
     }
+
+    public void nullTuples() {
+        if (factHandle != null) {
+            factHandle.nullAll();
+        }
+        tuple.nullAll();
+        tuple = null;
+    }
 }

@@ -153,4 +153,7 @@ public interface LeftTuple extends Entry, Tuple {
      */
     void restoreTupleAfterSerialization(InternalWorkingMemory workingMemory,
             LeftTupleSink sink);
+
+    void nullAll();
+
 }

@@ -100,5 +100,10 @@ public interface InternalFactHandle
      * @param entryPointId the entryPointId to set
      */
     public void setEntryPointId(String entryPointId) ;
+
+    /**
+     * 
+     */
+    public void nullAll();
     
 }

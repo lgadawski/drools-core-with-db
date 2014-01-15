@@ -136,16 +136,6 @@ public class JoinNode extends BetaNode {
             ContextEntry[] contextEntry, boolean useLeftMemory,
             PropagationContext context, InternalWorkingMemory workingMemory,
             LeftTuple leftTuple) {
-//        m_tupleManager = DbTupleManager.getInstance();
-//        List<Object> dbTuples = m_tupleManager.getRightTuples(this.getId());
-//        for (Object rightTupleFromDb : dbTuples) {
-//            RightTuple tuple = (RightTuple) rightTupleFromDb;
-//            tuple.restoreTupleAfterSerialization(workingMemory, this);
-//            
-//            propagateFromLeft(tuple, leftTuple, contextEntry,
-//                    useLeftMemory, context, workingMemory);
-//        }
-        
         m_jdbcManager = JdbcAgendaItemManagerUtil.getInstance();
         m_tupleManager = DbTupleManager.getInstance();
         Connection connection = null;
@@ -154,7 +144,6 @@ public class JoinNode extends BetaNode {
         try {
             connection = m_jdbcManager.getConnection();
             connection.setAutoCommit(false);
-
             statement = connection
                     .prepareStatement(Statements.SELECT_RIGHT_TUPLES);
             statement.setInt(1, this.getId());
@@ -251,15 +240,6 @@ public class JoinNode extends BetaNode {
     private void getAndPropagateSerialDBTupleFromRight(
             PropagationContext context, InternalWorkingMemory workingMemory,
             BetaMemory memory, RightTuple rightTuple) {
-//        m_tupleManager = DbTupleManager.getInstance();
-//        List<Object> dbTuples = m_tupleManager.getLeftTuples(this.getId());
-//        for (Object leftTupleFromDb : dbTuples) {
-//            LeftTuple tuple = (LeftTuple) leftTupleFromDb;
-//            tuple.restoreTupleAfterSerialization(workingMemory, this);
-//            
-//            propagateFromRight(rightTuple, tuple, memory, context, workingMemory);
-//        }
-        
         m_jdbcManager = JdbcAgendaItemManagerUtil.getInstance();
         m_tupleManager = DbTupleManager.getInstance();
         Connection connection = null;
@@ -284,7 +264,7 @@ public class JoinNode extends BetaNode {
             connection.setAutoCommit(true);
             m_tupleManager.closeEverything(connection, statement, resultSet);// release
         } catch (SQLException e) {
-            // TODO handle expections
+            // TODO handle exceptions
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
