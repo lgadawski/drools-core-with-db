@@ -100,7 +100,8 @@ public class JoinNode extends BetaNode {
             memory.getLeftTupleMemory().add( leftTuple );
         } else {
             m_tupleManager = DbTupleManager.getInstance();
-            m_tupleManager.saveLeftTuple(leftTuple);
+            int id = m_tupleManager.saveLeftTuple(leftTuple);
+            leftTuple.setTupleId(id);
         }
         
         this.constraints.updateFromTuple( contextEntry,
@@ -248,7 +249,6 @@ public class JoinNode extends BetaNode {
         try {
             connection = m_jdbcManager.getConnection();
             connection.setAutoCommit(false);
-
             statement = connection
                     .prepareStatement(Statements.SELECT_LEFT_TUPLES);
             statement.setInt(1, this.getId());
@@ -257,6 +257,7 @@ public class JoinNode extends BetaNode {
             while (resultSet.next()) {
                 LeftTuple tuple = (LeftTuple) m_tupleManager
                         .readObject(resultSet);
+                tuple.setTupleId(m_tupleManager.readTupleId(resultSet));
                 tuple.restoreTupleAfterSerialization(workingMemory, this);
                 propagateFromRight(rightTuple, tuple, memory, context,
                         workingMemory);
@@ -287,8 +288,6 @@ public class JoinNode extends BetaNode {
         }
     }
 
-
-
     public void retractRightTuple( final RightTuple rightTuple,
                                    final PropagationContext context,
                                    final InternalWorkingMemory workingMemory ) {
@@ -299,7 +298,11 @@ public class JoinNode extends BetaNode {
             return;
         }
 
-        memory.getRightTupleMemory().remove( rightTuple );
+        if (MyAppConfig.USE_DB) {
+            m_tupleManager.removeRightTuple(rightTuple);
+        } else {
+            memory.getRightTupleMemory().remove( rightTuple );
+        }
 
         if ( rightTuple.firstChild != null ) {
             this.sink.propagateRetractRightTuple( rightTuple,
@@ -318,7 +321,12 @@ public class JoinNode extends BetaNode {
             return;
         }
 
-        memory.getLeftTupleMemory().remove( leftTuple );
+        if (MyAppConfig.USE_DB) {
+            m_tupleManager.removeLeftTuple(leftTuple);
+        } else {
+            memory.getLeftTupleMemory().remove( leftTuple );
+        }
+        
         if ( leftTuple.getFirstChild() != null ) {
             this.sink.propagateRetractLeftTuple( leftTuple,
                                                  context,
@@ -344,9 +352,11 @@ public class JoinNode extends BetaNode {
         // this is needed to fix for indexing and deterministic iteration
         memory.getRightTupleMemory().removeAdd( rightTuple );
 
-        if ( memory.getLeftTupleMemory() != null && memory.getLeftTupleMemory().size() == 0 ) {
-            // do nothing here, as we know there are no left tuples.
-            return;
+        if (!MyAppConfig.USE_DB) {
+            if ( memory.getLeftTupleMemory() != null && memory.getLeftTupleMemory().size() == 0 ) {
+                // do nothing here, as we know there are no left tuples.
+                return;
+            }
         }
 
         LeftTuple childLeftTuple = rightTuple.firstChild;

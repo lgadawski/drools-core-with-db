@@ -24,10 +24,6 @@ import org.drools.common.InternalWorkingMemory;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.RightTupleList;
 
-import com.gadawski.drools.db.DbRelationshipManager;
-import com.gadawski.drools.db.IRelationshipManager;
-import com.gadawski.util.facts.RightRelationship;
-
 public class RightTuple
     implements
     Entry, Serializable {
@@ -35,7 +31,11 @@ public class RightTuple
      * 
      */
     private static final long serialVersionUID = 1L;
-
+    /**
+     * 
+     */
+    private int tupleId;
+    
     protected InternalFactHandle handle;
 
     private RightTuple           handlePrevious;
@@ -57,8 +57,6 @@ public class RightTuple
     protected int                         sinkId;
     protected transient RightTupleSink     sink;
 
-    private transient IRelationshipManager m_relManager;
-
     public RightTuple() {
 
     }
@@ -71,10 +69,6 @@ public class RightTuple
     public RightTuple(InternalFactHandle handle,
                       RightTupleSink sink) {
         setUpHandleAndSink(handle, sink);
-        
-//        if (MyAppConfig.USE_DB) {
-//            saveRightTupleToDb(handle, sink);   
-//        }
     }
 
     /**
@@ -108,17 +102,6 @@ public class RightTuple
     public static RightTuple createRightTupleFromDb(InternalFactHandle handle,
             RightTupleSink sink) {
         return new RightTuple().setUpHandleAndSink(handle, sink);
-    }
-
-    /**
-     * @param fact
-     * @param sink
-     */
-    private void saveRightTupleToDb(InternalFactHandle fact, RightTupleSink sink) {
-        m_relManager = DbRelationshipManager.getInstance();
-        final RightRelationship rightRel = (RightRelationship) m_relManager
-                .createRightRelationship(fact, sink);
-        m_relManager.saveRelationship(rightRel);
     }
 
     public RightTupleSink getRightTupleSink() {
@@ -308,5 +291,19 @@ public class RightTuple
         }
         WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
         this.setHandleEntryPoint(tupleEntryPoint);
+    }
+
+    /**
+     * @return the tupleId
+     */
+    public int getTupleId() {
+        return tupleId;
+    }
+
+    /**
+     * @param tupleId the tupleId to set
+     */
+    public void setTupleId(int tupleId) {
+        this.tupleId = tupleId;
     }
 }

@@ -47,15 +47,17 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
-    public void saveLeftTuple(LeftTuple leftTuple) {
+    public int saveLeftTuple(LeftTuple leftTuple) {
         int sinkId = getSinkId(leftTuple.getSink());
-        m_jdbcAgendaItemManagerUtil.saveLeftTuple(sinkId, leftTuple);
+        Integer parentId = leftTuple.getParentId();
+        return m_jdbcAgendaItemManagerUtil.saveLeftTuple(parentId, sinkId,
+                leftTuple);
     }
 
     @Override
-    public void saveRightTuple(RightTuple rightTuple) {
+    public int saveRightTuple(RightTuple rightTuple) {
         int sinkId = getSinkId(rightTuple.getRightTupleSink());
-        m_jdbcAgendaItemManagerUtil.saveRightTuple(sinkId, rightTuple);
+        return m_jdbcAgendaItemManagerUtil.saveRightTuple(sinkId, rightTuple);
     }
 
     @Override
@@ -69,23 +71,33 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
-    public ResultSet getRightTupleCursor(int sinkId, Connection connection,
-            PreparedStatement statement, ResultSet resultSet) {
-        return m_jdbcAgendaItemManagerUtil.getRightTupleCursor(sinkId,
-                connection, statement, resultSet);
-    }
-
-    @Override
-    public ResultSet getLeftTupleCursor(int sinkId, Connection connection,
-            PreparedStatement statement, ResultSet resultSet) {
-        return m_jdbcAgendaItemManagerUtil.getLeftTupleCursor(sinkId,
-                connection, statement, resultSet);
-    }
-
-    @Override
     public Object readObject(ResultSet resultSet) throws IOException,
             ClassNotFoundException, SQLException {
         return m_jdbcAgendaItemManagerUtil.readObject(resultSet);
+    }
+
+    @Override
+    public Integer readTupleId(ResultSet resultSet) throws SQLException {
+        return m_jdbcAgendaItemManagerUtil.readTupleId(resultSet);
+    }
+
+    @Override
+    public void closeEverything(Connection connection,
+            PreparedStatement statement, ResultSet resultSet) {
+        JdbcAgendaItemManagerUtil.closeEverything(connection, statement,
+                resultSet);
+    }
+
+    @Override
+    public void removeRightTuple(RightTuple rightTuple) {
+        m_jdbcAgendaItemManagerUtil.removeRightTuple(rightTuple.getTupleId(),
+                rightTuple.getSinkId());
+    }
+
+    @Override
+    public void removeLeftTuple(LeftTuple leftTuple) {
+        m_jdbcAgendaItemManagerUtil.removeLeftTuple(leftTuple.getTupleId(),
+                leftTuple.getSinkId());
     }
 
     /**
@@ -98,11 +110,5 @@ public class DbTupleManager implements IDbTupleManager {
             return sink.getId();
         }
         return sinkId;
-    }
-
-    @Override
-    public void closeEverything(Connection connection,
-            PreparedStatement statement, ResultSet resultSet) {
-        JdbcAgendaItemManagerUtil.closeEverything(connection, statement, resultSet);
     }
 }

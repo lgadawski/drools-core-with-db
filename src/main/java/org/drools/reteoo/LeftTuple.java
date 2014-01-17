@@ -135,7 +135,7 @@ public interface LeftTuple extends Entry, Tuple {
     /**
      * @return
      */
-    long getSinkId();
+    int getSinkId();
 
     /**
      * @return
@@ -156,4 +156,19 @@ public interface LeftTuple extends Entry, Tuple {
 
     void nullAll();
 
+    /**
+     * @return
+     */
+    Integer getTupleId();
+
+    /**
+     * @param tupleId
+     */
+    void setTupleId(Integer tupleId);
+
+    /**
+     * @return parent id.
+     */
+    Integer getParentId();
+    
 }

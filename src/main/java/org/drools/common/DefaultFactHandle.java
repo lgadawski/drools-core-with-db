@@ -17,6 +17,7 @@
 package org.drools.common;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Arrays;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -57,11 +58,14 @@ public class DefaultFactHandle
 
     private LeftTuple               firstLeftTuple;
     private LeftTuple               lastLeftTuple;
-
+    
     /**
      * Entry point id, helpful for deserializing object.
      */
     private String entryPointId;
+    /**
+     * Should be manually deserialized based on workingMemory.
+     */
     private transient WorkingMemoryEntryPoint entryPoint;
 
     private boolean                 disconnected;

@@ -37,7 +37,15 @@ public class BaseLeftTuple
     Tuple,
     Entry, LeftTuple {
     private static final long  serialVersionUID = 540l;
-
+    /**
+     * 
+     */
+    private Integer tupleId;
+    /**
+     * 
+     */
+    private Integer parentId;
+    
     private int                index;
 
     private InternalFactHandle handle;
@@ -50,8 +58,8 @@ public class BaseLeftTuple
     private LeftTuple          leftParentNext;
 
     private RightTuple         rightParent;
-    private LeftTuple          rightParentPrevious;
-    private LeftTuple          rightParentNext;
+    private transient LeftTuple          rightParentPrevious;
+    private transient LeftTuple          rightParentNext;
 
     // children
     private LeftTuple          firstChild;
@@ -108,6 +116,7 @@ public class BaseLeftTuple
         if (sink != null) {
             this.sinkId = sink.getId();
         }
+        this.parentId = leftTuple.getTupleId();
     }
     
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -139,6 +148,7 @@ public class BaseLeftTuple
 
         this.sink = sink;
         this.sinkId = sink.getId();
+        this.parentId = leftTuple.getTupleId();
     }    
 
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -213,6 +223,7 @@ public class BaseLeftTuple
         if (sink != null) {
             this.sinkId = sink.getId();
         }
+        this.parentId = leftTuple.getTupleId();
     }
 
     /* (non-Javadoc)
@@ -819,7 +830,7 @@ public class BaseLeftTuple
     /**
      * @return the sinkId
      */
-    public long getSinkId() {
+    public int getSinkId() {
         return sinkId;
     }
 
@@ -848,7 +859,7 @@ public class BaseLeftTuple
     @Override
     public void restoreTupleAfterSerialization(
             InternalWorkingMemory workingMemory, LeftTupleSink sink) {
-        if (this.getSinkId() == sink.getId()) {
+        if (sink != null && this.getSinkId() == sink.getId()) {
             this.setSink(sink);
         }
         WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
@@ -874,5 +885,26 @@ public class BaseLeftTuple
         lastChild = null;
         sink = null;
         object = null;
+    }
+
+    /**
+     * @return the tupleId
+     */
+    @Override
+    public Integer getTupleId() {
+        return tupleId;
+    }
+
+    /**
+     * @param tupleId the tupleId to set
+     */
+    @Override
+    public void setTupleId(Integer tupleId) {
+        this.tupleId = tupleId;
+    }
+
+    @Override
+    public Integer getParentId() {
+        return parentId;
     }
 }

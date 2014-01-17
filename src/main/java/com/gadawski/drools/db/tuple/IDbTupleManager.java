@@ -19,7 +19,12 @@ public interface IDbTupleManager {
     /**
      * @param leftTuple
      */
-    void saveLeftTuple(LeftTuple leftTuple);
+    int saveLeftTuple(LeftTuple leftTuple);
+
+    /**
+     * @param rightTuple
+     */
+    int saveRightTuple(RightTuple rightTuple);
 
     /**
      * @param id
@@ -32,30 +37,6 @@ public interface IDbTupleManager {
      * @return
      */
     List<Object> getRightTuples(int id);
-
-    /**
-     * @param rightTuple
-     */
-    void saveRightTuple(RightTuple rightTuple);
-
-    /**
-     * Gets cursor for right tuples from Database.
-     * 
-     * @param id
-     * @param resultSet
-     * @param statement
-     * @param connection
-     * @return
-     */
-    ResultSet getRightTupleCursor(int id, Connection connection,
-            PreparedStatement statement, ResultSet resultSet);
-
-    /**
-     * @param id
-     * @return
-     */
-    ResultSet getLeftTupleCursor(int id, Connection connection,
-            PreparedStatement statement, ResultSet resultSet);
 
     /**
      * Reads object from cursor
@@ -76,5 +57,27 @@ public interface IDbTupleManager {
      */
     void closeEverything(Connection connection, PreparedStatement statement,
             ResultSet resultSet);
+
+    /**
+     * Removes rightTuple from right memory.
+     * 
+     * @param rightTuple
+     *            - to be removed.F
+     */
+    void removeRightTuple(RightTuple rightTuple);
+
+    /**
+     * Removes leftTuple from left memory.
+     * 
+     * @param leftTuple
+     */
+    void removeLeftTuple(LeftTuple leftTuple);
+
+    /**
+     * @param resultSet
+     * @return
+     * @throws SQLException 
+     */
+    Integer readTupleId(ResultSet resultSet) throws SQLException;
 
 }

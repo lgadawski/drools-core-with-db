@@ -120,8 +120,8 @@ public class LogicalAssertionTest extends DroolsTestCase {
         final DefaultFactHandle handle1 = (DefaultFactHandle) workingMemory.insert( "o1" );
         final LeftTupleImpl tuple1 = new LeftTupleImpl( handle1,
                                                         null,
-                                                        true );
-
+                                                        true );        
+        
         final PropagationContext context1 = new PropagationContextImpl( 0,
                                                                         PropagationContext.ASSERTION,
                                                                         null,
