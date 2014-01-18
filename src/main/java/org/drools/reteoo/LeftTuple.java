@@ -170,5 +170,10 @@ public interface LeftTuple extends Entry, Tuple {
      * @return parent id.
      */
     Integer getParentId();
+
+    /**
+     * @return handle's id
+     */
+    Integer getHandleId();
     
 }

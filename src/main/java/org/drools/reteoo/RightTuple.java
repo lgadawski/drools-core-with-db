@@ -34,7 +34,7 @@ public class RightTuple
     /**
      * 
      */
-    private int tupleId;
+    private Integer tupleId;
     
     protected InternalFactHandle handle;
 
@@ -296,14 +296,21 @@ public class RightTuple
     /**
      * @return the tupleId
      */
-    public int getTupleId() {
+    public Integer getTupleId() {
         return tupleId;
     }
 
     /**
      * @param tupleId the tupleId to set
      */
-    public void setTupleId(int tupleId) {
+    public void setTupleId(Integer tupleId) {
         this.tupleId = tupleId;
+    }
+
+    /**
+     * @return handle's id.
+     */
+    public Integer getHandleId() {
+        return handle.getId();
     }
 }

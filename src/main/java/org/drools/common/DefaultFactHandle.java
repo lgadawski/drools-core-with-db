@@ -17,7 +17,6 @@
 package org.drools.common;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Arrays;
 
 import javax.xml.bind.annotation.XmlAccessType;

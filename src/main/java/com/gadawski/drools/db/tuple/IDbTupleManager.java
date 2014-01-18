@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.drools.common.InternalFactHandle;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.RightTuple;
 
@@ -17,14 +18,28 @@ import org.drools.reteoo.RightTuple;
 public interface IDbTupleManager {
 
     /**
+     * Saves left tuple to db.
+     * 
      * @param leftTuple
+     * @return tuple_id of newly inserted tuple.
      */
     int saveLeftTuple(LeftTuple leftTuple);
 
     /**
+     * Saves right tuple to db.
+     * 
      * @param rightTuple
+     * @return tuple_id of newly inserted tuple.
      */
     int saveRightTuple(RightTuple rightTuple);
+
+    /**
+     * Save fact handle to db.
+     * 
+     * @param handle
+     *            to be saved
+     */
+    void saveFactHandle(InternalFactHandle handle);
 
     /**
      * @param id
@@ -76,8 +91,34 @@ public interface IDbTupleManager {
     /**
      * @param resultSet
      * @return
-     * @throws SQLException 
+     * @throws SQLException
      */
-    Integer readTupleId(ResultSet resultSet) throws SQLException;
+    Integer readLeftTupleId(ResultSet resultSet) throws SQLException;
+
+    /**
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
+    Integer readRightTupleId(ResultSet resultSet) throws SQLException;
+
+    /**
+     * @param sinkId
+     * @param connection
+     * @param statement
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
+    ResultSet getRightTupleResultSet(int sinkId, Connection connection,
+            PreparedStatement statement, ResultSet resultSet)
+            throws SQLException;
+
+    /**
+     * Retracts given fact handle.
+     * 
+     * @param factHandle
+     */
+    void retractFactHandle(InternalFactHandle factHandle);
 
 }

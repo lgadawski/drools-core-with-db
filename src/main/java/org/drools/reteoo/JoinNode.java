@@ -35,7 +35,7 @@ import org.drools.spi.PropagationContext;
 import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.tuple.DbTupleManager;
 import com.gadawski.drools.db.tuple.IDbTupleManager;
-import com.gadawski.util.db.jdbc.JdbcAgendaItemManagerUtil;
+import com.gadawski.util.db.jdbc.JdbcManagerUtil;
 import com.gadawski.util.db.jdbc.Statements;
 
 public class JoinNode extends BetaNode {
@@ -48,7 +48,7 @@ public class JoinNode extends BetaNode {
     /**
      * 
      */
-    private JdbcAgendaItemManagerUtil m_jdbcManager;
+    private JdbcManagerUtil m_jdbcManager;
 
     public JoinNode() {
 
@@ -100,8 +100,7 @@ public class JoinNode extends BetaNode {
             memory.getLeftTupleMemory().add( leftTuple );
         } else {
             m_tupleManager = DbTupleManager.getInstance();
-            int id = m_tupleManager.saveLeftTuple(leftTuple);
-            leftTuple.setTupleId(id);
+            m_tupleManager.saveLeftTuple(leftTuple);
         }
         
         this.constraints.updateFromTuple( contextEntry,
@@ -137,7 +136,7 @@ public class JoinNode extends BetaNode {
             ContextEntry[] contextEntry, boolean useLeftMemory,
             PropagationContext context, InternalWorkingMemory workingMemory,
             LeftTuple leftTuple) {
-        m_jdbcManager = JdbcAgendaItemManagerUtil.getInstance();
+        m_jdbcManager = JdbcManagerUtil.getInstance();
         m_tupleManager = DbTupleManager.getInstance();
         Connection connection = null;
         PreparedStatement statement = null;
@@ -148,7 +147,7 @@ public class JoinNode extends BetaNode {
             statement = connection
                     .prepareStatement(Statements.SELECT_RIGHT_TUPLES);
             statement.setInt(1, this.getId());
-            statement.setFetchSize(JdbcAgendaItemManagerUtil.FETCH_SIZE);
+            statement.setFetchSize(JdbcManagerUtil.FETCH_SIZE);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 RightTuple tuple = (RightTuple) m_tupleManager
@@ -158,7 +157,7 @@ public class JoinNode extends BetaNode {
                         useLeftMemory, context, workingMemory);
             }
             connection.setAutoCommit(true);
-            m_tupleManager.closeEverything(connection, statement, resultSet); // release
+            JdbcManagerUtil.closeEverything(connection, statement, resultSet); // release
         } catch (SQLException e) {
             // TODO handle exceptions!
             e.printStackTrace();
@@ -241,7 +240,7 @@ public class JoinNode extends BetaNode {
     private void getAndPropagateSerialDBTupleFromRight(
             PropagationContext context, InternalWorkingMemory workingMemory,
             BetaMemory memory, RightTuple rightTuple) {
-        m_jdbcManager = JdbcAgendaItemManagerUtil.getInstance();
+        m_jdbcManager = JdbcManagerUtil.getInstance();
         m_tupleManager = DbTupleManager.getInstance();
         Connection connection = null;
         ResultSet resultSet = null;
@@ -252,12 +251,12 @@ public class JoinNode extends BetaNode {
             statement = connection
                     .prepareStatement(Statements.SELECT_LEFT_TUPLES);
             statement.setInt(1, this.getId());
-            statement.setFetchSize(JdbcAgendaItemManagerUtil.FETCH_SIZE);
+            statement.setFetchSize(JdbcManagerUtil.FETCH_SIZE);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 LeftTuple tuple = (LeftTuple) m_tupleManager
                         .readObject(resultSet);
-                tuple.setTupleId(m_tupleManager.readTupleId(resultSet));
+                tuple.setTupleId(m_tupleManager.readLeftTupleId(resultSet));
                 tuple.restoreTupleAfterSerialization(workingMemory, this);
                 propagateFromRight(rightTuple, tuple, memory, context,
                         workingMemory);

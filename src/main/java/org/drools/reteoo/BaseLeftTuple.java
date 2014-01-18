@@ -854,6 +854,12 @@ public class BaseLeftTuple
         if (handle != null) {
             handle.setEntryPoint(tupleEntryPoint);
         }
+        //set entry points for all left parents
+        LeftTuple temp = leftParent;
+        while(temp != null) {
+            temp.setHandleEntryPoint(tupleEntryPoint);
+            temp = temp.getLeftParent();
+        }
     }
 
     @Override
@@ -906,5 +912,10 @@ public class BaseLeftTuple
     @Override
     public Integer getParentId() {
         return parentId;
+    }
+
+    @Override
+    public Integer getHandleId() {
+        return handle.getId();
     }
 }

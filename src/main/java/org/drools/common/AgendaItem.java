@@ -577,4 +577,11 @@ public class AgendaItem
         tuple.nullAll();
         tuple = null;
     }
+
+    /**
+     * @return
+     */
+    public Integer getTupleId() {
+        return this.tuple.getTupleId();
+    }
 }

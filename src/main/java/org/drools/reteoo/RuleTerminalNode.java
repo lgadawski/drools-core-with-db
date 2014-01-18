@@ -45,6 +45,8 @@ import org.drools.spi.PropagationContext;
 import org.drools.time.impl.ExpressionIntervalTimer;
 
 import com.gadawski.drools.config.MyAppConfig;
+import com.gadawski.drools.db.tuple.DbTupleManager;
+import com.gadawski.drools.db.tuple.IDbTupleManager;
 
 /**
  * Leaf Rete-OO node responsible for enacting <code>Action</code> s on a
@@ -85,6 +87,10 @@ public class RuleTerminalNode extends AbstractTerminalNode {
     private int                           leftInputOtnId;
 
     private String                        consequenceName;
+    /**
+     * 
+     */
+    private IDbTupleManager m_tupleManager;
 
     // ------------------------------------------------------------
     // Constructors
@@ -239,6 +245,11 @@ public class RuleTerminalNode extends AbstractTerminalNode {
     public void assertLeftTuple(LeftTuple leftTuple,
                                 final PropagationContext context,
                                 final InternalWorkingMemory workingMemory) {
+        if (MyAppConfig.USE_DB) { 
+            m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.saveLeftTuple(leftTuple);
+        }
+        
         //check if the rule is not effective or
         // if the current Rule is no-loop and the origin rule is the same then return
 

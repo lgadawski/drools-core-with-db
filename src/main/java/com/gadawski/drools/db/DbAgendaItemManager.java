@@ -3,7 +3,7 @@ package com.gadawski.drools.db;
 import org.drools.common.AgendaItem;
 import org.drools.spi.Activation;
 
-import com.gadawski.util.db.jdbc.JdbcAgendaItemManagerUtil;
+import com.gadawski.util.db.jdbc.JdbcManagerUtil;
 
 public class DbAgendaItemManager implements IAgendaItemManager {
     // = AgendaItem.class
@@ -15,13 +15,13 @@ public class DbAgendaItemManager implements IAgendaItemManager {
     /**
      * Entity manager util instance.
      */
-    private final JdbcAgendaItemManagerUtil m_jdbcAgendaItemManagerUtil;
+    private final JdbcManagerUtil m_jdbcAgendaItemManagerUtil;
 
     /**
      * 
      */
     private DbAgendaItemManager() {
-        m_jdbcAgendaItemManagerUtil = JdbcAgendaItemManagerUtil.getInstance();
+        m_jdbcAgendaItemManagerUtil = JdbcManagerUtil.getInstance();
     }
 
     /**
@@ -36,7 +36,7 @@ public class DbAgendaItemManager implements IAgendaItemManager {
 
     @Override
     public void saveAgendaItem(AgendaItem item) {
-        m_jdbcAgendaItemManagerUtil.saveAgendaItemN(item);
+        m_jdbcAgendaItemManagerUtil.saveAgendaItem(item.getTupleId(), item);
     }
 
     @Override

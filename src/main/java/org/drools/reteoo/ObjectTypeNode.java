@@ -65,6 +65,10 @@ import org.drools.time.TimerService;
 import org.drools.time.impl.DefaultJobHandle;
 import org.drools.time.impl.PointInTimeTrigger;
 
+import com.gadawski.drools.config.MyAppConfig;
+import com.gadawski.drools.db.tuple.DbTupleManager;
+import com.gadawski.drools.db.tuple.IDbTupleManager;
+
 /**
  * <code>ObjectTypeNodes<code> are responsible for filtering and propagating the matching
  * fact assertions propagated from the <code>Rete</code> node using <code>ObjectType</code> interface.
@@ -118,6 +122,10 @@ public class ObjectTypeNode extends ObjectSource
 
     /** @see LRUnlinkingOption */
     private boolean lrUnlinkingEnabled = false;
+    /**
+     * 
+     */
+    private IDbTupleManager m_tupleManager;
 
     public ObjectTypeNode() {
 
@@ -279,19 +287,24 @@ public class ObjectTypeNode extends ObjectSource
             memory.memory.remove( factHandle );            
         }
 
-        for ( RightTuple rightTuple = factHandle.getFirstRightTuple(); rightTuple != null; rightTuple = rightTuple.getHandleNext() ) {
-            rightTuple.getRightTupleSink().retractRightTuple( rightTuple,
-                                                              context,
-                                                              workingMemory );
-        }
-        factHandle.clearRightTuples();
+        if (MyAppConfig.USE_DB) {
+            m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.retractFactHandle(factHandle);
+        } else {
+            for (RightTuple rightTuple = factHandle.getFirstRightTuple(); rightTuple != null; rightTuple = rightTuple
+                    .getHandleNext()) {
+                rightTuple.getRightTupleSink().retractRightTuple(rightTuple,
+                        context, workingMemory);
+            }
+            factHandle.clearRightTuples();
 
-        for ( LeftTuple leftTuple = factHandle.getFirstLeftTuple(); leftTuple != null; leftTuple = leftTuple.getLeftParentNext() ) {
-            leftTuple.getLeftTupleSink().retractLeftTuple( leftTuple,
-                                                           context,
-                                                           workingMemory );
+            for (LeftTuple leftTuple = factHandle.getFirstLeftTuple(); leftTuple != null; leftTuple = leftTuple
+                    .getLeftParentNext()) {
+                leftTuple.getLeftTupleSink().retractLeftTuple(leftTuple,
+                        context, workingMemory);
+            }
+            factHandle.clearLeftTuples();
         }
-        factHandle.clearLeftTuples();
     }
 
     public void modifyObject(InternalFactHandle factHandle,

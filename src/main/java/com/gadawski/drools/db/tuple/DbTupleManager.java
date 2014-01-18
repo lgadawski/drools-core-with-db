@@ -10,11 +10,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.drools.common.InternalFactHandle;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.RightTuple;
 import org.drools.reteoo.Sink;
 
-import com.gadawski.util.db.jdbc.JdbcAgendaItemManagerUtil;
+import com.gadawski.util.db.jdbc.JdbcManagerUtil;
 
 /**
  * @author l.gadawski@gmail.com
@@ -28,7 +29,7 @@ public class DbTupleManager implements IDbTupleManager {
     /**
      * Entity manager util instance.
      */
-    private JdbcAgendaItemManagerUtil m_jdbcAgendaItemManagerUtil;
+    private JdbcManagerUtil m_jdbcManager;
 
     /**
      * @return
@@ -42,62 +43,87 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     private DbTupleManager() {
-        this.m_jdbcAgendaItemManagerUtil = JdbcAgendaItemManagerUtil
-                .getInstance();
+        this.m_jdbcManager = JdbcManagerUtil.getInstance();
     }
 
     @Override
     public int saveLeftTuple(LeftTuple leftTuple) {
         int sinkId = getSinkId(leftTuple.getSink());
         Integer parentId = leftTuple.getParentId();
-        return m_jdbcAgendaItemManagerUtil.saveLeftTuple(parentId, sinkId,
-                leftTuple);
+        Integer handleId = leftTuple.getHandleId();
+        Integer tupleId = m_jdbcManager.saveLeftTuple(parentId, handleId,
+                sinkId, leftTuple);
+        leftTuple.setTupleId(tupleId);
+        return tupleId;
     }
 
     @Override
     public int saveRightTuple(RightTuple rightTuple) {
         int sinkId = getSinkId(rightTuple.getRightTupleSink());
-        return m_jdbcAgendaItemManagerUtil.saveRightTuple(sinkId, rightTuple);
+        Integer handleId = rightTuple.getHandleId();
+        return m_jdbcManager.saveRightTuple(handleId, sinkId, rightTuple);
+    }
+
+    @Override
+    public void saveFactHandle(InternalFactHandle handle) {
+        int handleId = handle.getId();
+        m_jdbcManager.saveFactHandle(handleId, handle);
     }
 
     @Override
     public List<Object> getLeftTuples(int sinkId) {
-        return m_jdbcAgendaItemManagerUtil.getLeftTuples(sinkId);
+        return m_jdbcManager.getLeftTuples(sinkId);
     }
 
     @Override
     public List<Object> getRightTuples(int sinkId) {
-        return m_jdbcAgendaItemManagerUtil.getRightTuples(sinkId);
+        return m_jdbcManager.getRightTuples(sinkId);
     }
 
     @Override
     public Object readObject(ResultSet resultSet) throws IOException,
             ClassNotFoundException, SQLException {
-        return m_jdbcAgendaItemManagerUtil.readObject(resultSet);
+        return m_jdbcManager.readObject(resultSet);
     }
 
     @Override
-    public Integer readTupleId(ResultSet resultSet) throws SQLException {
-        return m_jdbcAgendaItemManagerUtil.readTupleId(resultSet);
+    public Integer readLeftTupleId(ResultSet resultSet) throws SQLException {
+        return m_jdbcManager.readLeftTupleId(resultSet);
+    }
+
+    @Override
+    public Integer readRightTupleId(ResultSet resultSet) throws SQLException {
+        return m_jdbcManager.readRightTupleId(resultSet);
     }
 
     @Override
     public void closeEverything(Connection connection,
             PreparedStatement statement, ResultSet resultSet) {
-        JdbcAgendaItemManagerUtil.closeEverything(connection, statement,
-                resultSet);
+        JdbcManagerUtil.closeEverything(connection, statement, resultSet);
     }
 
     @Override
     public void removeRightTuple(RightTuple rightTuple) {
-        m_jdbcAgendaItemManagerUtil.removeRightTuple(rightTuple.getTupleId(),
+        m_jdbcManager.removeRightTuple(rightTuple.getTupleId(),
                 rightTuple.getSinkId());
     }
 
     @Override
     public void removeLeftTuple(LeftTuple leftTuple) {
-        m_jdbcAgendaItemManagerUtil.removeLeftTuple(leftTuple.getTupleId(),
+        m_jdbcManager.removeLeftTuple(leftTuple.getTupleId(),
                 leftTuple.getSinkId());
+    }
+
+    @Override
+    public void retractFactHandle(InternalFactHandle factHandle) {
+        m_jdbcManager.removeFactHandle(factHandle.getId());
+    }
+
+    @Override
+    public ResultSet getRightTupleResultSet(int sinkId, Connection connection,
+            PreparedStatement statement, ResultSet resultSet)
+            throws SQLException {
+        return null;
     }
 
     /**
@@ -111,4 +137,5 @@ public class DbTupleManager implements IDbTupleManager {
         }
         return sinkId;
     }
+
 }

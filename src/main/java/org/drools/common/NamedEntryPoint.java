@@ -52,6 +52,10 @@ import org.drools.spi.PropagationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gadawski.drools.config.MyAppConfig;
+import com.gadawski.drools.db.tuple.DbTupleManager;
+import com.gadawski.drools.db.tuple.IDbTupleManager;
+
 public class NamedEntryPoint
     implements
     InternalWorkingMemoryEntryPoint,
@@ -82,6 +86,8 @@ public class NamedEntryPoint
     protected final ReentrantLock           lock;
     
     protected Set<InternalFactHandle>       dynamicFacts = null;
+
+    private IDbTupleManager tupleManager;
 
     public NamedEntryPoint(EntryPoint entryPoint,
                            EntryPointNode entryPointNode,
@@ -761,6 +767,11 @@ public class NamedEntryPoint
                                                    this );
         this.objectStore.addHandle( handle,
                                     object );
+        
+        if (MyAppConfig.USE_DB) {
+            this.tupleManager = DbTupleManager.getInstance();
+            this.tupleManager.saveFactHandle(handle);
+        }
         return handle;
     }
     
