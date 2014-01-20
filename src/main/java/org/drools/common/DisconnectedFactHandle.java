@@ -266,4 +266,10 @@ public class DisconnectedFactHandle
         
     }
 
+    @Override
+    public void restoreHandleAfterSerialization(
+            InternalWorkingMemory workingMemory) {
+        this.setEntryPoint(workingMemory.getWorkingMemoryEntryPoint(this.getEntryPointId()));
+    }
+
 }

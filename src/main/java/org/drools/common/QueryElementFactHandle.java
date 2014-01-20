@@ -213,5 +213,11 @@ public class QueryElementFactHandle
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public void restoreHandleAfterSerialization(
+            InternalWorkingMemory workingMemory) {
+        this.setEntryPoint(workingMemory.getWorkingMemoryEntryPoint(this.getEntryPointId()));
+    }
     
 }

@@ -27,6 +27,9 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
+import com.gadawski.drools.db.tuple.DbTupleManager;
+import com.gadawski.drools.db.tuple.IDbTupleManager;
+
 /**
  * A parent class for all specific LeftTuple specializations
  * @author etirelli
@@ -47,6 +50,10 @@ public class BaseLeftTuple
     private Integer parentId;
     
     private int                index;
+    /**
+     * 
+     */
+    private Integer handleId;
 
     private InternalFactHandle handle;
 
@@ -84,6 +91,7 @@ public class BaseLeftTuple
                              final LeftTupleSink sink,
                              final boolean leftTupleMemoryEnabled) {
         this.handle = factHandle;
+        this.handleId = factHandle.getId();
         
         if ( leftTupleMemoryEnabled ) {
             this.handle.addLastLeftTuple( this );
@@ -100,6 +108,7 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex();
         this.parent = leftTuple.getParent();
         this.handle = leftTuple.getHandle();
+        this.handleId = this.handle.getId();
         
         if ( leftTupleMemoryEnabled ) {
             this.leftParent = leftTuple;
@@ -125,6 +134,7 @@ public class BaseLeftTuple
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
         this.handle = rightTuple.getFactHandle();
+        this.handleId = this.handle.getId();
         
         this.leftParent = leftTuple;
         // insert at the end f the list
@@ -170,6 +180,8 @@ public class BaseLeftTuple
                              final LeftTupleSink sink,
                              final boolean leftTupleMemoryEnabled) {
         this.handle = rightTuple.getFactHandle();
+        this.handleId = this.handle.getId();
+        
         this.index = leftTuple.getIndex() + 1;
         this.parent = leftTuple;
 
@@ -485,6 +497,7 @@ public class BaseLeftTuple
     
     public void setFactHandle(InternalFactHandle handle) {
         this.handle = handle;
+        this.handleId = handle.getId();
     }
 
     /* (non-Javadoc)
@@ -702,6 +715,7 @@ public class BaseLeftTuple
 
     public void setHandle(InternalFactHandle handle) {
         this.handle = handle;
+        this.handleId = handle.getId();
     }
 
     public LeftTuple getFirstChild() {
@@ -864,13 +878,42 @@ public class BaseLeftTuple
 
     @Override
     public void restoreTupleAfterSerialization(
-            InternalWorkingMemory workingMemory, LeftTupleSink sink) {
+            InternalWorkingMemory workingMemory, Sink sink) {
+//        restoreHandles(workingMemory);
         if (sink != null && this.getSinkId() == sink.getId()) {
-            this.setSink(sink);
+            this.setSink((LeftTupleSink) sink);
         }
         WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
                 .getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
         this.setHandleEntryPoint(tupleEntryPoint);
+    }
+
+    /**
+     * There is need to restore handle for current tuple as well as for parents.
+     * 
+     * @param workingMemory
+     */
+    private void restoreHandles(InternalWorkingMemory workingMemory) {
+        IDbTupleManager tupleManager = DbTupleManager.getInstance();
+
+        this.setHandle((InternalFactHandle) tupleManager
+                .getFactHandle(this.handleId, workingMemory));
+        LeftTuple tempLeft = leftParent;
+        while (tempLeft != null) {
+            tempLeft.setHandle((InternalFactHandle) tupleManager
+                    .getFactHandle(tempLeft.getHandleId(), workingMemory));
+            WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
+                    .getWorkingMemoryEntryPoint(tempLeft
+                            .getHandleEntryPointId());
+            tempLeft.setHandleEntryPoint(tupleEntryPoint);
+            tempLeft = tempLeft.getLeftParent();
+        }
+        if (rightParent != null) {
+            WorkingMemoryEntryPoint rightTupleEntryPoint = workingMemory
+                    .getWorkingMemoryEntryPoint(rightParent
+                            .getHandleEntryPointId());
+            rightParent.setHandleEntryPoint(rightTupleEntryPoint);
+        }
     }
 
     @Override
@@ -916,6 +959,6 @@ public class BaseLeftTuple
 
     @Override
     public Integer getHandleId() {
-        return handle.getId();
+        return handleId;
     }
 }

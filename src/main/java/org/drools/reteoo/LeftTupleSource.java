@@ -287,6 +287,10 @@ public abstract class LeftTupleSource extends BaseNode
                                          int leftInputOtnId,
                                          long leftInferredMask) {
         LeftTuple leftTuple = modifyPreviousTuples.peekLeftTuple();
+        if (leftTuple != null) {
+            leftTuple.restoreTupleAfterSerialization(workingMemory, sink);
+        }
+        
         while ( leftTuple != null && leftTuple.getLeftTupleSink().getLeftInputOtnId() < leftInputOtnId ) {
             modifyPreviousTuples.removeLeftTuple();
             // we skipped this node, due to alpha hashing, so retract now

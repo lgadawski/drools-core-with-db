@@ -17,13 +17,12 @@
 package org.drools.common;
 
 import org.drools.FactHandle;
+import org.drools.marshalling.impl.ProtobufMessages.EntryPoint;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.RightTuple;
 import org.drools.runtime.rule.WorkingMemoryEntryPoint;
 
-public interface InternalFactHandle
-    extends
-    FactHandle, Cloneable {
+public interface InternalFactHandle extends FactHandle, Cloneable {
     public int getId();
 
     public long getRecency();
@@ -39,71 +38,80 @@ public interface InternalFactHandle
     public void setRecency(long recency);
 
     public void invalidate();
-    
+
     public boolean isValid();
-    
+
     public int getIdentityHashCode();
 
     public int getObjectHashCode();
-    
+
     public boolean isDisconnected();
-    
+
     /**
-     * Returns true if this FactHandle represents
-     * and Event or false if this FactHandle represents
-     * a regular Fact
+     * Returns true if this FactHandle represents and Event or false if this
+     * FactHandle represents a regular Fact
      * 
      * @return
      */
     public boolean isEvent();
-    
+
     public RightTuple getFirstRightTuple();
 
     public RightTuple getLastRightTuple();
 
     public LeftTuple getFirstLeftTuple();
-    
+
     public LeftTuple getLastLeftTuple();
-    
+
     public WorkingMemoryEntryPoint getEntryPoint();
-    
-    public void setEntryPoint( WorkingMemoryEntryPoint ep );
-    
+
+    public void setEntryPoint(WorkingMemoryEntryPoint ep);
+
     public InternalFactHandle clone();
-    
+
     public String toExternalForm();
-    
-    public String toTupleTree( int indent );
-    
+
+    public String toTupleTree(int indent);
+
     public void disconnect();
 
-    public void addLastLeftTuple( LeftTuple leftTuple );
+    public void addLastLeftTuple(LeftTuple leftTuple);
 
-    public void removeLeftTuple( LeftTuple leftTuple );
+    public void removeLeftTuple(LeftTuple leftTuple);
 
     public void clearLeftTuples();
 
     public void clearRightTuples();
 
-    public void addFirstRightTuple( RightTuple rightTuple );
+    public void addFirstRightTuple(RightTuple rightTuple);
 
-    public void addLastRightTuple( RightTuple rightTuple );
+    public void addLastRightTuple(RightTuple rightTuple);
 
-    public void removeRightTuple( RightTuple rightTuple );
-    
+    public void removeRightTuple(RightTuple rightTuple);
+
     /**
      * @return the entryPointId
      */
-    public String getEntryPointId() ;
+    public String getEntryPointId();
 
     /**
-     * @param entryPointId the entryPointId to set
+     * @param entryPointId
+     *            the entryPointId to set
      */
-    public void setEntryPointId(String entryPointId) ;
+    public void setEntryPointId(String entryPointId);
 
     /**
      * 
      */
     public void nullAll();
-    
+
+    /**
+     * Resotores handle states after serialization.
+     * 
+     * @param workingMemory
+     *            - to get {@link EntryPoint}.
+     */
+    public void restoreHandleAfterSerialization(
+            InternalWorkingMemory workingMemory);
+
 }

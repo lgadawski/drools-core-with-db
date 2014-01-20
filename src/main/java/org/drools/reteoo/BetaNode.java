@@ -505,7 +505,8 @@ public abstract class BetaNode extends LeftTupleSource
                              PropagationContext context,
                              InternalWorkingMemory workingMemory) {
         RightTuple rightTuple = modifyPreviousTuples.peekRightTuple();
-
+        rightTuple.restoreTupleAfterSerialization(workingMemory, this);
+        
         // if the peek is for a different OTN we assume that it is after the current one and then this is an assert
         while ( rightTuple != null &&
                 ((BetaNode) rightTuple.getRightTupleSink()).getRightInputOtnId() < getRightInputOtnId() ) {

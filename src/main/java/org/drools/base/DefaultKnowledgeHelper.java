@@ -35,14 +35,14 @@ import org.drools.common.InternalRuleFlowGroup;
 import org.drools.common.InternalWorkingMemoryActions;
 import org.drools.common.InternalWorkingMemoryEntryPoint;
 import org.drools.common.LogicalDependency;
-import org.drools.common.SimpleLogicalDependency;
 import org.drools.common.ObjectTypeConfigurationRegistry;
+import org.drools.common.SimpleLogicalDependency;
 import org.drools.core.util.LinkedList;
 import org.drools.core.util.LinkedListEntry;
 import org.drools.factmodel.traits.CoreWrapper;
 import org.drools.factmodel.traits.Thing;
-import org.drools.factmodel.traits.TraitableBean;
 import org.drools.factmodel.traits.TraitFactory;
+import org.drools.factmodel.traits.TraitableBean;
 import org.drools.impl.KnowledgeBaseImpl;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.ObjectTypeConf;
@@ -63,6 +63,9 @@ import org.drools.spi.KnowledgeHelper;
 import org.drools.spi.PropagationContext;
 import org.drools.spi.Tuple;
 
+import com.gadawski.drools.db.tuple.DbTupleManager;
+import com.gadawski.drools.db.tuple.IDbTupleManager;
+
 public class DefaultKnowledgeHelper
     implements
     KnowledgeHelper,
@@ -79,6 +82,8 @@ public class DefaultKnowledgeHelper
     private LinkedList<LogicalDependency>       previousJustified;
     
     private LinkedList<LogicalDependency>       previousBlocked;
+
+    private IDbTupleManager m_tupleManager;
 
     public DefaultKnowledgeHelper() {
 
@@ -334,6 +339,11 @@ public class DefaultKnowledgeHelper
 
     public void update(final FactHandle handle, long mask) {
         InternalFactHandle h = (InternalFactHandle) handle;
+        m_tupleManager = DbTupleManager.getInstance();
+        m_tupleManager.saveFactHandle(h); // merge fact handle
+        h = (InternalFactHandle) m_tupleManager.getFactHandle(h.getId(), workingMemory); // get updated
+        h.restoreHandleAfterSerialization(this.workingMemory);
+      
         ((InternalWorkingMemoryEntryPoint) h.getEntryPoint()).update( h,
                                                                       ((InternalFactHandle)handle).getObject(),
                                                                       mask,

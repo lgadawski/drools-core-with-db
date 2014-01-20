@@ -163,7 +163,8 @@ public class ObjectTypeNode extends ObjectSource
         super.readExternal( in );
         objectType = (ObjectType) in.readObject();
 
-        // this is here as not all objectTypeNodes used ClassObjectTypes in packages (i.e. rules with those nodes did not exist yet)
+        // this is here as not all objectTypeNodes used ClassObjectTypes in 
+        // packages (i.e. rules with those nodes did not exist yet)
         // and thus have no wiring targets
         if ( objectType instanceof ClassObjectType ) {
             objectType = ((AbstractRuleBase) ((DroolsObjectInputStream) in).getRuleBase()).getClassFieldAccessorCache().getClassObjectType( (ClassObjectType) objectType );

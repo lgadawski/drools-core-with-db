@@ -16,7 +16,10 @@
 
 package org.drools.reteoo;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.InternalFactHandle;
@@ -24,9 +27,12 @@ import org.drools.common.InternalWorkingMemory;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.RightTupleList;
 
+import com.gadawski.drools.db.tuple.DbTupleManager;
+import com.gadawski.drools.db.tuple.IDbTupleManager;
+
 public class RightTuple
     implements
-    Entry, Serializable {
+    Entry, Externalizable {
     /**
      * 
      */
@@ -35,6 +41,10 @@ public class RightTuple
      * 
      */
     private Integer tupleId;
+    /**
+     * 
+     */
+    private Integer handleId;
     
     protected InternalFactHandle handle;
 
@@ -55,7 +65,7 @@ public class RightTuple
      * 
      */
     protected int                         sinkId;
-    protected transient RightTupleSink     sink;
+    protected RightTupleSink     sink;
 
     public RightTuple() {
 
@@ -71,6 +81,42 @@ public class RightTuple
         setUpHandleAndSink(handle, sink);
     }
 
+    @Override
+    public void readExternal(ObjectInput in) throws IOException,
+            ClassNotFoundException {
+        this.tupleId = (Integer) in.readObject();
+        this.handleId = (Integer) in.readObject();
+//        restoreHandle();
+        this.handle = (InternalFactHandle) in.readObject();
+        this.handlePrevious = (RightTuple) in.readObject();
+        this.handleNext = (RightTuple) in.readObject();
+        this.memory = (RightTupleList) in.readObject(); // TODO test if this
+                                                        // works!
+        this.previous = (Entry) in.readObject();
+        this.next = (Entry) in.readObject();
+        this.firstChild = (LeftTuple) in.readObject();
+        this.lastChild = (LeftTuple) in.readObject();
+        this.blocked = (LeftTuple) in.readObject();
+        this.sinkId = in.readInt();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(this.tupleId);
+        out.writeObject(this.handleId);
+        out.writeObject(this.handle);
+        out.writeObject(this.handlePrevious);
+        out.writeObject(this.handleNext);
+        out.writeObject(this.memory); // TODO test if this work for large number
+                                      // of objects!
+        out.writeObject(this.previous);
+        out.writeObject(this.next);
+        out.writeObject(this.firstChild);
+        out.writeObject(this.lastChild);
+        out.writeObject(this.blocked);
+        out.writeInt(this.sinkId);
+    }
+    
     /**
      * Sets up handle and sink.
      * 
@@ -81,6 +127,7 @@ public class RightTuple
     private RightTuple setUpHandleAndSink(InternalFactHandle handle,
             RightTupleSink sink) {
         this.handle = handle;
+        this.handleId = handle.getId();
         this.sink = sink;
         if (sink != null) {
             this.sinkId = sink.getId();
@@ -285,12 +332,30 @@ public class RightTuple
      * @param sink
      */
     public void restoreTupleAfterSerialization(
-            InternalWorkingMemory workingMemory, RightTupleSink sink) {
+            InternalWorkingMemory workingMemory, Sink sink) {
+//        restoreHandle();
         if (this.getSinkId() == sink.getId()) {
-            this.setSink(sink);
+            this.setSink((RightTupleSink) sink);
         }
         WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
         this.setHandleEntryPoint(tupleEntryPoint);
+    }
+
+    /**
+     * Based on handleId restore handle from db.
+     * 
+     * @param workingMemory
+     */
+    private void restoreHandle(InternalWorkingMemory workingMemory) {
+        IDbTupleManager tupleManager = DbTupleManager.getInstance();
+        this.setHandle((InternalFactHandle) tupleManager.getFactHandle(this.handleId, workingMemory));
+    }
+
+    /**
+     * @param handle
+     */
+    private void setHandle(InternalFactHandle handle) {
+        this.handle = handle;
     }
 
     /**
@@ -311,6 +376,6 @@ public class RightTuple
      * @return handle's id.
      */
     public Integer getHandleId() {
-        return handle.getId();
+        return handleId;
     }
 }

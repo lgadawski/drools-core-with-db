@@ -35,6 +35,9 @@ import org.drools.spi.InternalReadAccessor;
 import org.drools.spi.PropagationContext;
 import org.drools.spi.ReadAccessor;
 
+import com.gadawski.drools.db.tuple.DbTupleManager;
+import com.gadawski.drools.db.tuple.IDbTupleManager;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -392,7 +395,9 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
                                       final PropagationContext context,
                                       final InternalWorkingMemory workingMemory) {
         final Object object = factHandle.getObject();
-
+        IDbTupleManager tupleManager = DbTupleManager.getInstance();
+        Integer handleId = factHandle.getId();
+        
         // Iterates the FieldIndex collection, which tells you if particularly field is hashed or not
         // if the field is hashed then it builds the hashkey to return the correct sink for the current objects slot's
         // value, one object may have multiple fields indexed.
@@ -415,10 +420,12 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
             }
         }
 
+        InternalFactHandle freshFactHandle;
         // propagate unhashed
         if ( this.hashableSinks != null ) {
             for ( ObjectSinkNode sink = this.hashableSinks.getFirst(); sink != null; sink = sink.getNextObjectSinkNode() ) {
-                doPropagateModifyObject( factHandle,
+                freshFactHandle = (InternalFactHandle) tupleManager.getFactHandle(handleId, workingMemory);
+                doPropagateModifyObject( freshFactHandle,
                                          modifyPreviousTuples,
                                          context,
                                          workingMemory,
@@ -429,7 +436,8 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
         if ( this.otherSinks != null ) {
             // propagate others
             for ( ObjectSinkNode sink = this.otherSinks.getFirst(); sink != null; sink = sink.getNextObjectSinkNode() ) {
-                doPropagateModifyObject( factHandle,
+                freshFactHandle = (InternalFactHandle) tupleManager.getFactHandle(handleId, workingMemory);
+                doPropagateModifyObject( freshFactHandle,
                                          modifyPreviousTuples,
                                          context,
                                          workingMemory,

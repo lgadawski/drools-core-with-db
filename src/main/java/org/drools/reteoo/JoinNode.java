@@ -100,6 +100,7 @@ public class JoinNode extends BetaNode {
             memory.getLeftTupleMemory().add( leftTuple );
         } else {
             m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.saveFactHandle(leftTuple.getHandle());
             m_tupleManager.saveLeftTuple(leftTuple);
         }
         
@@ -151,8 +152,8 @@ public class JoinNode extends BetaNode {
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 RightTuple tuple = (RightTuple) m_tupleManager
-                        .readObject(resultSet);
-                tuple.restoreTupleAfterSerialization(workingMemory, this);
+                        .readRightTuple(resultSet, workingMemory, this);
+//                tuple.restoreTupleAfterSerialization(workingMemory, this);
                 propagateFromLeft(tuple, leftTuple, contextEntry,
                         useLeftMemory, context, workingMemory);
             }
@@ -203,6 +204,7 @@ public class JoinNode extends BetaNode {
 
         if (MyAppConfig.USE_DB) {
             m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.saveFactHandle(rightTuple.getFactHandle());
             m_tupleManager.saveRightTuple(rightTuple);
         } else {
             memory.getRightTupleMemory().add( rightTuple );
@@ -255,9 +257,9 @@ public class JoinNode extends BetaNode {
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 LeftTuple tuple = (LeftTuple) m_tupleManager
-                        .readObject(resultSet);
-                tuple.setTupleId(m_tupleManager.readLeftTupleId(resultSet));
-                tuple.restoreTupleAfterSerialization(workingMemory, this);
+                        .readLeftTuple(resultSet, workingMemory, this);
+//                tuple.setTupleId(m_tupleManager.readLeftTupleId(resultSet));
+//                tuple.restoreTupleAfterSerialization(workingMemory, this);
                 propagateFromRight(rightTuple, tuple, memory, context,
                         workingMemory);
             }

@@ -522,4 +522,10 @@ public class DefaultFactHandle
         lastLeftTuple = null;
     }
 
+    @Override
+    public void restoreHandleAfterSerialization(
+            InternalWorkingMemory workingMemory) {
+        this.setEntryPoint(workingMemory.getWorkingMemoryEntryPoint(this
+                .getEntryPointId()));
+    }
 }

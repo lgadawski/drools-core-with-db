@@ -147,7 +147,8 @@ public class LeftInputAdapterNode extends LeftTupleSource
     public void assertObject(final InternalFactHandle factHandle,
                              final PropagationContext context,
                              final InternalWorkingMemory workingMemory) {
-        boolean useLeftMemory = !MyAppConfig.USE_DB;
+//        boolean useLeftMemory = !MyAppConfig.USE_DB;
+        boolean useLeftMemory = true;
         if ( !this.leftTupleMemoryEnabled ) {
             // This is a hack, to not add closed DroolsQuery objects
             Object object = ((InternalFactHandle)context.getFactHandle()).getObject();

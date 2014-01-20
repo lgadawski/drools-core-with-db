@@ -8,8 +8,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.drools.common.InternalFactHandle;
+import org.drools.common.InternalWorkingMemory;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.RightTuple;
+import org.drools.reteoo.Sink;
 
 /**
  * @author l.gadawski@gmail.com
@@ -57,12 +59,28 @@ public interface IDbTupleManager {
      * Reads object from cursor
      * 
      * @param resultSet
+     * @param workingMemory
+     * @param sink
      * @return
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    Object readObject(ResultSet resultSet) throws IOException,
+    Object readRightTuple(ResultSet resultSet,
+            InternalWorkingMemory workingMemory, Sink sink) throws IOException,
+            ClassNotFoundException, SQLException;
+
+    /**
+     * @param resultSet
+     * @param workingMemory
+     * @param sink
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    Object readLeftTuple(ResultSet resultSet,
+            InternalWorkingMemory workingMemory, Sink sink) throws IOException,
             ClassNotFoundException, SQLException;
 
     /**
@@ -121,4 +139,13 @@ public interface IDbTupleManager {
      */
     void retractFactHandle(InternalFactHandle factHandle);
 
+    /**
+     * Gets FactHandle from db,
+     * 
+     * @param handleId
+     *            - id of fact handle in table.
+     * @param workingMemory
+     * @return fact handle for given id.
+     */
+    Object getFactHandle(Integer handleId, InternalWorkingMemory workingMemory);
 }
