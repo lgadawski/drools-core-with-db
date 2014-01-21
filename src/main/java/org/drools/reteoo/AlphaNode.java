@@ -15,6 +15,8 @@
  */
 
 package org.drools.reteoo;
+import static org.drools.core.util.BitMaskUtil.intersect;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -30,12 +32,9 @@ import org.drools.common.PropagationContextImpl;
 import org.drools.common.RuleBasePartitionId;
 import org.drools.reteoo.builder.BuildContext;
 import org.drools.rule.ContextEntry;
-import org.drools.rule.Pattern;
 import org.drools.rule.constraint.MvelConstraint;
 import org.drools.spi.AlphaNodeFieldConstraint;
 import org.drools.spi.PropagationContext;
-
-import static org.drools.core.util.BitMaskUtil.intersect;
 
 /**
  * <code>AlphaNodes</code> are nodes in the <code>Rete</code> network used
@@ -58,7 +57,7 @@ public class AlphaNode extends ObjectSource
     private ObjectSinkNode           nextRightTupleSinkNode;
 
     public AlphaNode() {
-
+        
     }
 
     /**

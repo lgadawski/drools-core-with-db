@@ -16,7 +16,7 @@
 
 package org.drools.spi;
 
-import java.io.Serializable;
+import java.io.Externalizable;
 
 import org.drools.common.InternalFactHandle;
 import org.drools.rule.Declaration;
@@ -30,7 +30,7 @@ import org.drools.rule.Declaration;
  */
 public interface Tuple
     extends
-    Serializable {
+    Externalizable {
     /**
      * Returns the <code>FactHandle</code> for the given pattern index. If the pattern is empty
      * It returns null.

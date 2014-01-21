@@ -62,13 +62,21 @@ public class DbTupleManager implements IDbTupleManager {
     public int saveRightTuple(RightTuple rightTuple) {
         int sinkId = getSinkId(rightTuple.getRightTupleSink());
         Integer handleId = rightTuple.getHandleId();
-        return m_jdbcManager.saveRightTuple(handleId, sinkId, rightTuple);
+        int tupleId = m_jdbcManager
+                .saveRightTuple(handleId, sinkId, rightTuple);
+        rightTuple.setTupleId(tupleId);
+        return tupleId;
     }
 
     @Override
     public void saveFactHandle(InternalFactHandle handle) {
         int handleId = handle.getId();
         m_jdbcManager.saveFactHandle(handleId, handle);
+    }
+
+    @Override
+    public void updateRightTuple(RightTuple rightTuple) {
+        m_jdbcManager.updateRightTuple(rightTuple.getTupleId(), rightTuple);
     }
 
     @Override
@@ -86,8 +94,13 @@ public class DbTupleManager implements IDbTupleManager {
             InternalWorkingMemory workingMemory) {
         InternalFactHandle handle = (InternalFactHandle) m_jdbcManager
                 .getFactHandle(handleId);
-        handle.restoreHandleAfterSerialization(workingMemory);
+        // handle.restoreHandleAfterSerialization(workingMemory);
         return handle;
+    }
+
+    @Override
+    public Object getRightTuple(Integer tupleId) {
+        return m_jdbcManager.getRightTuple(tupleId);
     }
 
     @Override

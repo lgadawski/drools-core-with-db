@@ -63,6 +63,7 @@ import org.drools.spi.KnowledgeHelper;
 import org.drools.spi.PropagationContext;
 import org.drools.spi.Tuple;
 
+import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.tuple.DbTupleManager;
 import com.gadawski.drools.db.tuple.IDbTupleManager;
 
@@ -339,10 +340,11 @@ public class DefaultKnowledgeHelper
 
     public void update(final FactHandle handle, long mask) {
         InternalFactHandle h = (InternalFactHandle) handle;
-        m_tupleManager = DbTupleManager.getInstance();
-        m_tupleManager.saveFactHandle(h); // merge fact handle
-        h = (InternalFactHandle) m_tupleManager.getFactHandle(h.getId(), workingMemory); // get updated
-        h.restoreHandleAfterSerialization(this.workingMemory);
+        if (MyAppConfig.USE_DB) {
+            m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.saveFactHandle(h); // merge fact handle
+            h = (InternalFactHandle) m_tupleManager.getFactHandle(h.getId(), workingMemory); // get updated
+        }
       
         ((InternalWorkingMemoryEntryPoint) h.getEntryPoint()).update( h,
                                                                       ((InternalFactHandle)handle).getObject(),

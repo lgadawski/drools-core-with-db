@@ -71,7 +71,7 @@ public class DbAgendaItemManager implements IAgendaItemManager {
 
     @Override
     public void removeAgendaItem(final AgendaItem agendaItem) {
-        // TODO Auto-generated method stub
+        m_jdbcAgendaItemManagerUtil.removeAgendaItemByLeftTupleId(agendaItem.getTupleId());
     }
 
     /**

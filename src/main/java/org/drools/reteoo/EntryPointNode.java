@@ -260,7 +260,7 @@ public class EntryPointNode extends ObjectSource
         ModifyPreviousTuples modifyPreviousTuples = new ModifyPreviousTuples(handle.getFirstLeftTuple(), handle.getFirstRightTuple() );
         handle.clearLeftTuples();
         handle.clearRightTuples();
-        
+    
         for ( int i = 0, length = cachedNodes.length; i < length; i++ ) {
             cachedNodes[i].modifyObject( handle,
                                          modifyPreviousTuples,
@@ -300,7 +300,7 @@ public class EntryPointNode extends ObjectSource
         }
         modifyPreviousTuples.retractTuples( context, workingMemory );
     }
-    
+
     public void modifyObject(InternalFactHandle factHandle,
                                    ModifyPreviousTuples modifyPreviousTuples,
                                    PropagationContext context,

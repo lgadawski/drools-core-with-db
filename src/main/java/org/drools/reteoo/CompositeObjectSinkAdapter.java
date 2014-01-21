@@ -35,6 +35,7 @@ import org.drools.spi.InternalReadAccessor;
 import org.drools.spi.PropagationContext;
 import org.drools.spi.ReadAccessor;
 
+import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.tuple.DbTupleManager;
 import com.gadawski.drools.db.tuple.IDbTupleManager;
 
@@ -346,7 +347,9 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
                                       final PropagationContext context,
                                       final InternalWorkingMemory workingMemory) {
         final Object object = factHandle.getObject();
-
+        IDbTupleManager tupleManager = DbTupleManager.getInstance();
+        Integer handleId = factHandle.getId();
+                
         // Iterates the FieldIndex collection, which tells you if particularly field is hashed or not
         // if the field is hashed then it builds the hashkey to return the correct sink for the current objects slot's
         // value, one object may have multiple fields indexed.
@@ -372,7 +375,9 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
         // propagate unhashed
         if ( this.hashableSinks != null ) {
             for ( ObjectSinkNode sink = this.hashableSinks.getFirst(); sink != null; sink = sink.getNextObjectSinkNode() ) {
-                doPropagateAssertObject( factHandle,
+                InternalFactHandle freshFactHandle = getCurrentFactHandle(
+                        workingMemory, tupleManager, handleId, factHandle);
+                doPropagateAssertObject(freshFactHandle,
                                          context,
                                          workingMemory,
                                          sink );
@@ -382,7 +387,9 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
         if ( this.otherSinks != null ) {
             // propagate others
             for ( ObjectSinkNode sink = this.otherSinks.getFirst(); sink != null; sink = sink.getNextObjectSinkNode() ) {
-                doPropagateAssertObject( factHandle,
+                InternalFactHandle freshFactHandle = getCurrentFactHandle(
+                        workingMemory, tupleManager, handleId, factHandle);
+                doPropagateAssertObject(freshFactHandle,
                                          context,
                                          workingMemory,
                                          sink );
@@ -420,11 +427,11 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
             }
         }
 
-        InternalFactHandle freshFactHandle;
         // propagate unhashed
         if ( this.hashableSinks != null ) {
             for ( ObjectSinkNode sink = this.hashableSinks.getFirst(); sink != null; sink = sink.getNextObjectSinkNode() ) {
-                freshFactHandle = (InternalFactHandle) tupleManager.getFactHandle(handleId, workingMemory);
+                InternalFactHandle freshFactHandle = getCurrentFactHandle(
+                        workingMemory, tupleManager, handleId, factHandle);
                 doPropagateModifyObject( freshFactHandle,
                                          modifyPreviousTuples,
                                          context,
@@ -436,7 +443,8 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
         if ( this.otherSinks != null ) {
             // propagate others
             for ( ObjectSinkNode sink = this.otherSinks.getFirst(); sink != null; sink = sink.getNextObjectSinkNode() ) {
-                freshFactHandle = (InternalFactHandle) tupleManager.getFactHandle(handleId, workingMemory);
+                InternalFactHandle freshFactHandle = getCurrentFactHandle(
+                        workingMemory, tupleManager, handleId, factHandle);
                 doPropagateModifyObject( freshFactHandle,
                                          modifyPreviousTuples,
                                          context,
@@ -445,7 +453,21 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
             }
         }
     }
-    
+
+    private InternalFactHandle getCurrentFactHandle(
+            final InternalWorkingMemory workingMemory,
+            IDbTupleManager tupleManager, Integer handleId,
+            InternalFactHandle factHandle) {
+        InternalFactHandle freshFactHandle = factHandle;
+        if (MyAppConfig.USE_DB) {
+            if (freshFactHandle.getObject() == null) {
+                freshFactHandle = (InternalFactHandle) tupleManager
+                        .getFactHandle(handleId, workingMemory);
+            }
+        }
+        return freshFactHandle;
+    }
+
     public void byPassModifyToBetaNode (final InternalFactHandle factHandle,
                                         final ModifyPreviousTuples modifyPreviousTuples,
                                         final PropagationContext context,

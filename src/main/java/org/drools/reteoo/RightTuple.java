@@ -29,6 +29,7 @@ import org.drools.core.util.index.RightTupleList;
 
 import com.gadawski.drools.db.tuple.DbTupleManager;
 import com.gadawski.drools.db.tuple.IDbTupleManager;
+import com.gadawski.drools.reteoo.builder.NodeContext;
 
 public class RightTuple
     implements
@@ -66,6 +67,10 @@ public class RightTuple
      */
     protected int                         sinkId;
     protected RightTupleSink     sink;
+    /**
+     * 
+     */
+    private NodeContext m_nodeContext = NodeContext.getInstance();
 
     public RightTuple() {
 
@@ -98,6 +103,7 @@ public class RightTuple
         this.lastChild = (LeftTuple) in.readObject();
         this.blocked = (LeftTuple) in.readObject();
         this.sinkId = in.readInt();
+        this.setSink((RightTupleSink) m_nodeContext.getNode(this.sinkId));
     }
 
     @Override
@@ -334,11 +340,11 @@ public class RightTuple
     public void restoreTupleAfterSerialization(
             InternalWorkingMemory workingMemory, Sink sink) {
 //        restoreHandle();
-        if (this.getSinkId() == sink.getId()) {
-            this.setSink((RightTupleSink) sink);
-        }
-        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
-        this.setHandleEntryPoint(tupleEntryPoint);
+//        if (this.getSinkId() == sink.getId()) {
+//            this.setSink((RightTupleSink) sink);
+//        }
+//        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
+//        this.setHandleEntryPoint(tupleEntryPoint);
     }
 
     /**

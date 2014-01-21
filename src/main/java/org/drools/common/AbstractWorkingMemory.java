@@ -96,6 +96,8 @@ import org.drools.time.TimerServiceFactory;
 import org.drools.type.DateFormats;
 import org.drools.type.DateFormatsImpl;
 
+import com.gadawski.drools.common.EntryPointsContext;
+
 /**
  * Implementation of <code>WorkingMemory</code>.
  */
@@ -456,7 +458,9 @@ public abstract class AbstractWorkingMemory
                                                       this );
 
         this.entryPoints = new ConcurrentHashMap<String, WorkingMemoryEntryPoint>();
-
+        EntryPointsContext epContext = EntryPointsContext.getInstance();
+        epContext.setUp(this.entryPoints);
+            
         this.entryPoints.put( "DEFAULT",
                               this.defaultEntryPoint );
 

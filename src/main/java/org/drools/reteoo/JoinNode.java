@@ -242,6 +242,7 @@ public class JoinNode extends BetaNode {
     private void getAndPropagateSerialDBTupleFromRight(
             PropagationContext context, InternalWorkingMemory workingMemory,
             BetaMemory memory, RightTuple rightTuple) {
+        Integer tupleId = rightTuple.getTupleId();
         m_jdbcManager = JdbcManagerUtil.getInstance();
         m_tupleManager = DbTupleManager.getInstance();
         Connection connection = null;
@@ -256,12 +257,14 @@ public class JoinNode extends BetaNode {
             statement.setFetchSize(JdbcManagerUtil.FETCH_SIZE);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                LeftTuple tuple = (LeftTuple) m_tupleManager
-                        .readLeftTuple(resultSet, workingMemory, this);
-//                tuple.setTupleId(m_tupleManager.readLeftTupleId(resultSet));
-//                tuple.restoreTupleAfterSerialization(workingMemory, this);
+                LeftTuple tuple = (LeftTuple) m_tupleManager.readLeftTuple(
+                        resultSet, workingMemory, this);
                 propagateFromRight(rightTuple, tuple, memory, context,
                         workingMemory);
+                if (tupleId != null) {
+                    rightTuple = (RightTuple) m_tupleManager
+                            .getRightTuple(tupleId);
+                }
             }
             connection.setAutoCommit(true);
             m_tupleManager.closeEverything(connection, statement, resultSet);// release
@@ -300,7 +303,9 @@ public class JoinNode extends BetaNode {
         }
 
         if (MyAppConfig.USE_DB) {
-            m_tupleManager.removeRightTuple(rightTuple);
+            if (rightTuple.getTupleId() != null) {
+                m_tupleManager.removeRightTuple(rightTuple);
+            }
         } else {
             memory.getRightTupleMemory().remove( rightTuple );
         }
@@ -323,7 +328,9 @@ public class JoinNode extends BetaNode {
         }
 
         if (MyAppConfig.USE_DB) {
-            m_tupleManager.removeLeftTuple(leftTuple);
+            if (leftTuple.getTupleId() != null) {
+                m_tupleManager.removeLeftTuple(leftTuple);
+            }
         } else {
             memory.getLeftTupleMemory().remove( leftTuple );
         }

@@ -39,41 +39,66 @@ import org.drools.spi.AlphaNodeFieldConstraint;
 import org.drools.spi.DataProvider;
 import org.drools.spi.ObjectType;
 
+import com.gadawski.drools.reteoo.builder.NodeContext;
+
 import java.io.Serializable;
 
 public class DefaultNodeFactory implements NodeFactory, Serializable {
-
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private NodeContext nodes = NodeContext.getInstance();
 
     public AlphaNode buildAlphaNode( int id, AlphaNodeFieldConstraint constraint, ObjectSource objectSource, BuildContext context ) {
-        return new AlphaNode( id, constraint, objectSource, context );
+        AlphaNode node = new AlphaNode( id, constraint, objectSource, context );
+        nodes.addNode(node);
+        return node;
     }
 
     public TerminalNode buildTerminalNode( int id, LeftTupleSource source, Rule rule, GroupElement subrule, int subruleIndex, BuildContext context ) {
-        return new RuleTerminalNode( id, source, rule, subrule, subruleIndex, context );
+        RuleTerminalNode node = new RuleTerminalNode( id, source, rule, subrule, subruleIndex, context );
+        nodes.addNode(node);
+        return node;
     }
 
     public ObjectTypeNode buildObjectTypeNode( int id, EntryPointNode objectSource, ObjectType objectType, BuildContext context ) {
-        return new ObjectTypeNode( id, objectSource, objectType, context );
+        ObjectTypeNode node = new ObjectTypeNode( id, objectSource, objectType, context );
+        nodes.addNode(node);
+        return node;
     }
 
     public JoinNode buildJoinNode( int id, LeftTupleSource leftInput, ObjectSource rightInput, BetaConstraints binder, BuildContext context ) {
-        return new JoinNode( id, leftInput, rightInput, binder, context );
+        JoinNode node = new JoinNode( id, leftInput, rightInput, binder, context );
+        nodes.addNode(node);
+        return node;
     }
 
     public LeftInputAdapterNode buildLeftInputAdapterNode( int id, ObjectSource objectSource, BuildContext context ) {
-        return new LeftInputAdapterNode( id, objectSource, context );
+        LeftInputAdapterNode node = new LeftInputAdapterNode( id, objectSource, context );
+        nodes.addNode(node);
+        return node;
     }
 
     public TerminalNode buildQueryTerminalNode(int id, LeftTupleSource source, Rule rule, GroupElement subrule, int subruleIndex, BuildContext context) {
-        return new QueryTerminalNode( id, source, rule, subrule, subruleIndex, context );
+        QueryTerminalNode node = new QueryTerminalNode( id, source, rule, subrule, subruleIndex, context );
+        nodes.addNode(node);
+        return node;
     }
 
     public QueryElementNode buildQueryElementNode( int id, LeftTupleSource tupleSource, QueryElement qe, boolean tupleMemoryEnabled, boolean openQuery, BuildContext context ) {
-        return new QueryElementNode( id, tupleSource, qe, tupleMemoryEnabled, openQuery, context );
+        QueryElementNode node = new QueryElementNode( id, tupleSource, qe, tupleMemoryEnabled, openQuery, context );
+        nodes.addNode(node);
+        return node;
     }
 
     public BaseNode buildFromNode(int id, DataProvider dataProvider, LeftTupleSource tupleSource, AlphaNodeFieldConstraint[] alphaNodeFieldConstraints, BetaConstraints betaConstraints, boolean tupleMemoryEnabled, BuildContext context, From from) {
-        return new FromNode( id, dataProvider, tupleSource, alphaNodeFieldConstraints, betaConstraints, tupleMemoryEnabled, context, from );
+        FromNode node = new FromNode( id, dataProvider, tupleSource, alphaNodeFieldConstraints, betaConstraints, tupleMemoryEnabled, context, from );
+        nodes.addNode(node);
+        return node;
     }
 
 }

@@ -16,7 +16,10 @@
 
 package org.drools.common;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Arrays;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -30,6 +33,8 @@ import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.RightTuple;
 import org.drools.runtime.rule.WorkingMemoryEntryPoint;
 
+import com.gadawski.drools.common.EntryPointsContext;
+
 /**
  * Implementation of <code>FactHandle</code>.
  */
@@ -37,7 +42,7 @@ import org.drools.runtime.rule.WorkingMemoryEntryPoint;
 @XmlAccessorType(XmlAccessType.NONE)
 public class DefaultFactHandle
                               implements
-                              InternalFactHandle, Serializable {
+                              InternalFactHandle, Externalizable{
 
     // ----------------------------------------------------------------------
     // Instance members
@@ -68,6 +73,10 @@ public class DefaultFactHandle
     private transient WorkingMemoryEntryPoint entryPoint;
 
     private boolean                 disconnected;
+    /**
+     * 
+     */
+    private EntryPointsContext m_epContext = EntryPointsContext.getInstance();
 
     // ----------------------------------------------------------------------
     // Constructors
@@ -136,6 +145,40 @@ public class DefaultFactHandle
         createFromExternalFormat( externalFormat );
     }
 
+    @Override
+    public void readExternal(ObjectInput in) throws IOException,
+            ClassNotFoundException {
+        this.id = in.readInt();
+        this.recency = in.readLong();
+        this.object = in.readObject();
+        this.key = (EqualityKey) in.readObject();
+        this.objectHashCode = in.readInt();
+        this.identityHashCode = in.readInt();
+        this.firstRightTuple = (RightTuple) in.readObject();
+        this.lastRightTuple = (RightTuple) in.readObject();
+        this.firstLeftTuple = (LeftTuple) in.readObject();
+        this.lastLeftTuple = (LeftTuple) in.readObject();
+        this.entryPointId = (String) in.readObject();
+        this.setEntryPoint(m_epContext.getWorkingMemoryEntryPoint(this.entryPointId));
+        this.disconnected = in.readBoolean();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(this.id);
+        out.writeLong(this.recency);
+        out.writeObject(this.object);
+        out.writeObject(this.key);
+        out.writeInt(this.objectHashCode);
+        out.writeInt(this.identityHashCode);
+        out.writeObject(this.firstRightTuple);
+        out.writeObject(this.lastRightTuple);
+        out.writeObject(this.firstLeftTuple);
+        out.writeObject(this.lastLeftTuple);
+        out.writeObject(this.entryPointId);
+        out.writeBoolean(this.disconnected);
+    }
+    
     // ----------------------------------------------------------------------
     // Instance members
     // ----------------------------------------------------------------------
@@ -525,7 +568,7 @@ public class DefaultFactHandle
     @Override
     public void restoreHandleAfterSerialization(
             InternalWorkingMemory workingMemory) {
-        this.setEntryPoint(workingMemory.getWorkingMemoryEntryPoint(this
-                .getEntryPointId()));
+//        this.setEntryPoint(workingMemory.getWorkingMemoryEntryPoint(this
+//                .getEntryPointId()));
     }
 }

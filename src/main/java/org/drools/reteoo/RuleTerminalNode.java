@@ -247,6 +247,7 @@ public class RuleTerminalNode extends AbstractTerminalNode {
                                 final InternalWorkingMemory workingMemory) {
         if (MyAppConfig.USE_DB) { 
             m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.saveFactHandle(leftTuple.getHandle());
             m_tupleManager.saveLeftTuple(leftTuple);
         }
         

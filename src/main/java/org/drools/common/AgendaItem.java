@@ -42,6 +42,8 @@ import org.drools.spi.Consequence;
 import org.drools.spi.ObjectType;
 import org.drools.spi.PropagationContext;
 
+import com.gadawski.drools.reteoo.builder.NodeContext;
+
 /**
  * Item entry in the <code>Agenda</code>.
  */
@@ -520,8 +522,10 @@ public class AgendaItem
      */
     public void restoreAgendaItemAfterSerialization(
             InternalWorkingMemory workingMemory, InternalAgendaGroup group) {
-        this.setRuleTerminalNode(getRuleTerminalNode(
-                this.getRuleTerminalNodeId(), workingMemory));
+        NodeContext nodeContext = NodeContext.getInstance();
+        this.setRuleTerminalNode((RuleTerminalNode) nodeContext
+                .getNode((int) this.getRuleTerminalNodeId()));
+//        getRuleTerminalNodethis.getRuleTerminalNodeId(), workingMemory));
         this.setCurrentOTNforPropagationContext(getObjectTypeNode(
                 this.getCurrentOTNidforPropagationContext(), workingMemory));
         this.setAgendaGroup(group);

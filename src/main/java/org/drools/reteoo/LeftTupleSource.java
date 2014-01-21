@@ -33,6 +33,8 @@ import org.drools.spi.ClassWireable;
 import org.drools.spi.ObjectType;
 import org.drools.spi.PropagationContext;
 
+import com.gadawski.drools.config.MyAppConfig;
+
 import static org.drools.core.util.BitMaskUtil.intersect;
 import static org.drools.reteoo.PropertySpecificUtil.calculateNegativeMask;
 import static org.drools.reteoo.PropertySpecificUtil.calculatePositiveMask;
@@ -288,7 +290,9 @@ public abstract class LeftTupleSource extends BaseNode
                                          long leftInferredMask) {
         LeftTuple leftTuple = modifyPreviousTuples.peekLeftTuple();
         if (leftTuple != null) {
-            leftTuple.restoreTupleAfterSerialization(workingMemory, sink);
+            if (MyAppConfig.USE_DB) {
+                leftTuple.restoreTupleAfterSerialization(workingMemory, sink);
+            }
         }
         
         while ( leftTuple != null && leftTuple.getLeftTupleSink().getLeftInputOtnId() < leftInputOtnId ) {

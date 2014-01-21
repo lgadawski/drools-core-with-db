@@ -16,6 +16,9 @@
 
 package org.drools.reteoo;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Arrays;
 
 import org.drools.WorkingMemoryEntryPoint;
@@ -27,8 +30,10 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
+import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.tuple.DbTupleManager;
 import com.gadawski.drools.db.tuple.IDbTupleManager;
+import com.gadawski.drools.reteoo.builder.NodeContext;
 
 /**
  * A parent class for all specific LeftTuple specializations
@@ -79,6 +84,14 @@ public class BaseLeftTuple
     private transient LeftTupleSink      sink;
 
     private Object             object;
+    /**
+     * 
+     */
+    private NodeContext m_nodeContext = NodeContext.getInstance();
+    /**
+     * 
+     */
+    private IDbTupleManager m_tupleManager = DbTupleManager.getInstance();
 
     public BaseLeftTuple() {
         // constructor needed for serialisation
@@ -159,6 +172,9 @@ public class BaseLeftTuple
         this.sink = sink;
         this.sinkId = sink.getId();
         this.parentId = leftTuple.getTupleId();
+        if (MyAppConfig.USE_DB) {
+            m_tupleManager.updateRightTuple(rightTuple);
+        }
     }    
 
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -236,8 +252,53 @@ public class BaseLeftTuple
             this.sinkId = sink.getId();
         }
         this.parentId = leftTuple.getTupleId();
+        if (MyAppConfig.USE_DB) {
+            m_tupleManager.updateRightTuple(rightTuple);
+        }
     }
 
+    @Override
+    public void readExternal(ObjectInput in) throws IOException,
+            ClassNotFoundException {
+        this.tupleId = (Integer) in.readObject();
+        this.parentId = (Integer) in.readObject();
+        this.index = in.readInt();
+        this.handleId = (Integer) in.readObject();
+        this.handle = (InternalFactHandle) in.readObject();
+        this.parent = (LeftTuple) in.readObject();
+        this.leftParent = (LeftTuple) in.readObject();
+        this.leftParentPrevious = (LeftTuple) in.readObject();
+        this.leftParentNext= (LeftTuple) in.readObject();
+        this.rightParent= (RightTuple) in.readObject();
+//        this.rightParentPrevious = (LeftTuple) in.readObject();
+//        this.rightParentNext = (LeftTuple) in.readObject();
+        this.firstChild = (LeftTuple) in.readObject();
+        this.lastChild = (LeftTuple) in.readObject();
+        this.sinkId = in.readInt();
+        this.setSink((LeftTupleSink) m_nodeContext.getNode(this.sinkId));
+        this.object = in.readObject();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(this.tupleId);
+        out.writeObject(this.parentId);
+        out.writeInt(this.index);
+        out.writeObject(this.handleId);
+        out.writeObject(this.handle);
+        out.writeObject(this.parent);
+        out.writeObject(this.leftParent);
+        out.writeObject(this.leftParentPrevious);
+        out.writeObject(this.leftParentNext);
+        out.writeObject(this.rightParent);
+//        out.writeObject(this.rightParentPrevious);
+//        out.writeObject(this.rightParentNext);
+        out.writeObject(this.firstChild);
+        out.writeObject(this.lastChild);
+        out.writeInt(this.sinkId);
+        out.writeObject(this.object);
+    }
+    
     /* (non-Javadoc)
      * @see org.drools.reteoo.LeftTuple#reAdd()
      */
@@ -740,6 +801,9 @@ public class BaseLeftTuple
 
     public void setSink(LeftTupleSink sink) {
         this.sink = sink;
+        if (sink != null) {
+            this.sinkId = sink.getId();
+        }
     }
 
     public void setIndex(int index) {
@@ -879,13 +943,15 @@ public class BaseLeftTuple
     @Override
     public void restoreTupleAfterSerialization(
             InternalWorkingMemory workingMemory, Sink sink) {
-//        restoreHandles(workingMemory);
-        if (sink != null && this.getSinkId() == sink.getId()) {
-            this.setSink((LeftTupleSink) sink);
-        }
-        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
-                .getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
-        this.setHandleEntryPoint(tupleEntryPoint);
+        restoreHandles(workingMemory);
+//        NodeContext nodeContext = NodeContext.getInstance();
+//        this.setSink((LeftTupleSink) nodeContext.getNode(this.getSinkId()));
+//        if (sink != null && this.getSinkId() == sink.getId()) {
+//            this.setSink((LeftTupleSink) sink);
+//        }
+//        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
+//                .getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
+//        this.setHandleEntryPoint(tupleEntryPoint);
     }
 
     /**
@@ -900,20 +966,34 @@ public class BaseLeftTuple
                 .getFactHandle(this.handleId, workingMemory));
         LeftTuple tempLeft = leftParent;
         while (tempLeft != null) {
-            tempLeft.setHandle((InternalFactHandle) tupleManager
-                    .getFactHandle(tempLeft.getHandleId(), workingMemory));
-            WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
-                    .getWorkingMemoryEntryPoint(tempLeft
-                            .getHandleEntryPointId());
-            tempLeft.setHandleEntryPoint(tupleEntryPoint);
+            restoreHandle(workingMemory, tupleManager, tempLeft);
             tempLeft = tempLeft.getLeftParent();
         }
-        if (rightParent != null) {
-            WorkingMemoryEntryPoint rightTupleEntryPoint = workingMemory
-                    .getWorkingMemoryEntryPoint(rightParent
-                            .getHandleEntryPointId());
-            rightParent.setHandleEntryPoint(rightTupleEntryPoint);
+        LeftTuple tempParent = parent;
+        while (tempParent  != null) {
+            restoreHandle(workingMemory, tupleManager, tempParent);
+            tempParent = tempParent.getParent();
         }
+//        if (rightParent != null) {
+//            WorkingMemoryEntryPoint rightTupleEntryPoint = workingMemory
+//                    .getWorkingMemoryEntryPoint(rightParent
+//                            .getHandleEntryPointId());
+//            rightParent.setHandleEntryPoint(rightTupleEntryPoint);
+//        }
+    }
+
+    /**
+     * @param workingMemory
+     * @param tupleManager
+     * @param temp
+     */
+    private void restoreHandle(InternalWorkingMemory workingMemory,
+            IDbTupleManager tupleManager, LeftTuple temp) {
+        temp.setHandle((InternalFactHandle) tupleManager.getFactHandle(
+                temp.getHandleId(), workingMemory));
+//        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
+//                .getWorkingMemoryEntryPoint(temp.getHandleEntryPointId());
+//        temp.setHandleEntryPoint(tupleEntryPoint);
     }
 
     @Override
@@ -961,4 +1041,5 @@ public class BaseLeftTuple
     public Integer getHandleId() {
         return handleId;
     }
+
 }

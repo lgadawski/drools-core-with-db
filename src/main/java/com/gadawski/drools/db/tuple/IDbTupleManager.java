@@ -95,7 +95,7 @@ public interface IDbTupleManager {
      * Removes rightTuple from right memory.
      * 
      * @param rightTuple
-     *            - to be removed.F
+     *            - to be removed.
      */
     void removeRightTuple(RightTuple rightTuple);
 
@@ -148,4 +148,12 @@ public interface IDbTupleManager {
      * @return fact handle for given id.
      */
     Object getFactHandle(Integer handleId, InternalWorkingMemory workingMemory);
+
+    /**
+     * @param tupleId
+     * @return
+     */
+    Object getRightTuple(Integer tupleId);
+
+    void updateRightTuple(RightTuple rightTuple);
 }
