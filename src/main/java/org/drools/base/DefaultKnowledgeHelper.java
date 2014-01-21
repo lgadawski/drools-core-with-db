@@ -343,7 +343,7 @@ public class DefaultKnowledgeHelper
         if (MyAppConfig.USE_DB) {
             m_tupleManager = DbTupleManager.getInstance();
             m_tupleManager.saveFactHandle(h); // merge fact handle
-            h = (InternalFactHandle) m_tupleManager.getFactHandle(h.getId(), workingMemory); // get updated
+            h = (InternalFactHandle) m_tupleManager.getFactHandle(h.getId()); // get updated
         }
       
         ((InternalWorkingMemoryEntryPoint) h.getEntryPoint()).update( h,

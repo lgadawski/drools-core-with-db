@@ -90,17 +90,17 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
-    public Object getFactHandle(Integer handleId,
-            InternalWorkingMemory workingMemory) {
+    public Object getFactHandle(Integer handleId) {
         InternalFactHandle handle = (InternalFactHandle) m_jdbcManager
                 .getFactHandle(handleId);
-        // handle.restoreHandleAfterSerialization(workingMemory);
         return handle;
     }
 
     @Override
     public Object getRightTuple(Integer tupleId) {
-        return m_jdbcManager.getRightTuple(tupleId);
+        RightTuple tuple =  (RightTuple) m_jdbcManager.getRightTuple(tupleId);
+        tuple.restoreTupleAfterSerialization();
+        return tuple;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class DbTupleManager implements IDbTupleManager {
             InternalWorkingMemory workingMemory, Sink sink) throws IOException,
             ClassNotFoundException, SQLException {
         RightTuple tuple = (RightTuple) m_jdbcManager.readObject(resultSet);
-        tuple.restoreTupleAfterSerialization(workingMemory, sink);
+        tuple.restoreTupleAfterSerialization();
         return tuple;
     }
 
@@ -118,7 +118,7 @@ public class DbTupleManager implements IDbTupleManager {
             ClassNotFoundException, SQLException {
         LeftTuple tuple = (LeftTuple) m_jdbcManager.readObject(resultSet);
         tuple.setTupleId(m_jdbcManager.readLeftTupleId(resultSet));
-        tuple.restoreTupleAfterSerialization(workingMemory, sink);
+        tuple.restoreTupleAfterSerialization(sink);
         return tuple;
     }
 

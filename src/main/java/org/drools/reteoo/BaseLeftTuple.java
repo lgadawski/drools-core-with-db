@@ -24,7 +24,6 @@ import java.util.Arrays;
 import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.EventFactHandle;
 import org.drools.common.InternalFactHandle;
-import org.drools.common.InternalWorkingMemory;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
@@ -264,6 +263,7 @@ public class BaseLeftTuple
         this.parentId = (Integer) in.readObject();
         this.index = in.readInt();
         this.handleId = (Integer) in.readObject();
+//        restoreHandles();
         this.handle = (InternalFactHandle) in.readObject();
         this.parent = (LeftTuple) in.readObject();
         this.leftParent = (LeftTuple) in.readObject();
@@ -928,58 +928,28 @@ public class BaseLeftTuple
     }
 
     @Override
-    public void setHandleEntryPoint(WorkingMemoryEntryPoint tupleEntryPoint) {
-        if (handle != null) {
-            handle.setEntryPoint(tupleEntryPoint);
-        }
-        //set entry points for all left parents
-        LeftTuple temp = leftParent;
-        while(temp != null) {
-            temp.setHandleEntryPoint(tupleEntryPoint);
-            temp = temp.getLeftParent();
-        }
-    }
-
-    @Override
-    public void restoreTupleAfterSerialization(
-            InternalWorkingMemory workingMemory, Sink sink) {
-        restoreHandles(workingMemory);
-//        NodeContext nodeContext = NodeContext.getInstance();
-//        this.setSink((LeftTupleSink) nodeContext.getNode(this.getSinkId()));
-//        if (sink != null && this.getSinkId() == sink.getId()) {
-//            this.setSink((LeftTupleSink) sink);
-//        }
-//        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
-//                .getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
-//        this.setHandleEntryPoint(tupleEntryPoint);
+    public void restoreTupleAfterSerialization(Sink sink) {
+        restoreHandles();
     }
 
     /**
      * There is need to restore handle for current tuple as well as for parents.
      * 
-     * @param workingMemory
      */
-    private void restoreHandles(InternalWorkingMemory workingMemory) {
+    private void restoreHandles() {
         IDbTupleManager tupleManager = DbTupleManager.getInstance();
-
         this.setHandle((InternalFactHandle) tupleManager
-                .getFactHandle(this.handleId, workingMemory));
+                .getFactHandle(this.handleId));
         LeftTuple tempLeft = leftParent;
         while (tempLeft != null) {
-            restoreHandle(workingMemory, tupleManager, tempLeft);
+            restoreHandle(tupleManager, tempLeft);
             tempLeft = tempLeft.getLeftParent();
         }
         LeftTuple tempParent = parent;
-        while (tempParent  != null) {
-            restoreHandle(workingMemory, tupleManager, tempParent);
+        while (tempParent != null) {
+            restoreHandle(tupleManager, tempParent);
             tempParent = tempParent.getParent();
         }
-//        if (rightParent != null) {
-//            WorkingMemoryEntryPoint rightTupleEntryPoint = workingMemory
-//                    .getWorkingMemoryEntryPoint(rightParent
-//                            .getHandleEntryPointId());
-//            rightParent.setHandleEntryPoint(rightTupleEntryPoint);
-//        }
     }
 
     /**
@@ -987,13 +957,9 @@ public class BaseLeftTuple
      * @param tupleManager
      * @param temp
      */
-    private void restoreHandle(InternalWorkingMemory workingMemory,
-            IDbTupleManager tupleManager, LeftTuple temp) {
-        temp.setHandle((InternalFactHandle) tupleManager.getFactHandle(
-                temp.getHandleId(), workingMemory));
-//        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory
-//                .getWorkingMemoryEntryPoint(temp.getHandleEntryPointId());
-//        temp.setHandleEntryPoint(tupleEntryPoint);
+    private void restoreHandle(IDbTupleManager tupleManager, LeftTuple temp) {
+        temp.setHandle((InternalFactHandle) tupleManager.getFactHandle(temp
+                .getHandleId()));
     }
 
     @Override

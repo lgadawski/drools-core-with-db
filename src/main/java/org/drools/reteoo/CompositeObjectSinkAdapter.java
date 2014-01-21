@@ -462,7 +462,7 @@ public class CompositeObjectSinkAdapter extends AbstractObjectSinkAdapter {
         if (MyAppConfig.USE_DB) {
             if (freshFactHandle.getObject() == null) {
                 freshFactHandle = (InternalFactHandle) tupleManager
-                        .getFactHandle(handleId, workingMemory);
+                        .getFactHandle(handleId);
             }
         }
         return freshFactHandle;

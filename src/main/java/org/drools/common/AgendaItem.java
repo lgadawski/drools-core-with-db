@@ -529,7 +529,7 @@ public class AgendaItem
         this.setCurrentOTNforPropagationContext(getObjectTypeNode(
                 this.getCurrentOTNidforPropagationContext(), workingMemory));
         this.setAgendaGroup(group);
-        tuple.restoreTupleAfterSerialization(workingMemory, rtn);
+        tuple.restoreTupleAfterSerialization(rtn);
     }
     
     /**

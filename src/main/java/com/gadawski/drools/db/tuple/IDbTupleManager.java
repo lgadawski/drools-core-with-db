@@ -147,7 +147,7 @@ public interface IDbTupleManager {
      * @param workingMemory
      * @return fact handle for given id.
      */
-    Object getFactHandle(Integer handleId, InternalWorkingMemory workingMemory);
+    Object getFactHandle(Integer handleId);
 
     /**
      * @param tupleId

@@ -291,7 +291,7 @@ public abstract class LeftTupleSource extends BaseNode
         LeftTuple leftTuple = modifyPreviousTuples.peekLeftTuple();
         if (leftTuple != null) {
             if (MyAppConfig.USE_DB) {
-                leftTuple.restoreTupleAfterSerialization(workingMemory, sink);
+                leftTuple.restoreTupleAfterSerialization(sink);
             }
         }
         

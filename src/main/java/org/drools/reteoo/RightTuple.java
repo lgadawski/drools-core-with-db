@@ -23,7 +23,6 @@ import java.io.ObjectOutput;
 
 import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.InternalFactHandle;
-import org.drools.common.InternalWorkingMemory;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.RightTupleList;
 
@@ -66,7 +65,7 @@ public class RightTuple
      * 
      */
     protected int                         sinkId;
-    protected RightTupleSink     sink;
+    protected transient RightTupleSink     sink;
     /**
      * 
      */
@@ -337,9 +336,8 @@ public class RightTuple
      * @param workingMemory
      * @param sink
      */
-    public void restoreTupleAfterSerialization(
-            InternalWorkingMemory workingMemory, Sink sink) {
-//        restoreHandle();
+    public void restoreTupleAfterSerialization() {
+        restoreHandle();
 //        if (this.getSinkId() == sink.getId()) {
 //            this.setSink((RightTupleSink) sink);
 //        }
@@ -352,9 +350,9 @@ public class RightTuple
      * 
      * @param workingMemory
      */
-    private void restoreHandle(InternalWorkingMemory workingMemory) {
+    private void restoreHandle() {
         IDbTupleManager tupleManager = DbTupleManager.getInstance();
-        this.setHandle((InternalFactHandle) tupleManager.getFactHandle(this.handleId, workingMemory));
+        this.setHandle((InternalFactHandle) tupleManager.getFactHandle(this.handleId));
     }
 
     /**
@@ -362,6 +360,7 @@ public class RightTuple
      */
     private void setHandle(InternalFactHandle handle) {
         this.handle = handle;
+        this.handleId = handle.getId();
     }
 
     /**
