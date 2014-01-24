@@ -83,6 +83,10 @@ public class BaseLeftTuple
 
     private Object             object;
     /**
+     * Holds id of right tuple parent.
+     */
+    private Integer parentRightTupleId;
+    /**
      * 
      */
     private NodeContext m_nodeContext = NodeContext.getInstance();
@@ -173,6 +177,9 @@ public class BaseLeftTuple
         this.sink = sink;
         this.sinkId = sink.getId();
         this.parentId = leftTuple.getTupleId();
+        if (this.rightParent != null) {
+            this.setParentRightTupleId(this.rightParent.getTupleId());
+        }
         if (MyAppConfig.USE_DB) {
             m_tupleManager.updateRightTuple(rightTuple);
             m_tupleManager.saveFactHandle(this.handle);
@@ -255,6 +262,9 @@ public class BaseLeftTuple
             this.sinkId = sink.getId();
         }
         this.parentId = leftTuple.getTupleId();
+        if (this.rightParent != null) {
+            this.setParentRightTupleId(this.rightParent.getTupleId());
+        }
         if (MyAppConfig.USE_DB) {
             m_tupleManager.updateRightTuple(rightTuple);
             m_tupleManager.saveFactHandle(this.handle);
@@ -285,6 +295,7 @@ public class BaseLeftTuple
         this.sinkId = in.readInt();
         this.setSink((LeftTupleSink) m_nodeContext.getNode(this.sinkId));
         this.object = in.readObject();
+        this.setParentRightTupleId((Integer) in.readObject());
     }
 
     @Override
@@ -305,6 +316,7 @@ public class BaseLeftTuple
         out.writeObject(this.lastChild);
         out.writeInt(this.sinkId);
         out.writeObject(this.object);
+        out.writeObject(this.getParentRightTupleId());
     }
     
     /* (non-Javadoc)
@@ -523,6 +535,7 @@ public class BaseLeftTuple
      */
     public void setRightParent(RightTuple rightParent) {
         this.rightParent = rightParent;
+        this.setParentRightTupleId(rightParent.getTupleId());
     }
 
     /* (non-Javadoc)
@@ -1003,7 +1016,7 @@ public class BaseLeftTuple
      */
     @Override
     public void setTupleId(Integer tupleId) {
-//        this.tupleId = tupleId;
+        this.tupleId = tupleId;
     }
 
     @Override
@@ -1014,6 +1027,20 @@ public class BaseLeftTuple
     @Override
     public Integer getHandleId() {
         return handleId;
+    }
+
+    /**
+     * @return the parentRightTupleId
+     */
+    public Integer getParentRightTupleId() {
+        return parentRightTupleId;
+    }
+
+    /**
+     * @param parentRightTupleId the parentRightTupleId to set
+     */
+    public void setParentRightTupleId(Integer parentRightTupleId) {
+        this.parentRightTupleId = parentRightTupleId;
     }
 
 }

@@ -259,6 +259,12 @@ public class RuleTerminalNode extends AbstractTerminalNode {
 
         final InternalAgenda agenda = (InternalAgenda) workingMemory.getAgenda();
 
+        if (MyAppConfig.USE_DB) { // has to be saved before creating activation
+                                  // because agenda_item need tuple id
+            m_tupleManager = DbTupleManager.getInstance();
+            m_tupleManager.saveFactHandle(leftTuple.getHandle());
+            m_tupleManager.saveLeftTuple(leftTuple);
+        }
         boolean fire = agenda.createActivation( leftTuple, 
                                                 context, 
                                                 workingMemory, 
@@ -268,9 +274,6 @@ public class RuleTerminalNode extends AbstractTerminalNode {
             AgendaItem activation = (AgendaItem) leftTuple.getObject();
             if (MyAppConfig.USE_DB) {
                 agenda.addActivation(activation);
-                m_tupleManager = DbTupleManager.getInstance();
-                m_tupleManager.saveFactHandle(leftTuple.getHandle());
-                m_tupleManager.saveLeftTuple(leftTuple);
                 //release memory that holds leftTuple in AgendaItem
                 activation.nullTuples();
                 leftTuple.nullAll();

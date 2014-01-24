@@ -369,7 +369,7 @@ public class RightTuple
      * @param tupleId the tupleId to set
      */
     public void setTupleId(Integer tupleId) {
-//        this.tupleId = tupleId;
+        this.tupleId = tupleId;
     }
 
     /**

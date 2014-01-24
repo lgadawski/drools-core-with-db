@@ -163,7 +163,6 @@ public class AgendaItem
 
     public synchronized void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(this.tuple);
-//        out.writeLong(this.relationshipId);
         out.writeLong(this.m_ruleTerminalNodeId);
         out.writeInt(this.salience);
         out.writeInt(this.sequenence);

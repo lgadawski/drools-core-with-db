@@ -56,8 +56,9 @@ public class DbTupleManager implements IDbTupleManager {
         int sinkId = getSinkId(leftTuple.getSink());
         Integer parentId = leftTuple.getParentId();
         Integer handleId = leftTuple.getHandleId();
+        Integer parentRightTupleId = leftTuple.getParentRightTupleId();
         Integer tupleId = m_jdbcManager.saveLeftTuple(parentId, handleId,
-                sinkId, leftTuple);
+                parentRightTupleId, sinkId, leftTuple);
         if (tupleId != null) {
             leftTuple.setTupleId(tupleId);
         }
@@ -145,6 +146,14 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
+    public void removeRightTupleChilds(RightTuple rightTuple) {
+        Integer childRightTupleId = rightTuple.getTupleId();
+        if (childRightTupleId != null) {
+            m_jdbcManager.removeRightTupleChilds(childRightTupleId);
+        }
+    }
+
+    @Override
     public void removeRightTuple(RightTuple rightTuple) {
         Integer tupleId = rightTuple.getTupleId();
         if (tupleId != null) {
@@ -186,4 +195,5 @@ public class DbTupleManager implements IDbTupleManager {
         }
         return sinkId;
     }
+
 }

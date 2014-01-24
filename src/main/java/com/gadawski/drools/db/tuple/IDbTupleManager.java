@@ -156,4 +156,13 @@ public interface IDbTupleManager {
     Object getRightTuple(Integer tupleId);
 
     void updateRightTuple(RightTuple rightTuple);
+
+    /**
+     * Removes all left tuples associated with given right tuple that are
+     * rightTuple's childs.
+     * 
+     * @param rightTuple
+     *            - it's childs left tuples will be removed from db.
+     */
+    void removeRightTupleChilds(RightTuple rightTuple);
 }
