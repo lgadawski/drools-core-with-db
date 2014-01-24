@@ -74,7 +74,7 @@ public class DbAgendaItemGroup implements InternalAgendaGroup {
     }
 
     @Override
-    public void add(final org.drools.spi.Activation activation) {
+    public void add(final Activation activation) {
         m_dbAgendaItemManager.saveAgendaItem((AgendaItem) activation);
     }
 

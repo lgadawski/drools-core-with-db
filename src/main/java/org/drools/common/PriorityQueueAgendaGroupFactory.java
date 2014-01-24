@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import com.gadawski.drools.common.AgendaGroupContext;
 import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.DbAgendaItemGroup;
 
@@ -28,6 +29,8 @@ import com.gadawski.drools.db.DbAgendaItemGroup;
 public class PriorityQueueAgendaGroupFactory implements AgendaGroupFactory, Externalizable {
     private static final AgendaGroupFactory INSTANCE = new PriorityQueueAgendaGroupFactory();
 
+    private AgendaGroupContext m_agendaGroup = AgendaGroupContext.getInstance();
+    
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
     }
 
@@ -40,10 +43,13 @@ public class PriorityQueueAgendaGroupFactory implements AgendaGroupFactory, Exte
 
     public InternalAgendaGroup createAgendaGroup(String name, InternalRuleBase ruleBase) {
 //        return new SimpleAgendaGroup(name, ruleBase);
+        InternalAgendaGroup agendaGroup = null;
         if (MyAppConfig.USE_DB) {
-            return new DbAgendaItemGroup( name, ruleBase);
+            agendaGroup = new DbAgendaItemGroup(name, ruleBase);
+        } else {
+            agendaGroup = new BinaryHeapQueueAgendaGroup(name, ruleBase);
         }
-        return new BinaryHeapQueueAgendaGroup( name,
-                                    ruleBase );
+        m_agendaGroup .addAgendaGroup(name, agendaGroup);
+        return agendaGroup;
     }
 }

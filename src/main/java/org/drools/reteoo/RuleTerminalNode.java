@@ -245,11 +245,6 @@ public class RuleTerminalNode extends AbstractTerminalNode {
     public void assertLeftTuple(LeftTuple leftTuple,
                                 final PropagationContext context,
                                 final InternalWorkingMemory workingMemory) {
-        if (MyAppConfig.USE_DB) { 
-            m_tupleManager = DbTupleManager.getInstance();
-            m_tupleManager.saveFactHandle(leftTuple.getHandle());
-            m_tupleManager.saveLeftTuple(leftTuple);
-        }
         
         //check if the rule is not effective or
         // if the current Rule is no-loop and the origin rule is the same then return
@@ -273,6 +268,9 @@ public class RuleTerminalNode extends AbstractTerminalNode {
             AgendaItem activation = (AgendaItem) leftTuple.getObject();
             if (MyAppConfig.USE_DB) {
                 agenda.addActivation(activation);
+                m_tupleManager = DbTupleManager.getInstance();
+                m_tupleManager.saveFactHandle(leftTuple.getHandle());
+                m_tupleManager.saveLeftTuple(leftTuple);
                 //release memory that holds leftTuple in AgendaItem
                 activation.nullTuples();
                 leftTuple.nullAll();

@@ -1,4 +1,4 @@
-package com.gadawski.drools.reteoo.builder;
+package com.gadawski.drools.common;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +35,11 @@ public class NodeContext {
      */
     public static synchronized NodeContext getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new NodeContext();
+            synchronized (NodeContext.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new NodeContext();
+                }
+            }
         }
         return INSTANCE;
     }

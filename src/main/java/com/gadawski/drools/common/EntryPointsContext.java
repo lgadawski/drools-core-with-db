@@ -7,7 +7,7 @@ import org.drools.WorkingMemoryEntryPoint;
 
 /**
  * @author l.gadawski@gmail.com
- *
+ * 
  */
 public class EntryPointsContext {
     /**
@@ -17,8 +17,7 @@ public class EntryPointsContext {
     /**
      * 
      */
-    private Map<String, WorkingMemoryEntryPoint> m_entryPoints = 
-            new ConcurrentHashMap<String, WorkingMemoryEntryPoint>();
+    private Map<String, WorkingMemoryEntryPoint> m_entryPoints = new ConcurrentHashMap<String, WorkingMemoryEntryPoint>();
 
     /**
      * 
@@ -33,7 +32,11 @@ public class EntryPointsContext {
      */
     public static synchronized EntryPointsContext getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new EntryPointsContext();
+            synchronized (EntryPointsContext.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new EntryPointsContext();
+                }
+            }
         }
         return INSTANCE;
     }
@@ -50,7 +53,7 @@ public class EntryPointsContext {
      * @return
      */
     public WorkingMemoryEntryPoint getWorkingMemoryEntryPoint(String name) {
-        WorkingMemoryEntryPoint wmEntryPoint = this.m_entryPoints.get( name );
+        WorkingMemoryEntryPoint wmEntryPoint = this.m_entryPoints.get(name);
         return wmEntryPoint;
     }
 }

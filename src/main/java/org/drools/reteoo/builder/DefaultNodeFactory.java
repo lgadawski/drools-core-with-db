@@ -39,7 +39,7 @@ import org.drools.spi.AlphaNodeFieldConstraint;
 import org.drools.spi.DataProvider;
 import org.drools.spi.ObjectType;
 
-import com.gadawski.drools.reteoo.builder.NodeContext;
+import com.gadawski.drools.common.NodeContext;
 
 import java.io.Serializable;
 

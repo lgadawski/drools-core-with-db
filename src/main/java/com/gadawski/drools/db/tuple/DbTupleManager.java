@@ -37,7 +37,11 @@ public class DbTupleManager implements IDbTupleManager {
      */
     public static synchronized DbTupleManager getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new DbTupleManager();
+            synchronized (DbTupleManager.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new DbTupleManager();
+                }
+            }
             return INSTANCE;
         }
         return INSTANCE;
@@ -54,7 +58,9 @@ public class DbTupleManager implements IDbTupleManager {
         Integer handleId = leftTuple.getHandleId();
         Integer tupleId = m_jdbcManager.saveLeftTuple(parentId, handleId,
                 sinkId, leftTuple);
-        leftTuple.setTupleId(tupleId);
+        if (tupleId != null) {
+            leftTuple.setTupleId(tupleId);
+        }
         return tupleId;
     }
 
@@ -98,7 +104,7 @@ public class DbTupleManager implements IDbTupleManager {
 
     @Override
     public Object getRightTuple(Integer tupleId) {
-        RightTuple tuple =  (RightTuple) m_jdbcManager.getRightTuple(tupleId);
+        RightTuple tuple = (RightTuple) m_jdbcManager.getRightTuple(tupleId);
         tuple.restoreTupleAfterSerialization();
         return tuple;
     }
@@ -140,19 +146,26 @@ public class DbTupleManager implements IDbTupleManager {
 
     @Override
     public void removeRightTuple(RightTuple rightTuple) {
-        m_jdbcManager.removeRightTuple(rightTuple.getTupleId(),
-                rightTuple.getSinkId());
+        Integer tupleId = rightTuple.getTupleId();
+        if (tupleId != null) {
+            m_jdbcManager.removeRightTuple(tupleId, rightTuple.getSinkId());
+        }
     }
 
     @Override
     public void removeLeftTuple(LeftTuple leftTuple) {
-        m_jdbcManager.removeLeftTuple(leftTuple.getTupleId(),
-                leftTuple.getSinkId());
+        Integer tupleId = leftTuple.getTupleId();
+        if (tupleId != null) {
+            m_jdbcManager.removeLeftTuple(tupleId, leftTuple.getSinkId());
+        }
     }
 
     @Override
     public void retractFactHandle(InternalFactHandle factHandle) {
-        m_jdbcManager.removeFactHandle(factHandle.getId());
+        int id = factHandle.getId();
+        if (id >= 0) {
+            m_jdbcManager.removeFactHandle(id);
+        }
     }
 
     @Override

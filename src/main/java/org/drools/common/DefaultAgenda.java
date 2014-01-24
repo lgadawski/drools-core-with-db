@@ -1256,7 +1256,7 @@ public class DefaultAgenda
     private AgendaItem getNextAgendaItem(InternalAgendaGroup group) {
         AgendaItem item = (AgendaItem) group.getNext();
         if (MyAppConfig.USE_DB) {
-            item.restoreAgendaItemAfterSerialization(workingMemory, group);
+            item.restoreAgendaItemAfterSerialization();
         }
         return item;
     }

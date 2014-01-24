@@ -26,9 +26,9 @@ import org.drools.common.InternalFactHandle;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.RightTupleList;
 
+import com.gadawski.drools.common.NodeContext;
 import com.gadawski.drools.db.tuple.DbTupleManager;
 import com.gadawski.drools.db.tuple.IDbTupleManager;
-import com.gadawski.drools.reteoo.builder.NodeContext;
 
 public class RightTuple
     implements
@@ -338,11 +338,6 @@ public class RightTuple
      */
     public void restoreTupleAfterSerialization() {
         restoreHandle();
-//        if (this.getSinkId() == sink.getId()) {
-//            this.setSink((RightTupleSink) sink);
-//        }
-//        WorkingMemoryEntryPoint tupleEntryPoint = workingMemory.getWorkingMemoryEntryPoint(this.getHandleEntryPointId());
-//        this.setHandleEntryPoint(tupleEntryPoint);
     }
 
     /**
@@ -374,7 +369,7 @@ public class RightTuple
      * @param tupleId the tupleId to set
      */
     public void setTupleId(Integer tupleId) {
-        this.tupleId = tupleId;
+//        this.tupleId = tupleId;
     }
 
     /**

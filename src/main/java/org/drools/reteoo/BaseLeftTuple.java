@@ -21,7 +21,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Arrays;
 
-import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.EventFactHandle;
 import org.drools.common.InternalFactHandle;
 import org.drools.core.util.Entry;
@@ -29,10 +28,10 @@ import org.drools.core.util.index.LeftTupleList;
 import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
+import com.gadawski.drools.common.NodeContext;
 import com.gadawski.drools.config.MyAppConfig;
 import com.gadawski.drools.db.tuple.DbTupleManager;
 import com.gadawski.drools.db.tuple.IDbTupleManager;
-import com.gadawski.drools.reteoo.builder.NodeContext;
 
 /**
  * A parent class for all specific LeftTuple specializations
@@ -138,6 +137,9 @@ public class BaseLeftTuple
             this.sinkId = sink.getId();
         }
         this.parentId = leftTuple.getTupleId();
+        if (MyAppConfig.USE_DB) {
+            m_tupleManager.saveFactHandle(this.handle);
+        }
     }
     
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -173,6 +175,8 @@ public class BaseLeftTuple
         this.parentId = leftTuple.getTupleId();
         if (MyAppConfig.USE_DB) {
             m_tupleManager.updateRightTuple(rightTuple);
+            m_tupleManager.saveFactHandle(this.handle);
+            m_tupleManager.saveLeftTuple(this.getLeftParent());
         }
     }    
 
@@ -253,6 +257,10 @@ public class BaseLeftTuple
         this.parentId = leftTuple.getTupleId();
         if (MyAppConfig.USE_DB) {
             m_tupleManager.updateRightTuple(rightTuple);
+            m_tupleManager.saveFactHandle(this.handle);
+            if (this.leftParent != null) {
+                m_tupleManager.saveLeftTuple(this.leftParent);
+            }
         }
     }
 
@@ -995,7 +1003,7 @@ public class BaseLeftTuple
      */
     @Override
     public void setTupleId(Integer tupleId) {
-        this.tupleId = tupleId;
+//        this.tupleId = tupleId;
     }
 
     @Override

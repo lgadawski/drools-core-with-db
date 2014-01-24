@@ -32,6 +32,8 @@ import org.drools.rule.Rule;
 import org.drools.spi.ObjectType;
 import org.drools.spi.PropagationContext;
 
+import com.gadawski.drools.common.NodeContext;
+
 public class PropagationContextImpl
     implements
     PropagationContext {
@@ -64,7 +66,7 @@ public class PropagationContextImpl
      * CurrentProgatingOTN id, trick useful for serialization. Because
      * serializing {@link ObjectTypeNode} was problematic.
      */
-    private Long currentPropagatingOTNid;
+    private int currentPropagatingOTNid;
     
     private boolean            shouldPropagateAll;
     
@@ -81,6 +83,8 @@ public class PropagationContextImpl
     // this field is only set for propagations happening during 
     // the deserialization of a session
     private MarshallerReaderContext readerContext;
+
+    private NodeContext m_nodeContext = NodeContext.getInstance();
 
 
     public PropagationContextImpl() {
@@ -202,8 +206,10 @@ public class PropagationContextImpl
         this.entryPoint = (EntryPoint) in.readObject();
         this.originOffset = in.readInt();
         this.propagationAttempts = (ObjectHashSet) in.readObject();
-        this.currentPropagatingOTNid = in.readLong();
-//        this.currentPropagatingOTN = (ObjectTypeNode) in.readObject();
+        this.currentPropagatingOTNid = in.readInt();
+        this.setCurrentPropagatingOTN((ObjectTypeNode) m_nodeContext
+                .getNode(this.currentPropagatingOTNid));
+        // this.currentPropagatingOTN = (ObjectTypeNode) in.readObject();
         this.shouldPropagateAll = in.readBoolean();        
         this.modificationMask = in.readLong();
     }
@@ -219,9 +225,9 @@ public class PropagationContextImpl
         out.writeInt( this.originOffset );
         out.writeObject( this.propagationAttempts );
         if (currentPropagatingOTN != null) {
-            out.writeLong( this.currentPropagatingOTN.getId() );
+            out.writeInt( this.currentPropagatingOTN.getId() );
         } else {
-            out.writeLong(-1L);
+            out.writeInt(-1);
         }
 //        out.writeObject( this.currentPropagatingOTN );
         out.writeBoolean( this.shouldPropagateAll );
@@ -412,12 +418,12 @@ public class PropagationContextImpl
     }
 
     @Override
-    public long getCurrentPropagatingOTNid() {
+    public int getCurrentPropagatingOTNid() {
         return currentPropagatingOTNid;
     }
 
     @Override
-    public void setCurrentPropagatingOTNid(long currentPropagatingOTNid) {
+    public void setCurrentPropagatingOTNid(int currentPropagatingOTNid) {
         this.currentPropagatingOTNid = currentPropagatingOTNid;
     }
 }

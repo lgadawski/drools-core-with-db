@@ -23,7 +23,6 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.drools.FactHandle;
 import org.drools.core.util.LinkedList;
@@ -39,10 +38,10 @@ import org.drools.rule.Rule;
 import org.drools.spi.Activation;
 import org.drools.spi.AgendaGroup;
 import org.drools.spi.Consequence;
-import org.drools.spi.ObjectType;
 import org.drools.spi.PropagationContext;
 
-import com.gadawski.drools.reteoo.builder.NodeContext;
+import com.gadawski.drools.common.AgendaGroupContext;
+import com.gadawski.drools.common.NodeContext;
 
 /**
  * Item entry in the <code>Agenda</code>.
@@ -89,7 +88,7 @@ public class AgendaItem
 
     private boolean                   activated;
 
-    private InternalAgendaGroup       agendaGroup;
+    private transient InternalAgendaGroup       agendaGroup;
 
     private transient ActivationGroupNode       activationGroupNode;
 
@@ -102,6 +101,10 @@ public class AgendaItem
     private boolean                   matched;
 
     private transient ActivationUnMatchListener activationUnMatchListener;
+
+    private NodeContext m_nodeContex = NodeContext.getInstance();
+
+    private AgendaGroupContext m_AgendaGroupContext = AgendaGroupContext.getInstance();
     
     // ------------------------------------------------------------
     // Constructors
@@ -143,6 +146,8 @@ public class AgendaItem
             ClassNotFoundException {
         this.tuple = (LeftTuple) in.readObject();
         this.m_ruleTerminalNodeId = in.readLong();
+        this.setRuleTerminalNode((RuleTerminalNode) m_nodeContex
+                .getNode((int) this.m_ruleTerminalNodeId));
         this.salience = in.readInt();
         this.sequenence = in.readInt();
         this.context = (PropagationContext) in.readObject();
@@ -152,6 +157,8 @@ public class AgendaItem
         this.activated = in.readBoolean();
 //        this.agendaGroup = (InternalAgendaGroup) in.readObject();
         this.matched = in.readBoolean();
+        this.setAgendaGroup(m_AgendaGroupContext.get(rtn.getRule()
+                .getAgendaGroup()));
     }
 
     public synchronized void writeExternal(ObjectOutput out) throws IOException {
@@ -520,58 +527,8 @@ public class AgendaItem
      * @param workingMemory
      * @param group
      */
-    public void restoreAgendaItemAfterSerialization(
-            InternalWorkingMemory workingMemory, InternalAgendaGroup group) {
-        NodeContext nodeContext = NodeContext.getInstance();
-        this.setRuleTerminalNode((RuleTerminalNode) nodeContext
-                .getNode((int) this.getRuleTerminalNodeId()));
-//        getRuleTerminalNodethis.getRuleTerminalNodeId(), workingMemory));
-        this.setCurrentOTNforPropagationContext(getObjectTypeNode(
-                this.getCurrentOTNidforPropagationContext(), workingMemory));
-        this.setAgendaGroup(group);
+    public void restoreAgendaItemAfterSerialization() {
         tuple.restoreTupleAfterSerialization(rtn);
-    }
-    
-    /**
-     * Find {@link ObjectTypeNode} for given nodeId.
-     * 
-     * @param nodeId
-     * @return {@link ObjectTypeNode} if node has been found, null otherwise.
-     */
-    private ObjectTypeNode getObjectTypeNode(final long nodeId,
-            InternalWorkingMemory workingMemory) {
-        Map<ObjectType, ObjectTypeNode> map = workingMemory.getEntryPointNode()
-                .getObjectTypeNodes();
-        for (ObjectType type : map.keySet()) {
-            ObjectTypeNode objectTypeNode = map.get(type);
-            if (objectTypeNode.getId() == nodeId) {
-                return objectTypeNode;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Iterates over terminal nodes and returns {@link RuleTerminalNode} if
-     * exists for given rtnId.
-     * 
-     * @param rtnId
-     * @return
-     */
-    private RuleTerminalNode getRuleTerminalNode(long rtnId,
-            InternalWorkingMemory workingMemory) {
-        @SuppressWarnings("rawtypes")
-        org.drools.core.util.Iterator nodeIter = TerminalNodeIterator
-                .iterator(workingMemory.getKnowledgeRuntime()
-                        .getKnowledgeBase());
-        RuleTerminalNode node;
-        while ((node = (RuleTerminalNode) nodeIter.next()) != null) {
-            if (node.getId() == rtnId) {
-                return node;
-            }
-        }
-        // possible null pointer exception!
-        return null;
     }
 
     public void nullTuples() {

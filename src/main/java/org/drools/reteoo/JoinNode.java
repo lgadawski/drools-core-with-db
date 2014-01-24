@@ -153,7 +153,7 @@ public class JoinNode extends BetaNode {
             while (resultSet.next()) {
                 RightTuple tuple = (RightTuple) m_tupleManager
                         .readRightTuple(resultSet, workingMemory, this);
-//                tuple.restoreTupleAfterSerialization(workingMemory, this);
+                tuple.restoreTupleAfterSerialization();
                 propagateFromLeft(tuple, leftTuple, contextEntry,
                         useLeftMemory, context, workingMemory);
             }
@@ -303,9 +303,7 @@ public class JoinNode extends BetaNode {
         }
 
         if (MyAppConfig.USE_DB) {
-            if (rightTuple.getTupleId() != null) {
-                m_tupleManager.removeRightTuple(rightTuple);
-            }
+            m_tupleManager.removeRightTuple(rightTuple);
         } else {
             memory.getRightTupleMemory().remove( rightTuple );
         }
@@ -328,9 +326,7 @@ public class JoinNode extends BetaNode {
         }
 
         if (MyAppConfig.USE_DB) {
-            if (leftTuple.getTupleId() != null) {
-                m_tupleManager.removeLeftTuple(leftTuple);
-            }
+            m_tupleManager.removeLeftTuple(leftTuple);
         } else {
             memory.getLeftTupleMemory().remove( leftTuple );
         }
