@@ -144,7 +144,7 @@ public interface LeftTuple extends Entry, Tuple {
      * @param workingMemory
      * @param joinNode
      */
-    void restoreTupleAfterSerialization(Sink sink);
+    void restoreTupleAfterSerialization();
 
     void nullAll();
 

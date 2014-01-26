@@ -527,7 +527,7 @@ public class AgendaItem
      * @param group
      */
     public void restoreAgendaItemAfterSerialization() {
-        tuple.restoreTupleAfterSerialization(rtn);
+        tuple.restoreTupleAfterSerialization();
     }
 
     public void nullTuples() {

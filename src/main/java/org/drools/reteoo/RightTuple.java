@@ -337,7 +337,7 @@ public class RightTuple
      * @param sink
      */
     public void restoreTupleAfterSerialization() {
-        restoreHandle();
+//        restoreHandle();
     }
 
     /**

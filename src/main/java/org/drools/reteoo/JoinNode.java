@@ -257,8 +257,8 @@ public class JoinNode extends BetaNode {
             statement.setFetchSize(JdbcManagerUtil.FETCH_SIZE);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                LeftTuple tuple = (LeftTuple) m_tupleManager.readLeftTuple(
-                        resultSet, workingMemory, this);
+                LeftTuple tuple = (LeftTuple) m_tupleManager
+                        .readLeftTuple(resultSet);
                 propagateFromRight(rightTuple, tuple, memory, context,
                         workingMemory);
                 if (tupleId != null) {

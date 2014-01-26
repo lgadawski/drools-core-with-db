@@ -33,7 +33,7 @@ import com.gadawski.drools.db.tuple.IDbTupleManager;
 public class SingleLeftTupleSinkAdapter extends AbstractLeftTupleSinkAdapter {
     protected LeftTupleSink sink;
     private IDbTupleManager m_tupleManager = DbTupleManager.getInstance();
-
+    
     public SingleLeftTupleSinkAdapter() {
         this( RuleBasePartitionId.MAIN_PARTITION,
               null );
@@ -131,6 +131,7 @@ public class SingleLeftTupleSinkAdapter extends AbstractLeftTupleSinkAdapter {
                                            final PropagationContext context,
                                            final InternalWorkingMemory workingMemory) {
         LeftTuple child = rightTuple.firstChild;
+
         if (MyAppConfig.USE_DB) {
             m_tupleManager.removeRightTupleChilds(rightTuple);
         }

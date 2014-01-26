@@ -141,9 +141,9 @@ public class BaseLeftTuple
             this.sinkId = sink.getId();
         }
         this.parentId = leftTuple.getTupleId();
-        if (MyAppConfig.USE_DB) {
-            m_tupleManager.saveFactHandle(this.handle);
-        }
+//        if (MyAppConfig.USE_DB) {
+//            m_tupleManager.saveFactHandle(this.handle);
+//        }
     }
     
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -180,11 +180,11 @@ public class BaseLeftTuple
         if (this.rightParent != null) {
             this.setParentRightTupleId(this.rightParent.getTupleId());
         }
-        if (MyAppConfig.USE_DB) {
-            m_tupleManager.updateRightTuple(rightTuple);
-            m_tupleManager.saveFactHandle(this.handle);
-            m_tupleManager.saveLeftTuple(this.getLeftParent());
-        }
+//        if (MyAppConfig.USE_DB) {
+//            m_tupleManager.updateRightTuple(rightTuple);
+//            m_tupleManager.saveFactHandle(this.handle);
+//            m_tupleManager.saveLeftTuple(this.getLeftParent());
+//        }
     }    
 
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -265,13 +265,13 @@ public class BaseLeftTuple
         if (this.rightParent != null) {
             this.setParentRightTupleId(this.rightParent.getTupleId());
         }
-        if (MyAppConfig.USE_DB) {
-            m_tupleManager.updateRightTuple(rightTuple);
-            m_tupleManager.saveFactHandle(this.handle);
-            if (this.leftParent != null) {
-                m_tupleManager.saveLeftTuple(this.leftParent);
-            }
-        }
+//        if (MyAppConfig.USE_DB) {
+//            m_tupleManager.updateRightTuple(rightTuple);
+//            m_tupleManager.saveFactHandle(this.handle);
+//            if (this.leftParent != null) {
+//                m_tupleManager.saveLeftTuple(this.leftParent);
+//            }
+//        }
     }
 
     @Override
@@ -949,8 +949,8 @@ public class BaseLeftTuple
     }
 
     @Override
-    public void restoreTupleAfterSerialization(Sink sink) {
-        restoreHandles();
+    public void restoreTupleAfterSerialization() {
+//        restoreHandles();
     }
 
     /**
@@ -963,12 +963,12 @@ public class BaseLeftTuple
                 .getFactHandle(this.handleId));
         LeftTuple tempLeft = leftParent;
         while (tempLeft != null) {
-            restoreHandle(tupleManager, tempLeft);
+            restoreHandle(tempLeft);
             tempLeft = tempLeft.getLeftParent();
         }
         LeftTuple tempParent = parent;
         while (tempParent != null) {
-            restoreHandle(tupleManager, tempParent);
+            restoreHandle(tempParent);
             tempParent = tempParent.getParent();
         }
     }
@@ -978,9 +978,10 @@ public class BaseLeftTuple
      * @param tupleManager
      * @param temp
      */
-    private void restoreHandle(IDbTupleManager tupleManager, LeftTuple temp) {
-        temp.setHandle((InternalFactHandle) tupleManager.getFactHandle(temp
-                .getHandleId()));
+    private void restoreHandle(LeftTuple temp) {
+        InternalFactHandle factHandle = m_tupleManager.getFactHandle(temp
+                .getHandleId());
+        temp.setHandle(factHandle);
     }
 
     @Override

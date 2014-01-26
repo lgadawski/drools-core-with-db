@@ -3,6 +3,7 @@ package com.gadawski.drools.db;
 import org.drools.common.AgendaItem;
 import org.drools.spi.Activation;
 
+import com.gadawski.drools.exceptions.NoLeftTupleIdForAgendaItem;
 import com.gadawski.util.db.jdbc.JdbcManagerUtil;
 
 public class DbAgendaItemManager implements IAgendaItemManager {
@@ -36,7 +37,15 @@ public class DbAgendaItemManager implements IAgendaItemManager {
 
     @Override
     public void saveAgendaItem(AgendaItem item) {
-        m_jdbcAgendaItemManagerUtil.saveAgendaItem(item.getTupleId(), item);
+        try {
+            Integer tupleId = item.getTupleId();
+            m_jdbcAgendaItemManagerUtil.saveAgendaItem(tupleId, item);
+            if (tupleId == null || tupleId == -1) {
+                throw new NoLeftTupleIdForAgendaItem("No left tuple id!");
+            }
+        } catch (NoLeftTupleIdForAgendaItem e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -71,7 +80,8 @@ public class DbAgendaItemManager implements IAgendaItemManager {
 
     @Override
     public void removeAgendaItem(final AgendaItem agendaItem) {
-        m_jdbcAgendaItemManagerUtil.removeAgendaItemByLeftTupleId(agendaItem.getTupleId());
+        m_jdbcAgendaItemManagerUtil.removeAgendaItemByLeftTupleId(agendaItem
+                .getTupleId());
     }
 
     /**

@@ -79,8 +79,7 @@ public interface IDbTupleManager {
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    Object readLeftTuple(ResultSet resultSet,
-            InternalWorkingMemory workingMemory, Sink sink) throws IOException,
+    Object readLeftTuple(ResultSet resultSet) throws IOException,
             ClassNotFoundException, SQLException;
 
     /**
@@ -147,7 +146,7 @@ public interface IDbTupleManager {
      * @param workingMemory
      * @return fact handle for given id.
      */
-    Object getFactHandle(Integer handleId);
+    InternalFactHandle getFactHandle(Integer handleId);
 
     /**
      * @param tupleId

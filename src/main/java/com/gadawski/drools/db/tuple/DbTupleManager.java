@@ -59,7 +59,7 @@ public class DbTupleManager implements IDbTupleManager {
         Integer parentRightTupleId = leftTuple.getParentRightTupleId();
         Integer tupleId = m_jdbcManager.saveLeftTuple(parentId, handleId,
                 parentRightTupleId, sinkId, leftTuple);
-        if (tupleId != null) {
+        if (tupleId != null && tupleId != -1) {
             leftTuple.setTupleId(tupleId);
         }
         return tupleId;
@@ -71,7 +71,9 @@ public class DbTupleManager implements IDbTupleManager {
         Integer handleId = rightTuple.getHandleId();
         int tupleId = m_jdbcManager
                 .saveRightTuple(handleId, sinkId, rightTuple);
-        rightTuple.setTupleId(tupleId);
+        if (tupleId != -1) {
+            rightTuple.setTupleId(tupleId);
+        }
         return tupleId;
     }
 
@@ -97,7 +99,7 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
-    public Object getFactHandle(Integer handleId) {
+    public InternalFactHandle getFactHandle(Integer handleId) {
         InternalFactHandle handle = (InternalFactHandle) m_jdbcManager
                 .getFactHandle(handleId);
         return handle;
@@ -106,7 +108,7 @@ public class DbTupleManager implements IDbTupleManager {
     @Override
     public Object getRightTuple(Integer tupleId) {
         RightTuple tuple = (RightTuple) m_jdbcManager.getRightTuple(tupleId);
-        tuple.restoreTupleAfterSerialization();
+//        tuple.restoreTupleAfterSerialization();
         return tuple;
     }
 
@@ -120,12 +122,11 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
-    public LeftTuple readLeftTuple(ResultSet resultSet,
-            InternalWorkingMemory workingMemory, Sink sink) throws IOException,
+    public LeftTuple readLeftTuple(ResultSet resultSet) throws IOException,
             ClassNotFoundException, SQLException {
         LeftTuple tuple = (LeftTuple) m_jdbcManager.readObject(resultSet);
         tuple.setTupleId(m_jdbcManager.readLeftTupleId(resultSet));
-        tuple.restoreTupleAfterSerialization(sink);
+        tuple.restoreTupleAfterSerialization();
         return tuple;
     }
 
