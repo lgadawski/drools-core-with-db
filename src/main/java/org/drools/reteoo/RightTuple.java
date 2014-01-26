@@ -21,14 +21,11 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.drools.WorkingMemoryEntryPoint;
 import org.drools.common.InternalFactHandle;
 import org.drools.core.util.Entry;
 import org.drools.core.util.index.RightTupleList;
 
 import com.gadawski.drools.common.NodeContext;
-import com.gadawski.drools.db.tuple.DbTupleManager;
-import com.gadawski.drools.db.tuple.IDbTupleManager;
 
 public class RightTuple
     implements
@@ -310,15 +307,6 @@ public class RightTuple
     }
 
     /**
-     * @param tupleEntryPoint
-     */
-    public void setHandleEntryPoint(WorkingMemoryEntryPoint tupleEntryPoint) {
-        if (handle != null) {
-            handle.setEntryPoint(tupleEntryPoint);
-        }
-    }
-
-    /**
      * @return
      */
     public int getSinkId() {
@@ -330,32 +318,6 @@ public class RightTuple
      */
     public void setSink(RightTupleSink sink) {
         this.sink = sink;
-    }
-
-    /**
-     * @param workingMemory
-     * @param sink
-     */
-    public void restoreTupleAfterSerialization() {
-//        restoreHandle();
-    }
-
-    /**
-     * Based on handleId restore handle from db.
-     * 
-     * @param workingMemory
-     */
-    private void restoreHandle() {
-        IDbTupleManager tupleManager = DbTupleManager.getInstance();
-        this.setHandle((InternalFactHandle) tupleManager.getFactHandle(this.handleId));
-    }
-
-    /**
-     * @param handle
-     */
-    private void setHandle(InternalFactHandle handle) {
-        this.handle = handle;
-        this.handleId = handle.getId();
     }
 
     /**

@@ -152,8 +152,7 @@ public class JoinNode extends BetaNode {
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 RightTuple tuple = (RightTuple) m_tupleManager
-                        .readRightTuple(resultSet, workingMemory, this);
-                tuple.restoreTupleAfterSerialization();
+                        .readRightTuple(resultSet);
                 propagateFromLeft(tuple, leftTuple, contextEntry,
                         useLeftMemory, context, workingMemory);
             }

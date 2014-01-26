@@ -16,6 +16,12 @@
 
 package org.drools.reteoo;
 
+import static org.drools.core.util.BitMaskUtil.intersect;
+import static org.drools.reteoo.PropertySpecificUtil.calculateNegativeMask;
+import static org.drools.reteoo.PropertySpecificUtil.calculatePositiveMask;
+import static org.drools.reteoo.PropertySpecificUtil.getSettableProperties;
+import static org.drools.reteoo.PropertySpecificUtil.isPropertyReactive;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -32,14 +38,6 @@ import org.drools.rule.Pattern;
 import org.drools.spi.ClassWireable;
 import org.drools.spi.ObjectType;
 import org.drools.spi.PropagationContext;
-
-import com.gadawski.drools.config.MyAppConfig;
-
-import static org.drools.core.util.BitMaskUtil.intersect;
-import static org.drools.reteoo.PropertySpecificUtil.calculateNegativeMask;
-import static org.drools.reteoo.PropertySpecificUtil.calculatePositiveMask;
-import static org.drools.reteoo.PropertySpecificUtil.getSettableProperties;
-import static org.drools.reteoo.PropertySpecificUtil.isPropertyReactive;
 
 /**
  * A source of <code>ReteTuple</code> s for a <code>TupleSink</code>.
@@ -289,11 +287,6 @@ public abstract class LeftTupleSource extends BaseNode
                                          int leftInputOtnId,
                                          long leftInferredMask) {
         LeftTuple leftTuple = modifyPreviousTuples.peekLeftTuple();
-        if (leftTuple != null) {
-            if (MyAppConfig.USE_DB) {
-                leftTuple.restoreTupleAfterSerialization();
-            }
-        }
         
         while ( leftTuple != null && leftTuple.getLeftTupleSink().getLeftInputOtnId() < leftInputOtnId ) {
             modifyPreviousTuples.removeLeftTuple();

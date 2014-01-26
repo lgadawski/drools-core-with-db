@@ -8,10 +8,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.drools.common.InternalFactHandle;
-import org.drools.common.InternalWorkingMemory;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.RightTuple;
-import org.drools.reteoo.Sink;
 
 /**
  * @author l.gadawski@gmail.com
@@ -66,8 +64,7 @@ public interface IDbTupleManager {
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    Object readRightTuple(ResultSet resultSet,
-            InternalWorkingMemory workingMemory, Sink sink) throws IOException,
+    Object readRightTuple(ResultSet resultSet) throws IOException,
             ClassNotFoundException, SQLException;
 
     /**
@@ -154,6 +151,9 @@ public interface IDbTupleManager {
      */
     Object getRightTuple(Integer tupleId);
 
+    /**
+     * @param rightTuple
+     */
     void updateRightTuple(RightTuple rightTuple);
 
     /**

@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.drools.common.InternalFactHandle;
-import org.drools.common.InternalWorkingMemory;
 import org.drools.reteoo.LeftTuple;
 import org.drools.reteoo.RightTuple;
 import org.drools.reteoo.Sink;
@@ -108,16 +107,13 @@ public class DbTupleManager implements IDbTupleManager {
     @Override
     public Object getRightTuple(Integer tupleId) {
         RightTuple tuple = (RightTuple) m_jdbcManager.getRightTuple(tupleId);
-//        tuple.restoreTupleAfterSerialization();
         return tuple;
     }
 
     @Override
-    public RightTuple readRightTuple(ResultSet resultSet,
-            InternalWorkingMemory workingMemory, Sink sink) throws IOException,
+    public RightTuple readRightTuple(ResultSet resultSet) throws IOException,
             ClassNotFoundException, SQLException {
         RightTuple tuple = (RightTuple) m_jdbcManager.readObject(resultSet);
-        tuple.restoreTupleAfterSerialization();
         return tuple;
     }
 
@@ -126,7 +122,6 @@ public class DbTupleManager implements IDbTupleManager {
             ClassNotFoundException, SQLException {
         LeftTuple tuple = (LeftTuple) m_jdbcManager.readObject(resultSet);
         tuple.setTupleId(m_jdbcManager.readLeftTupleId(resultSet));
-        tuple.restoreTupleAfterSerialization();
         return tuple;
     }
 

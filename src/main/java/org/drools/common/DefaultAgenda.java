@@ -53,8 +53,6 @@ import org.drools.spi.RuleFlowGroup;
 import org.drools.time.impl.ExpressionIntervalTimer;
 import org.drools.time.impl.Timer;
 
-import com.gadawski.drools.config.MyAppConfig;
-
 /**
  * Rule-firing Agenda.
  * 
@@ -1255,9 +1253,6 @@ public class DefaultAgenda
      */
     private AgendaItem getNextAgendaItem(InternalAgendaGroup group) {
         AgendaItem item = (AgendaItem) group.getNext();
-        if (MyAppConfig.USE_DB) {
-            item.restoreAgendaItemAfterSerialization();
-        }
         return item;
     }
 

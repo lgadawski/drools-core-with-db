@@ -519,17 +519,6 @@ public class AgendaItem
         getPropagationContext().setCurrentPropagatingOTN(objectTypeNode);
     }
 
-    /**
-     * Restore necessary references after serialization based on workingMemory
-     * and agendaGroup.
-     * 
-     * @param workingMemory
-     * @param group
-     */
-    public void restoreAgendaItemAfterSerialization() {
-        tuple.restoreTupleAfterSerialization();
-    }
-
     public void nullTuples() {
         if (factHandle != null) {
             factHandle.nullAll();

@@ -29,9 +29,6 @@ import org.drools.rule.Declaration;
 import org.drools.spi.Tuple;
 
 import com.gadawski.drools.common.NodeContext;
-import com.gadawski.drools.config.MyAppConfig;
-import com.gadawski.drools.db.tuple.DbTupleManager;
-import com.gadawski.drools.db.tuple.IDbTupleManager;
 
 /**
  * A parent class for all specific LeftTuple specializations
@@ -90,10 +87,6 @@ public class BaseLeftTuple
      * 
      */
     private NodeContext m_nodeContext = NodeContext.getInstance();
-    /**
-     * 
-     */
-    private IDbTupleManager m_tupleManager = DbTupleManager.getInstance();
 
     public BaseLeftTuple() {
         // constructor needed for serialisation
@@ -141,9 +134,6 @@ public class BaseLeftTuple
             this.sinkId = sink.getId();
         }
         this.parentId = leftTuple.getTupleId();
-//        if (MyAppConfig.USE_DB) {
-//            m_tupleManager.saveFactHandle(this.handle);
-//        }
     }
     
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -180,11 +170,6 @@ public class BaseLeftTuple
         if (this.rightParent != null) {
             this.setParentRightTupleId(this.rightParent.getTupleId());
         }
-//        if (MyAppConfig.USE_DB) {
-//            m_tupleManager.updateRightTuple(rightTuple);
-//            m_tupleManager.saveFactHandle(this.handle);
-//            m_tupleManager.saveLeftTuple(this.getLeftParent());
-//        }
     }    
 
     public BaseLeftTuple(final LeftTuple leftTuple,
@@ -265,13 +250,6 @@ public class BaseLeftTuple
         if (this.rightParent != null) {
             this.setParentRightTupleId(this.rightParent.getTupleId());
         }
-//        if (MyAppConfig.USE_DB) {
-//            m_tupleManager.updateRightTuple(rightTuple);
-//            m_tupleManager.saveFactHandle(this.handle);
-//            if (this.leftParent != null) {
-//                m_tupleManager.saveLeftTuple(this.leftParent);
-//            }
-//        }
     }
 
     @Override
@@ -946,42 +924,6 @@ public class BaseLeftTuple
             return handle.getEntryPointId();
         }
         return "";
-    }
-
-    @Override
-    public void restoreTupleAfterSerialization() {
-//        restoreHandles();
-    }
-
-    /**
-     * There is need to restore handle for current tuple as well as for parents.
-     * 
-     */
-    private void restoreHandles() {
-        IDbTupleManager tupleManager = DbTupleManager.getInstance();
-        this.setHandle((InternalFactHandle) tupleManager
-                .getFactHandle(this.handleId));
-        LeftTuple tempLeft = leftParent;
-        while (tempLeft != null) {
-            restoreHandle(tempLeft);
-            tempLeft = tempLeft.getLeftParent();
-        }
-        LeftTuple tempParent = parent;
-        while (tempParent != null) {
-            restoreHandle(tempParent);
-            tempParent = tempParent.getParent();
-        }
-    }
-
-    /**
-     * @param workingMemory
-     * @param tupleManager
-     * @param temp
-     */
-    private void restoreHandle(LeftTuple temp) {
-        InternalFactHandle factHandle = m_tupleManager.getFactHandle(temp
-                .getHandleId());
-        temp.setHandle(factHandle);
     }
 
     @Override

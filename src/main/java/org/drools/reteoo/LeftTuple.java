@@ -140,12 +140,6 @@ public interface LeftTuple extends Entry, Tuple {
      */
     String getHandleEntryPointId();
 
-    /**
-     * @param workingMemory
-     * @param joinNode
-     */
-    void restoreTupleAfterSerialization();
-
     void nullAll();
 
     /**
