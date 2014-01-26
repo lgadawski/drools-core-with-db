@@ -248,7 +248,6 @@ public class RuleTerminalNode extends AbstractTerminalNode {
         
         //check if the rule is not effective or
         // if the current Rule is no-loop and the origin rule is the same then return
-
         if ( (!this.rule.isEffective( leftTuple,
                                       this,
                                       workingMemory )) ||

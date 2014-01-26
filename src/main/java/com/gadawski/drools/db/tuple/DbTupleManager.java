@@ -83,11 +83,6 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
-    public void updateRightTuple(RightTuple rightTuple) {
-        m_jdbcManager.updateRightTuple(rightTuple.getTupleId(), rightTuple);
-    }
-
-    @Override
     public List<Object> getLeftTuples(int sinkId) {
         return m_jdbcManager.getLeftTuples(sinkId);
     }
@@ -153,7 +148,7 @@ public class DbTupleManager implements IDbTupleManager {
     public void removeRightTuple(RightTuple rightTuple) {
         Integer tupleId = rightTuple.getTupleId();
         if (tupleId != null) {
-            m_jdbcManager.removeRightTuple(tupleId, rightTuple.getSinkId());
+            m_jdbcManager.removeRightTuple(tupleId);
         }
     }
 
@@ -161,7 +156,7 @@ public class DbTupleManager implements IDbTupleManager {
     public void removeLeftTuple(LeftTuple leftTuple) {
         Integer tupleId = leftTuple.getTupleId();
         if (tupleId != null) {
-            m_jdbcManager.removeLeftTuple(tupleId, leftTuple.getSinkId());
+            m_jdbcManager.removeLeftTuple(tupleId);
         }
     }
 
