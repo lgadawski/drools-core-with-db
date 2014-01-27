@@ -51,13 +51,14 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
-    public int saveLeftTuple(LeftTuple leftTuple) {
+    public int saveLeftTupleAndFactHandle(LeftTuple leftTuple) {
         int sinkId = getSinkId(leftTuple.getSink());
         Integer parentId = leftTuple.getParentId();
         Integer handleId = leftTuple.getHandleId();
         Integer parentRightTupleId = leftTuple.getParentRightTupleId();
-        Integer tupleId = m_jdbcManager.saveLeftTuple(parentId, handleId,
-                parentRightTupleId, sinkId, leftTuple);
+        Integer tupleId = m_jdbcManager.saveLeftTupleAndFactHandle(parentId,
+                handleId, parentRightTupleId, sinkId, leftTuple,
+                leftTuple.getHandle());
         if (tupleId != null && tupleId != -1) {
             leftTuple.setTupleId(tupleId);
         }
@@ -65,11 +66,11 @@ public class DbTupleManager implements IDbTupleManager {
     }
 
     @Override
-    public int saveRightTuple(RightTuple rightTuple) {
+    public int saveRightTupleAndFactHandle(RightTuple rightTuple) {
         int sinkId = getSinkId(rightTuple.getRightTupleSink());
         Integer handleId = rightTuple.getHandleId();
-        int tupleId = m_jdbcManager
-                .saveRightTuple(handleId, sinkId, rightTuple);
+        int tupleId = m_jdbcManager.saveRightTupleAndFactHandle(handleId,
+                sinkId, rightTuple, rightTuple.getFactHandle());
         if (tupleId != -1) {
             rightTuple.setTupleId(tupleId);
         }

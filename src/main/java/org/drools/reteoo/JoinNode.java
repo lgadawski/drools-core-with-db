@@ -100,8 +100,8 @@ public class JoinNode extends BetaNode {
             memory.getLeftTupleMemory().add( leftTuple );
         } else {
             m_tupleManager = DbTupleManager.getInstance();
-            m_tupleManager.saveFactHandle(leftTuple.getHandle());
-            m_tupleManager.saveLeftTuple(leftTuple);
+//            m_tupleManager.saveFactHandle(leftTuple.getHandle());
+            m_tupleManager.saveLeftTupleAndFactHandle(leftTuple);
         }
         
         this.constraints.updateFromTuple( contextEntry,
@@ -203,8 +203,8 @@ public class JoinNode extends BetaNode {
 
         if (MyAppConfig.USE_DB) {
             m_tupleManager = DbTupleManager.getInstance();
-            m_tupleManager.saveFactHandle(rightTuple.getFactHandle());
-            m_tupleManager.saveRightTuple(rightTuple);
+//            m_tupleManager.saveFactHandle(rightTuple.getFactHandle());
+            m_tupleManager.saveRightTupleAndFactHandle(rightTuple);
         } else {
             memory.getRightTupleMemory().add( rightTuple );
         }
@@ -302,7 +302,7 @@ public class JoinNode extends BetaNode {
         }
 
         if (MyAppConfig.USE_DB) {
-            m_tupleManager.removeRightTuple(rightTuple);
+//            m_tupleManager.removeRightTuple(rightTuple);
         } else {
             memory.getRightTupleMemory().remove( rightTuple );
         }
@@ -325,7 +325,7 @@ public class JoinNode extends BetaNode {
         }
 
         if (MyAppConfig.USE_DB) {
-            m_tupleManager.removeLeftTuple(leftTuple);
+//            m_tupleManager.removeLeftTuple(leftTuple);
         } else {
             memory.getLeftTupleMemory().remove( leftTuple );
         }

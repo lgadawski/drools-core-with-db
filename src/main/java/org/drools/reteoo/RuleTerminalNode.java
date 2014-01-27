@@ -261,8 +261,8 @@ public class RuleTerminalNode extends AbstractTerminalNode {
         if (MyAppConfig.USE_DB) { // has to be saved before creating activation
                                   // because agenda_item need tuple id
             m_tupleManager = DbTupleManager.getInstance();
-            m_tupleManager.saveFactHandle(leftTuple.getHandle());
-            m_tupleManager.saveLeftTuple(leftTuple);
+//            m_tupleManager.saveFactHandle(leftTuple.getHandle());
+            m_tupleManager.saveLeftTupleAndFactHandle(leftTuple);
         }
         boolean fire = agenda.createActivation( leftTuple, 
                                                 context, 

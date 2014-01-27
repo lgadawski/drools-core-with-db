@@ -23,7 +23,7 @@ public interface IDbTupleManager {
      * @param leftTuple
      * @return tuple_id of newly inserted tuple.
      */
-    int saveLeftTuple(LeftTuple leftTuple);
+    int saveLeftTupleAndFactHandle(LeftTuple leftTuple);
 
     /**
      * Saves right tuple to db.
@@ -31,7 +31,7 @@ public interface IDbTupleManager {
      * @param rightTuple
      * @return tuple_id of newly inserted tuple.
      */
-    int saveRightTuple(RightTuple rightTuple);
+    int saveRightTupleAndFactHandle(RightTuple rightTuple);
 
     /**
      * Save fact handle to db.
@@ -45,12 +45,14 @@ public interface IDbTupleManager {
      * @param id
      * @return
      */
+    @Deprecated
     List<Object> getLeftTuples(int id);
 
     /**
      * @param id
      * @return
      */
+    @Deprecated
     List<Object> getRightTuples(int id);
 
     /**
